@@ -1,0 +1,106 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    <div id="createprojectModal" class="project-modal modal fade " tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-body project-container">
+                    <div class="form-header">
+                        <h1 class="modal-title" id="projectModalLabel">Create Project</h1>
+                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                    </div>
+                    <button class="upload-btn"><img src="img/upload.svg" alt=""></button>
+                    <form class="project-form" action="">
+
+                        <label for="">Project Name</label>
+                        <input placeholder="Project Name" type="text">
+
+                        <label for="">Client Name</label>
+                        <input placeholder="Client Name" type="text">
+
+                        <label for="">Description</label>
+                        <textarea placeholder="Project Descirption" name="" id=""></textarea>
+
+                        <div class="date-pick">
+                            <label for="startdate">Start Date</label>
+                            <input type="date" name="" id="startdate">
+
+                            <label for="endate">End Date</label>
+                            <input type="date" name="" id="endate">
+                        </div>
+
+                        <label for="">Members</label>
+                        <input placeholder="Enter Slave Force" type="text">
+
+                        <label for="">Budget</label>
+                        <input placeholder="Hundra tusen miljoner miljarder kronor, och det är mycket pengar" type="text">
+                        <button class="project-form-btn">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editprojectModal" class="project-modal modal fade " tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-body project-container">
+                    <div class="form-header">
+                        <h1 class="modal-title" id="projectModalLabel">Edit Project</h1>
+                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                    </div>
+                    <button class="upload-btn"><img src="img/upload.svg" alt=""></button>
+                    <form class="project-form" action="">
+
+                        <label for="">Project Name</label>
+                        <input placeholder="Project Name" type="text">
+
+                        <label for="">Client Name</label>
+                        <input placeholder="Client Name" type="text">
+
+                        <label for="">Description</label>
+                        <textarea placeholder="Project Descirption" name="" id=""></textarea>
+
+                        <div class="date-pick">
+                            <label for="startdate">Start Date</label>
+                            <input type="date" name="" id="startdate">
+
+                            <label for="endate">End Date</label>
+                            <input type="date" name="" id="endate">
+                        </div>
+
+                        <label for="">Members</label>
+                        <input placeholder="Enter Slave Force" type="text">
+
+                        <label for="">Budget</label>
+                        <input placeholder="Hundra tusen miljoner miljarder kronor, och det är mycket pengar" type="text">
+                        <button class="project-form-btn">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="userModal" class="user-card profile-modal modal fade" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button class="usersummary">
+                        '
+                        <img src="img/userimage.svg" alt="">
+                        <p>Villiam Fagrelius</p>
+                    </button>
+                    <div class="darkmode-box">
+                        <span class="dark-mode-lable">Dark mode</span>
+                        <label for="darkmode-switch" class="switch">
+                            <input type="checkbox" id="darkmode-switch" />
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <button class="btn-custom btn-logout">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
