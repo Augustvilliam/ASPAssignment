@@ -3,25 +3,14 @@
 }
 
 <div class="container">
-    <div class="mainpage">
-        @Html.Partial("_Sidebar")
-        <div class="content">
-            @Html.Partial("_Topbar")
+    <div class="container">
+        <div class="mainpage">
+            @Html.Partial("_Sidebar")
+            <div class="content">
+                @Html.Partial("_Topbar")
 
-            <div class="hero">
-                <div class="header">
-                    <h1>Projects</h1>
-                    <button class="project-btn" data-bs-toggle="modal" data-bs-target="#createprojectModal">+ Add projects</button>
-                </div>
-                <div class="status-bar">
-                    <a class="navbar-link" href="#">ALL</a>
-                    <a class="navbar-link" href="#">STARTED</a>
-                    <a class="navbar-link" href="#">COMPLETED</a>
-                </div>
-                <div class="project-view">
-                    @Html.Partial("_ProjectCard")
-                    @Html.Partial("_ProjectCard")
-                    @Html.Partial("_ProjectCard")
+                <div id="dynamic-content">
+                    @Html.Partial("_ProjectView")
                 </div>
             </div>
         </div>

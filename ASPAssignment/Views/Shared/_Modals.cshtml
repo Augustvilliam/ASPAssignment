@@ -11,16 +11,20 @@
                         <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
                     </div>
                     <button class="upload-btn"><img src="img/upload.svg" alt=""></button>
-                    <form class="project-form" action="">
+                    <form class="project-form" method="post">
 
-                        <label for="">Project Name</label>
-                        <input placeholder="Project Name" type="text">
 
-                        <label for="">Client Name</label>
-                        <input placeholder="Client Name" type="text">
+                        <label for="projectname">Project Name</label>
+                        <input id="projectname" placeholder="Project Name" type="text">
+                        <span class="text-danger" id="projectNameError"></span>
 
-                        <label for="">Description</label>
-                        <textarea placeholder="Project Descirption" name="" id=""></textarea>
+                        <label for="clientname">Client Name</label>
+                        <input id="clientname" placeholder="Client Name" type="text">
+                        <span class="text-danger" id="clientNameError"></span>
+
+                        <label for="desc">Description</label>
+                        <textarea id="desc" placeholder="Project Descirption" name=""></textarea>
+                        <span class="text-danger" id="descriptionError"></span>
 
                         <div class="date-pick">
                             <label for="startdate">Start Date</label>
@@ -30,12 +34,15 @@
                             <input type="date" name="" id="endate">
                         </div>
 
-                        <label for="">Members</label>
-                        <input placeholder="Enter Slave Force" type="text">
+                        <label for="member">Members</label>
+                        <input id="member" placeholder="Enter Slave Force" type="text">
+                        <span class="text-danger" id="membersError"></span>
 
-                        <label for="">Budget</label>
-                        <input placeholder="Hundra tusen miljoner miljarder kronor, och det är mycket pengar" type="text">
-                        <button class="project-form-btn">Update</button>
+                        <label for="budget">Budget</label>
+                        <input id="budget" placeholder="Hundra tusen miljoner miljarder kronor, och det är mycket pengar" type="text">
+                        <span class="text-danger" id="budgetError"></span>
+
+                        <button class="project-form-btn">Create</button>
                     </form>
                 </div>
             </div>
