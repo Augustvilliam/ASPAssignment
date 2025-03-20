@@ -1,0 +1,42 @@
+﻿
+@{
+	ViewData["Titel"] = "Admin Panel";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="admin-wrapper">
+    <div class="admin-card">
+        <h1 class="admin-head">Welcome to</h1>
+        <h1 class="admin-head-gold">Admin Panel</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus ullamcorper nisl erat, vel<br> convallis elit fermentum pellentesque. Sed mollis velit facilisis facilisis viverra.</p>
+    </div>
+
+    <div class="log-form-container">
+        <h1>Login</h1>
+        <button class="media-btn">
+            <img src="~/img/google-icon.svg" alt="">
+            <p>Login with Google</p>
+        </button>
+        <img class="splitter" src="~/img/splitter.svg" alt="">
+
+        <form class="log-form">
+            <p>Email</p>
+            <input class="form-input" placeholder="Your Email">
+
+            <p>password</p>
+            <input class="form-input" placeholder="Your Password">
+
+            <div class="forgot-password">
+                <input type="checkbox" name="" id="checkbox2">
+                <label for="checkbox2">Remember Me</label>
+                <a href="#">Forgot Password?</a>
+            </div>
+
+            <button class="login-btn">Login</button>
+            <a class="center-me" href="@Url.Action("Index", "Home")">CHEAT BUTTON SKIP LOGIN!</a>
+        </form>
+        <p>Don't Have an Account? <a href="@Url.Action("Register", "Account")">Sign Up</a></p>
+    </div>
+</div>
+
+<script src="~/js/Darkmode.js"></script>

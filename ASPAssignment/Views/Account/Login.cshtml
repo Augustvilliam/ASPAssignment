@@ -1,0 +1,40 @@
+﻿@{
+	ViewData["Titeel"] = "Login"; 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    <div class="reg-form-container">
+        <h1>Create account</h1>
+        <button class="media-btn">
+            <img src="~/img/google-icon.svg" alt="">
+            <p>Sign in with Google</p>
+        </button>
+        <img class="splitter" src="~/img/splitter.svg" alt="">
+
+        <form class="reg-form">
+            <p>Fullname</p>
+            <input class="form-input" placeholder="Your Full name">
+
+            <p>Email</p>
+            <input class="form-input" placeholder="Your Email">
+
+            <p>Password</p>
+            <input class="form-input" placeholder="Your Password">
+
+            <p>Confirm Password</p>
+            <input class="form-input" placeholder="Confirm Password">
+
+            <div>
+                <input type="checkbox" name="" id="checkbox1">
+                <label for="checkbox1">I accept <a href="#">Terms and Conditions!</a></label>
+            </div>
+
+            <button class="login-btn">Create Account</button>
+            <a class="center-me" href="@Url.Action("Index", "Home")">CHEAT BUTTON SKIP LOGIN!</a>
+        </form>
+        <p>Already Have an Account? <a href="@Url.Action("Login", "Account")">Login</a></p>
+    </div>
+
+    <script src="~/js/Darkmode.js"></script>
+

@@ -9,7 +9,13 @@
         </div>
         <button id="load-projects" class="sidebar-btn"><img class="btn-img" src="~/img/Buttonicon.svg" alt="">Projects</button>
         <button id="load-team-members" class="sidebar-btn"><img class="btn-img" src="~/img/Buttonicon.svg" alt="">Team Members</button>
-        <button class="sidebar-btn"><img class="btn-img" src="~/img/Buttonicon.svg" alt=""><a asp-controller="Admin" asp-action="Index">Admin Panel</a></button>
-        <button class="sidebar-btn"><img class="btn-img" src="~/img/Buttonicon.svg" alt=""><a asp-controller="Auth" asp-action="Login">Temp login portal</a></button>
+        <button class="sidebar-btn">
+            <img class="btn-img" src="~/img/Buttonicon.svg" alt="">
+            <a asp-controller="Admin" asp-action="Index">Admin Panel</a>
+        </button>
+        <button class="sidebar-btn">
+            <img class="btn-img" src="~/img/Buttonicon.svg" alt="">
+            <a asp-controller="Account" asp-action="Login">Temp login portal</a>
+        </button>
     </div>
 }
