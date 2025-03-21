@@ -1,31 +1,57 @@
-using ASPAssignment.Data.Context;
-using ASPAssignment.Models;
+
 using Data.Contexts;
+using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
 
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
+builder.Services.AddIdentity<MemberEntity, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+
 })
-.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<AppDbContext>();
+    .AddEntityFrameworkStores<DataContext>();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var app = builder.Build();
-
-
-
-
-
-
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
