@@ -1,14 +1,13 @@
 using ASPAssignment.Data.Context;
 using ASPAssignment.Models;
-using Data.Context;
+using Data.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static Data.Context.DataContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
 
 builder.Services.AddControllersWithViews();
 

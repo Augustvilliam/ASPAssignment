@@ -1,24 +1,16 @@
-﻿
-
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
 using Data.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Context;
+namespace Data.Contexts;
 
-public class DataContext : DbContext
+public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<MemberEntity>(options)
 {
-    public DataContext(DbContextOptions<DataContext> options) : base(options) { }
-
-    public DbSet<ProjectEntity> Projects { get; set; }
-    public DbSet<UserProfileEntity> UserProfiles { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ProjectEntity>()
-            .Property(p => p.Budget)
-            .HasPrecision(18, 2);
-
-        base.OnModelCreating(modelBuilder);
-    }
+    public virtual DbSet<MemberAdressEntity> MemberAdresses { get; set; }
 }
