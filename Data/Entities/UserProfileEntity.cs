@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Data.Entities;
 
+[Index(nameof(Email), IsUnique = true)]
 public class UserProfileEntity
 {
     [Key]
