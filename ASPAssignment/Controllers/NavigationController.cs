@@ -6,10 +6,10 @@ public class NavigationController : Controller
 {
     public IActionResult LoadProjects()
     {
-        return PartialView("_ProjectView");
+        return PartialView("/Partials/_ProjectView");
     }
     public IActionResult LoadTeamMembers()
     {
-        return PartialView("_TeamMembers");
+        return PartialView("/Partials/_TeamMembers");
     }
 }
