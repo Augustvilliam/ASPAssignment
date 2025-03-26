@@ -15,4 +15,6 @@ public class MemberEntity : IdentityUser
     public string? JobTitle { get; set; }
 
     public virtual MemberAdressEntity Adress { get; set; }
+
+    public string? ProfileImagePath { get; set; }
 }

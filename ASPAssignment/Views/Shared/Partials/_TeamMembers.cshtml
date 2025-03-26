@@ -5,15 +5,22 @@
             <h1>Team Members</h1>
             <button class="project-btn" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">+ Add Team Member</button>
         </div>
-        <div class="Team-view">
+        <div class="project-view">
             @foreach (var members in Model)
             {
-                <div class="project-card">
-                    <button data-bs-toggle="modal" data-bs-target="#editTeamMemberModal" class="more-btn"><img src="~/img/More 2.svg" alt=""></button>
-                    <div class="text-info">
-                        <h1>@members.FirstName @members.LastName</h1>
-                    </div>
-                    <button class="more-btn">Message</button>
+                <div class="team-card">
+                    <button data-member-id="@members.Id"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editTeamMemberModal"
+                        class="more-btn">
+                        <img src="~/img/More 2.svg" alt="">
+                    </button>
+                    <img class="profile-img" src="@members.ProfileImagePath ?? " /img/Employee.svg"" alt="Profile Image" />
+                    <h1>@members.FirstName @members.LastName</h1>
+                    <h3 class="jobtitle">@members.JobTitle</h3>
+                    <h2 class="contact-format">@members.Email</h2>
+                    <h2 class="contact-format">@members.Phone</h2>
+                    <button class="message-btn">Message</button>
                 </div>
             }
         </div>
