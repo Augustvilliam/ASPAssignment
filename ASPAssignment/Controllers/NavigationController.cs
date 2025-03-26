@@ -1,15 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Business.Interface;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers;
 
 public class NavigationController : Controller
 {
+    private readonly IMemberService _memberService;
+
+    public NavigationController(IMemberService memberService)
+    {
+        _memberService = memberService;
+    }
     public IActionResult LoadProjects()
     {
-        return PartialView("/Partials/_ProjectView");
+        return PartialView("~/Views/Shared/Partials/_ProjectView.cshtml");
     }
-    public IActionResult LoadTeamMembers()
+    public async Task<IActionResult> LoadTeamMembers()
     {
-        return PartialView("/Partials/_TeamMembers");
+        var members = await _memberService.GetAllMembers();
+        return PartialView("~/Views/Shared/Partials/_TeamMembers.cshtml", members);
     }
 }

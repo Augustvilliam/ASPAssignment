@@ -144,6 +144,14 @@ input {
 h1, h2, h3, h4, h5, h6 {
     color: var(--clr-heading)
 }
+
+
+/*Misc*/
+.Spacebetween{
+    display:flex;
+    justify-content:space-between
+}
+
 /* WRAPPERS AND CONTAINERS */
 
 .wrapper {

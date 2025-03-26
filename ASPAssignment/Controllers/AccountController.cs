@@ -1,4 +1,5 @@
 ﻿using Business.Interface;
+using Business.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,35 +9,51 @@ public class AccountController(IAccountService accountService) : Controller
 {
     private readonly IAccountService _accountService = accountService;
 
-    public IActionResult Login()
+    public IActionResult Login(string returnUrl = "~/")
     {
-        ViewBag.ErrorMessage = string.Empty;
-
+        ViewBag.ErrorMessage = "";
+        ViewBag.ReturnUrl = returnUrl;
         return View();
     }
     [HttpPost]
-    public async Task<IActionResult> Login(LoginForm form, string returnUrl ="")
+    public async Task<IActionResult> Login(LoginForm form, string returnUrl = "/Home/Index")
     {
-        ViewBag.ErrorMessage = string.Empty;
+        ViewBag.ErrorMessage = "";
 
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
-            ViewBag.ErrorMessage = "Invalid Email or password. Please try again.";
-            return View(form);
+            var result = await _accountService.LoginAsync(form);
+           if (result)
+                return LocalRedirect(returnUrl);
         }
 
-        var result = await _accountService.LoginAsync(form);
-        if (result)
-        {
-            return Redirect(returnUrl);
-        }
-
-        ViewBag.ErrorMessage = "Something went wrong. Please try again later";
+        ViewBag.ErrorMessage = "Invalid login attempt";
         return View();
-
     }
+
     public IActionResult Register()
     {
+        ViewBag.ErrorMessage = "";
         return View();
+    }
+
+    [HttpPost]
+     public async Task<IActionResult> Register(RegisterForm form)
+    {
+        if (ModelState.IsValid)
+        {
+            var result = await _accountService.RegisterAsync(form);
+            if (result)
+                return LocalRedirect("~/");
+        }
+
+        ViewBag.ErrorMessage = "";
+        return View(form);
+    }
+
+    public async Task<IActionResult> LogoutAsync()
+    {
+        await _accountService.SignOutAsync();
+        return LocalRedirect("~/");
     }
 }

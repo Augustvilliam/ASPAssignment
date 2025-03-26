@@ -6,28 +6,36 @@
 
 <div class="reg-form-container">
     <h1>Login</h1>
-    @* <button class="media-btn"> *@
-    @*     <img src="~/img/google-icon.svg" alt=""> *@
-    @*     <p>Sign in with Google</p> *@
-    @* </button> *@
+   <button class="media-btn"> 
+        <img src="~/img/google-icon.svg" alt=""> 
+        <p>Sign in with Google</p> 
+   </button> 
     <img class="splitter" src="~/img/splitter.svg" alt="">
 
     <form class="reg-form" asp-controller="Account" asp-action="Login" method="post" novalidate enctype="multipart/form-data">
-        <label asp-for="Email">Email</label>
+
+        <div>
+            @ViewBag?.ErrorMessage
+        </div>
+
+        <label asp-for="Email"></label>
         <input asp-for="Email" class="form-input" placeholder="Your Email">
 
         <label asp-for="Password">Password</label>
         <input asp-for="Password" class="form-input" placeholder="Your Password">
 
-        <div>
-            <input type="checkbox" name="" id="checkbox1">
-            <label for="checkbox1">Remember Me<a href="#">Forgot Password?</a></label>
+        <div class="Spacebetween">
+           <div>
+                <input type="checkbox" name="" id="checkbox1">
+                <label for="checkbox1">Remember Me</label>
+           </div>
+
+            <a href="#">Forgot Password?</a>
         </div>
 
         <button class="login-btn">Log in</button>
-        <a class="center-me" href="@Url.Action("Index", "Home")">CHEAT BUTTON SKIP LOGIN!</a>
     </form>
-    <p>Already Have an Account? <a href="@Url.Action("Login", "Account")">Login</a></p>
+    <p>Don't have an account? <a asp-controller="Account" asp-action="Register">Sign Up</a></p>
 </div>
 
 <script src="~/js/Darkmode.js"></script>

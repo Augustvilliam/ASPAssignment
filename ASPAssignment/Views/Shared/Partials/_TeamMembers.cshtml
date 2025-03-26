@@ -1,25 +1,21 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Member>
 @{
     <div class="hero">
         <div class="header">
             <h1>Team Members</h1>
             <button class="project-btn" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">+ Add Team Member</button>
         </div>
-        <div class="team-view">
-            <div class="project-card">
-                <img class="team-img" src="~/img/Employee.svg" alt="">
-                <div class="text-info">
-                    <h2>John Doe</h2>
-                    <h3>Frontend Developer</h3>
+        <div class="Team-view">
+            @foreach (var members in Model)
+            {
+                <div class="project-card">
+                    <button data-bs-toggle="modal" data-bs-target="#editTeamMemberModal" class="more-btn"><img src="~/img/More 2.svg" alt=""></button>
+                    <div class="text-info">
+                        <h1>@members.FirstName @members.LastName</h1>
+                    </div>
+                    <button class="more-btn">Message</button>
                 </div>
-                <div class="more-container">
-                    <button class="more-btn" data-bs-toggle="modal" data-bs-target="#editTeamMemberModal">
-                        <img src="~/img/More 2.svg" alt="">
-                    </button>
-                </div>
-            </div>
+            }
         </div>
     </div>
 }
