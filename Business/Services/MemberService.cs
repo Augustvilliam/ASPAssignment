@@ -25,7 +25,8 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
             LastName = x.LastName,
             Email = x.Email,
             Phone = x.PhoneNumber,
-            JobTitle = x.JobTitle
+            JobTitle = x.JobTitle,
+            ProfileImagePath = x.ProfileImagePath 
         });
         return members;
     }

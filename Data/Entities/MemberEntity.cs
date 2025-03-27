@@ -17,4 +17,6 @@ public class MemberEntity : IdentityUser
     public virtual MemberAdressEntity Adress { get; set; }
 
     public string? ProfileImagePath { get; set; }
+
+    public ICollection<ProjectEntity> Projects { get; set; } = new List<ProjectEntity>();
 }

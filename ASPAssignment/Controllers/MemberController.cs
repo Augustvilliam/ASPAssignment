@@ -31,7 +31,7 @@ public class MemberController : Controller
         {
             var result = await _memberService.UpdateMemberAsync(form);
             if (result)
-                return RedirectToAction("LoadTeamMembers", "Navigation");
+                return RedirectToAction("Index", "Home");
         }
         return BadRequest("Could Not Update Member");
     }

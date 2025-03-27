@@ -15,7 +15,9 @@
                         class="more-btn">
                         <img src="~/img/More 2.svg" alt="">
                     </button>
-                    <img class="profile-img" src="@members.ProfileImagePath ?? " /img/Employee.svg"" alt="Profile Image" />
+                    <img class="profile-img"
+                         src="@(members.ProfileImagePath ?? "/img/Employee.svg")"
+                         alt="Profile Image" />
                     <h1>@members.FirstName @members.LastName</h1>
                     <h3 class="jobtitle">@members.JobTitle</h3>
                     <h2 class="contact-format">@members.Email</h2>
