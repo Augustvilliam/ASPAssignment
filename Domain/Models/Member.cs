@@ -15,4 +15,6 @@ public class Member
     public string? JobTitle { get; set; }
     public string Email { get; set; } = null!;
     public string? Phone{ get; set; }
+
+    public string FullName => $"{FirstName} {LastName}";
 }

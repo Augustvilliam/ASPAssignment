@@ -3,16 +3,20 @@ using Business.Interface;
 using Business.Services;
 using Data.Contexts;
 using Data.Entities;
+using Data.Interface;
+using Data.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
 builder.Services.AddIdentity<MemberEntity, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;

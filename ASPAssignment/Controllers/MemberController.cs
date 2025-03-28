@@ -1,19 +1,16 @@
 ﻿using Business.Interface;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers;
 
 [Route("Member")]
-public class MemberController : Controller
+public class MemberController(IMemberService memberService) : Controller
 {
-    private readonly IMemberService _memberService;
+    private readonly IMemberService _memberService = memberService;
 
-    public MemberController(IMemberService memberService)
-    {
-        _memberService = memberService;
-    }
-
+    [Authorize]
     [HttpGet("GetMember/{id}")]
     public async Task<IActionResult> GetMember(string id)
     {
@@ -23,7 +20,7 @@ public class MemberController : Controller
 
         return Json(member);
     }
-
+    [Authorize]
     [HttpPost("Update")]
     public async Task<IActionResult> UpdateMember(MemberUpdateForm form)
     {

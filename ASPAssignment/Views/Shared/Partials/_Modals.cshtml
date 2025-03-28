@@ -2,7 +2,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    <div id="createprojectModal" class="project-modal modal fade " tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+    <div id="createprojectModal" class="project-modal modal fade" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-body project-container">
@@ -10,37 +10,36 @@
                         <h1 class="modal-title" id="projectModalLabel">Create Project</h1>
                         <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
                     </div>
-                    <button class="upload-btn"><img src="img/upload.svg" alt=""></button>
-                    <form class="project-form" method="post">
 
+                    <button type="button" class="upload-btn-team" id="projectUploadBtn">
+                        <img id="projectPreviewImage" src="/img/upload.svg" alt="Project Image">
+                    </button>
+                    <input type="file" name="ProjectImage" id="projectImageInput" accept="image/*" style="display: none;" />
+
+                    <form class="project-form" method="post" action="/Project/Create" enctype="multipart/form-data">
 
                         <label for="projectname">Project Name</label>
-                        <input id="projectname" placeholder="Project Name" type="text">
-                        <span class="text-danger" id="projectNameError"></span>
+                        <input name="ProjectName" id="projectname" placeholder="Project Name" type="text">
 
                         <label for="clientname">Client Name</label>
-                        <input id="clientname" placeholder="Client Name" type="text">
-                        <span class="text-danger" id="clientNameError"></span>
+                        <input name="ClientName" id="clientname" placeholder="Client Name" type="text">
 
                         <label for="desc">Description</label>
-                        <textarea id="desc" placeholder="Project Descirption" name=""></textarea>
-                        <span class="text-danger" id="descriptionError"></span>
+                        <textarea name="Description" id="desc" placeholder="Project Description"></textarea>
 
                         <div class="date-pick">
                             <label for="startdate">Start Date</label>
-                            <input type="date" name="" id="startdate">
+                            <input name="StartDate" id="startdate" type="date">
 
-                            <label for="endate">End Date</label>
-                            <input type="date" name="" id="endate">
+                            <label for="enddate">End Date</label>
+                            <input name="EndDate" id="enddate" type="date">
                         </div>
 
-                        <label for="member">Members</label>
-                        <input id="member" placeholder="Enter Slave Force" type="text">
-                        <span class="text-danger" id="membersError"></span>
+                        <label for="members">Project Members</label>
+                        <select name="SelectedMembersIds" id="members" multiple class="form-control"></select>
 
                         <label for="budget">Budget</label>
-                        <input id="budget" placeholder="Hundra tusen miljoner miljarder kronor, och det är mycket pengar" type="text">
-                        <span class="text-danger" id="budgetError"></span>
+                        <input name="Budget" id="budget" type="text" placeholder="Budget i kr">
 
                         <button class="project-form-btn">Create</button>
                     </form>
@@ -48,6 +47,7 @@
             </div>
         </div>
     </div>
+
 
 
     <div id="editprojectModal" class="project-modal modal fade " tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">

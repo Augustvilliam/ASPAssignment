@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 
 namespace Domain.Models;
@@ -7,7 +8,7 @@ namespace Domain.Models;
 public class ProjectCreateForm
 {
     [Display(Name = "Project Image")]
-    public string? ProjectImagePath { get; set; }
+    public IFormFile? ProjectImage { get; set; }
 
     [Required]
     [Display(Name = "Project Name")]

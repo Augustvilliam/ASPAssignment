@@ -1,6 +1,7 @@
 ﻿using Business.Interface;
 using Business.Services;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers;
@@ -50,6 +51,8 @@ public class AccountController(IAccountService accountService) : Controller
         ViewBag.ErrorMessage = "";
         return View(form);
     }
+
+    [Authorize]
 
     public async Task<IActionResult> LogoutAsync()
     {
