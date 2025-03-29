@@ -1,6 +1,6 @@
-﻿using ASPAssignment.Models;
+﻿using ASPAssignment.ViewModels;
+using Business.Dtos;
 using Business.Interface;
-using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,17 +21,43 @@ public class MemberController(IMemberService memberService) : Controller
 
         return Json(member);
     }
+
     [Authorize]
     [HttpPost("Update")]
     public async Task<IActionResult> UpdateMember(MemberUpdateForm form)
     {
-        if (ModelState.IsValid)
-        {
-            var result = await _memberService.UpdateMemberAsync(form);
+       if (ModelState.IsValid)
+       {
+            string? imagePath = null;
+            if ( form.ProfilePic != null && form.ProfilePic.Length > 0)
+            {
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                var fileName = $"{Guid.NewGuid()}_{form.ProfilePic.FileName}";
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await form.ProfilePic.CopyToAsync(stream);
+
+                imagePath = $"/uploads/{fileName}";
+            }
+            var dto = new MemberDto
+            {
+                Id = form.Id,
+                FirstName = form.FirstName,
+                LastName = form.LastName,
+                Email = form.Email,
+                Phone = form.Phone,
+                ProfileImagePath = imagePath
+            };
+
+            var result = await _memberService.UpdateMemberAsync(dto, imagePath);
             if (result)
                 return RedirectToAction("Index", "Home");
         }
-        return BadRequest("Could Not Update Member");
+       return BadRequest("Could not update Member");
     }
 
 }

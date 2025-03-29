@@ -1,8 +1,7 @@
 ﻿
-
+using Business.Dtos;
 using Business.Interface;
 using Data.Entities;
-using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace Business.Services
@@ -13,23 +12,23 @@ namespace Business.Services
         private readonly UserManager<MemberEntity> _userManager = userManager;
 
 
-        public async Task<bool> LoginAsync(LoginForm loginForm)
+        public async Task<bool> LoginAsync(LoginDto loginDto)
         {
-            var result = await _signInManager.PasswordSignInAsync(loginForm.Email, loginForm.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
             return result.Succeeded;
         }
 
-        public async Task<bool> RegisterAsync(RegisterForm regForm)
+        public async Task<bool> RegisterAsync(RegisterDto redgisterDto)
         {
             var memberEntity = new MemberEntity
             {
-                UserName = regForm.Email,
-                FirstName = regForm.FirstName,
-                LastName = regForm.LastName,
-                Email = regForm.Email,
+                UserName = redgisterDto.Email,
+                FirstName = redgisterDto.FirstName,
+                LastName = redgisterDto.LastName,
+                Email = redgisterDto.Email,
             };
 
-            var result = await _userManager.CreateAsync(memberEntity, regForm.Password);
+            var result = await _userManager.CreateAsync(memberEntity, redgisterDto.Password);
             return result.Succeeded;
         }
 

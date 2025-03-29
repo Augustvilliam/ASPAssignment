@@ -1,30 +1,35 @@
-﻿@model IEnumerable<Member>
-@{
-    <div class="hero">
-        <div class="header">
-            <h1>Team Members</h1>
-            <button class="project-btn" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">+ Add Team Member</button>
-        </div>
-        <div class="project-view">
-            @foreach (var members in Model)
-            {
-                <div class="team-card">
-                    <button data-member-id="@members.Id"
+﻿@model IEnumerable<Business.Dtos.MemberDto>
+
+<div class="hero">
+    <div class="header">
+        <h1>Team Members</h1>
+        <button class="project-btn" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">
+            + Add Team Member
+        </button>
+    </div>
+
+    <div class="project-view">
+        @foreach (var member in Model)
+        {
+            <div class="team-card">
+                <button data-member-id="@member.Id"
                         data-bs-toggle="modal"
                         data-bs-target="#editTeamMemberModal"
                         class="more-btn">
-                        <img src="~/img/More 2.svg" alt="">
-                    </button>
-                    <img class="profile-img"
-                         src="@(members.ProfileImagePath ?? "/img/Employee.svg")"
-                         alt="Profile Image" />
-                    <h1>@members.FirstName @members.LastName</h1>
-                    <h3 class="jobtitle">@members.JobTitle</h3>
-                    <h2 class="contact-format">@members.Email</h2>
-                    <h2 class="contact-format">@members.Phone</h2>
-                    <button class="message-btn">Message</button>
-                </div>
-            }
-        </div>
+                    <img src="~/img/More 2.svg" alt="More Options" />
+                </button>
+
+                <img class="profile-img"
+                     src="@(string.IsNullOrWhiteSpace(member.ProfileImagePath) ? "/img/Employee.svg" : member.ProfileImagePath)"
+                     alt="Profile Image" />
+
+                <h1>@member.FirstName @member.LastName</h1>
+                <h3 class="jobtitle">@member.JobTitle</h3>
+                <h2 class="contact-format">@member.Email</h2>
+                <h2 class="contact-format">@member.Phone</h2>
+
+                <button class="message-btn">Message</button>
+            </div>
+        }
     </div>
-}
+</div>

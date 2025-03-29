@@ -1,14 +1,13 @@
-﻿using Domain.Models;
+﻿using Business.Dtos;
 
 namespace Business.Interface
 {
     public interface IMemberService
     {
         Task<bool> DeleteMemberAsync(string id);
-        Task<IEnumerable<Member>> GetAllMembers();
-        Task<Member?> GetMemberByIdAsync(string id);
-        Task<MemberUpdateForm?> GetMemberForUpdateAsync(string id);
-        Task<bool> UpdateMemberAsync(MemberUpdateForm form);
-
+        Task<IEnumerable<MemberDto>> GetAllMembersAsync();
+        Task<MemberDto> GetMemberByIdAsync(string id);
+        Task<MemberDto?> GetMemberForUpdateAsync(string id);
+        Task<bool> UpdateMemberAsync(MemberDto dto, string? imagePath);
     }
 }

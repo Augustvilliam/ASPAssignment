@@ -1,11 +1,10 @@
-﻿using Domain.Models;
+﻿using Business.Dtos;
 
-namespace Business.Interface
+namespace Business.Interface;
+
+public interface IAccountService
 {
-    public interface IAccountService
-    {
-        Task<bool> LoginAsync(LoginForm loginform);
-        Task<bool> RegisterAsync(RegisterForm regForm);
-        Task SignOutAsync();
-    }
+    Task<bool> LoginAsync(LoginDto loginDto);
+    Task<bool> RegisterAsync(RegisterDto registerDto);
+    Task SignOutAsync();
 }

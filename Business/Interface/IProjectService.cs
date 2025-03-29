@@ -1,11 +1,11 @@
 ﻿using Data.Entities;
-using Domain.Models;
+using Business.Dtos;
 
 namespace Business.Interface
 {
     public interface IProjectService
     {
-        Task CreateProjectAsync(ProjectCreateForm form);
+        Task CreateProjectAsync(ProjectDto dto);
         Task<IEnumerable<ProjectEntity>> GetAllProjectsAsync();
     }
 }

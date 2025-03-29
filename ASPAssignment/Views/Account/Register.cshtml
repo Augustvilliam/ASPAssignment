@@ -1,48 +1,54 @@
-﻿@model RegisterForm
-@{
-        <div class="reg-form-container">
-            <h1>Create acount </h1>
-            <Button class="media-btn">
-                <img src="~/img/google-icon.svg" alt="">
-			    <p>Sign up with Google</p>
-            </Button>
-                <img class="splitter" src="~/img/splitter.svg" alt="">
+﻿@model ASPAssignment.ViewModels.RegisterForm
 
-            <form class="reg-form" asp-controller="Account" asp-action="Register" method="post" novalidate enctype="multipart/form-data">
-                <div>
-                    @ViewBag?.ErrorMessage
-                </div>
+<div class="reg-form-container">
+    <h1>Create Account</h1>
 
-                <label asp-for="FirstName">First Name</label>
-                <input asp-for="FirstName" class="form-input">
-			    <span asp-validation-for="FirstName" class="text-danger"></span>
+    <button type="button" class="media-btn">
+        <img src="~/img/google-icon.svg" alt="Google Icon" />
+        <p>Sign up with Google</p>
+    </button>
 
-                <label asp-for="LastName">Last Name</label>
-                <input asp-for="LastName" class="form-input" placeholder="Last Name">
-                <span asp-validation-for="LastName" class="text-danger"></span>
+    <img class="splitter" src="~/img/splitter.svg" alt="Splitter" />
 
+    <form class="reg-form" asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" novalidate>
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <div class="text-danger mb-2">@ViewBag.ErrorMessage</div>
+        }
 
-                <label asp-for="Email">Email</label>
-                <input asp-for="Email" class="form-input" placeholder="Your Email">
-                <span asp-validation-for="Email" class="text-danger"></span>
+        <label asp-for="FirstName">First Name</label>
+        <input asp-for="FirstName" class="form-input" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
 
+        <label asp-for="LastName">Last Name</label>
+        <input asp-for="LastName" class="form-input" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
 
-                <label asp-for="Password">Password</label>
-                <input asp-for="Password" class="form-input" placeholder="Your Password">
-                <span asp-validation-for="Password" class="text-danger"></span>
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" class="form-input" />
+        <span asp-validation-for="Email" class="text-danger"></span>
 
-                <label asp-for="ConfirmPassword">Confirm Password</label>
-                <input asp-for="ConfirmPassword" class="form-input" placeholder="Confirm Password">
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        <label asp-for="Password">Password</label>
+        <input asp-for="Password" class="form-input" />
+        <span asp-validation-for="Password" class="text-danger"></span>
 
-    
-                <div>
-                    <input type="checkbox" name="" id="checkbox1">
-                    <label for="checkbox1">I accept <a href="">Terms and Conditions!</a></label>
-                </div>
-                
-                <button class="login-btn">Create Account</button>
-            </form>
-            <p>Already Have an Account?<a asp-controller="Account" asp-action="Login">Login</a></p>
+        <label asp-for="ConfirmPassword">Confirm Password</label>
+        <input asp-for="ConfirmPassword" class="form-input" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+
+        <div class="form-check mb-3">
+            <input asp-for="Terms" class="form-check-input" type="checkbox" id="termsCheck" />
+            <label asp-for="Terms" class="form-check-label">
+                I accept <a href="#">Terms and Conditions</a>
+            </label>
+            <span asp-validation-for="Terms" class="text-danger"></span>
         </div>
-}
+
+        <button type="submit" class="login-btn">Create Account</button>
+    </form>
+
+    <p>
+        Already have an account?
+        <a asp-controller="Account" asp-action="Login">Login</a>
+    </p>
+</div>

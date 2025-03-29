@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 
-namespace ASPAssignment.Models;
+namespace ASPAssignment.ViewModels;
 
 public class RegisterForm
 {

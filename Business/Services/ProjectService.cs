@@ -1,9 +1,8 @@
-﻿
-using System.Runtime;
+﻿using Business.Dtos;
+using Business.Factories;
 using Business.Interface;
 using Data.Entities;
 using Data.Interface;
-using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services;
@@ -21,45 +20,24 @@ public class ProjectService : IProjectService
         _memberRepo = memberRepo;
     }
 
-    public async Task CreateProjectAsync(ProjectCreateForm form)
+    public async Task CreateProjectAsync(ProjectDto dto)
     {
         await _projectRepo.BeginTransactionAsync();
         try
         {
-            var project = new ProjectEntity
-            {
-                ProjectName = form.ProjectName,
-                ClientName = form.ClientName,
-                Description = form.Description,
-                StartDate = form.StartDate,
-                EndDate = form.EndDate,
-                Budget = form.Budget
-            };
+            var memberEntities = new List<MemberEntity>();
 
-            foreach (var memberId in form.SelectedMembersIds)
+            foreach (var memberId in dto.MemberIds)
             {
                 var member = await _memberRepo.GetByIdAsync(memberId);
                 if (member != null)
-                    project.Members.Add(member);
+                    memberEntities.Add(member);
             }
 
-            if (form.ProjectImage != null && form.ProjectImage.Length > 0)
-            {
-                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadPath))
-                    Directory.CreateDirectory(uploadPath);
+            var entity = ProjectFactory.CreateEntity(dto, memberEntities);
 
-                var fileName = $"{Guid.NewGuid()}_{form.ProjectImage.FileName}";
-                var filePath = Path.Combine(uploadPath, fileName);
-
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await form.ProjectImage.CopyToAsync(stream);
-
-                project.ProjectImagePath = $"/uploads/{fileName}";
-            }
-            await _projectRepo.CreateAsync(project);
+            await _projectRepo.CreateAsync(entity);
             await _projectRepo.CommitTransactionAsync();
-
         }
         catch (Exception)
         {

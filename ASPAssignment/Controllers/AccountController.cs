@@ -1,7 +1,6 @@
-﻿using ASPAssignment.Models;
+﻿using ASPAssignment.ViewModels;
+using Business.Dtos;
 using Business.Interface;
-using Business.Services;
-using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +16,7 @@ public class AccountController(IAccountService accountService) : Controller
         ViewBag.ReturnUrl = returnUrl;
         return View();
     }
+
     [HttpPost]
     public async Task<IActionResult> Login(LoginForm form, string returnUrl = "/Home/Index")
     {
@@ -24,11 +24,15 @@ public class AccountController(IAccountService accountService) : Controller
 
         if (ModelState.IsValid)
         {
-            var result = await _accountService.LoginAsync(form);
-           if (result)
+            var dto = new LoginDto
+            {
+                Email = form.Email,
+                Password = form.Password
+            };
+            var result = await _accountService.LoginAsync(dto);
+            if (result)
                 return LocalRedirect(returnUrl);
         }
-
         ViewBag.ErrorMessage = "Invalid login attempt";
         return View();
     }
@@ -40,21 +44,26 @@ public class AccountController(IAccountService accountService) : Controller
     }
 
     [HttpPost]
-     public async Task<IActionResult> Register(RegisterForm form)
+    public async Task<IActionResult> Register(RegisterForm form)
     {
         if (ModelState.IsValid)
         {
-            var result = await _accountService.RegisterAsync(form);
+            var dto = new RegisterDto
+            {
+                FirstName = form.FirstName,
+                LastName = form.LastName,
+                Email = form.Email,
+                Password = form.Password
+            };
+            var result = await _accountService.RegisterAsync(dto);
             if (result)
                 return LocalRedirect("~/");
         }
-
         ViewBag.ErrorMessage = "";
         return View(form);
     }
 
-    [Authorize]
-
+        [Authorize]
     public async Task<IActionResult> LogoutAsync()
     {
         await _accountService.SignOutAsync();

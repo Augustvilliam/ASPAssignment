@@ -22,7 +22,7 @@ public class NavigationController : Controller
 
         if (projects == null || !projects.Any())
         {
-            return Content("No projects found."); // Test fallback
+            return Content("No projects found.");
         }
 
         return PartialView("~/Views/Shared/Partials/_ProjectView.cshtml", projects);
@@ -31,7 +31,7 @@ public class NavigationController : Controller
 
     public async Task<IActionResult> LoadTeamMembers()
     {
-        var members = await _memberService.GetAllMembers();
+        var members = await _memberService.GetAllMembersAsync();
         return PartialView("~/Views/Shared/Partials/_TeamMembers.cshtml", members);
     }
 }
