@@ -1,4 +1,5 @@
-﻿using Business.Interface;
+﻿using ASPAssignment.Models;
+using Business.Interface;
 using Business.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;

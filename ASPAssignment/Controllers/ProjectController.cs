@@ -1,4 +1,5 @@
-﻿using Business.Interface;
+﻿using ASPAssignment.Models;
+using Business.Interface;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
