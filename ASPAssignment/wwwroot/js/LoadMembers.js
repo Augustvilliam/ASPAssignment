@@ -29,12 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!uploadBtn || !fileInput || !previewImg) return;
 
-    // Klick på bilden → öppna file picker
     uploadBtn.addEventListener("click", () => {
         fileInput.click();
     });
 
-    // När fil valts → visa förhandsvisning i knappen
     fileInput.addEventListener("change", function () {
         const file = this.files[0];
         if (file) {
@@ -46,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Om användaren redan har profilbild → byt src direkt vid modalladdning
     const modal = document.getElementById('editTeamMemberModal');
     modal.addEventListener('show.bs.modal', async function (event) {
         const button = event.relatedTarget;
@@ -57,13 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const response = await fetch(`/Member/GetMember/${memberId}`);
         const member = await response.json();
 
-        // 👇 Visa profilbild om det finns en sparad path
         if (member.profileImagePath)
             previewImg.src = member.profileImagePath;
         else
             previewImg.src = "/img/upload.svg";
 
-        // Fyll resten som innan
         document.getElementById('member-id').value = member.id;
         document.getElementById('firstname').value = member.firstName;
         document.getElementById('lastname').value = member.lastName;

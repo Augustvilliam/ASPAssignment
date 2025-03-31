@@ -1,0 +1,54 @@
+﻿@model ASPAssignment.ViewModels.MemberUpdateForm
+
+<div id="editTeamMemberModal" class="project-modal modal fade " tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="project-container" tabindex="-1">
+                    <div class="form-header">
+                        <h1>Edit Member</h1>
+                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                    </div>
+                    <button type="button" class="upload-btn-team" id="uploadPreviewBtn">
+                        <img id="previewImage" src="/img/upload.svg" alt="Profile Image">
+                    </button>
+
+                    <form enctype="multipart/form-data" class="project-form" method="post" action="/Member/Update">
+                        <input type="hidden" name="Id" id="member-id">
+                        <input type="file" name="ProfilePic" id="profilepic" accept="image/*" style="display: none;">
+
+                        <div class="fullname-group">
+                            <label for="">First Name</label>
+                            <input name="FirstName" id="firstname" placeholder="First Name" type="text">
+
+                            <label for="">Last Name</label>
+                            <input name="LastName" id="lastname" placeholder="Last Name" type="text">
+                        </div>
+
+                        <label for="email">Email</label>
+                        <input id="email" name="Email" placeholder="Email" type="text" readonly />
+                        <small class="form-text">Please contact and Admin for changes of Email...</small>
+
+                        <label for="phone">Phone</label>
+                        <input id="phone" name="Phone" placeholder="Phone" type="text" />
+
+                        <label for="jobtitle">Job Title</label>
+                        <input id="jobtitle" name="JobTitle" placeholder="Job Title" type="text" />
+
+                        <label for="adress">Adress</label>
+                        <input id="adress" name="Adress" placeholder="Address" type="text" />
+
+                        <div class="dob-group">
+                            <label for="">Date of Birth</label>
+                            <input id="day" type="date" placeholder="Day">
+                            <input id="month" type="date" placeholder="Month">
+                            <input id="year" type="date" placeholder="Year">
+                        </div>
+
+                        <button class="project-form-btn">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -90,6 +90,7 @@
     --opac-green: rgba(49, 212, 130, 0.1);
     --opac-red: rgba(130, 106, 249, 0.1);
     --opac-purple: rgba(130, 106, 249, 0.1);
+    --clr-danger-red: #fff0f0;
 }
 
     :root[data-theme="dark"] {
@@ -123,6 +124,7 @@
         --opac-green: rgba(49, 212, 130, 0.1);
         --opac-red: rgba(130, 106, 249, 0.1);
         --opac-purple: rgba(130, 106, 249, 0.1);
+        --clr-danger-red: #fff0f0;
     }
 
 a {
@@ -144,16 +146,42 @@ input {
 h1, h2, h3, h4, h5, h6 {
     color: var(--clr-heading)
 }
-
-
-/*Misc*/
-.Spacebetween{
-    display:flex;
-    justify-content:space-between
+.input-error {
+    border: 1px solid #dc3545;
+    background-color: var(--clr-danger-red);
 }
 
-/* WRAPPERS AND CONTAINERS */
+.text-danger {
+    color: var(--clr-dark-red);
+    margin-bottom:1rem;
+}
+#error-center{
+    text-align:center;
+}
+/*Misc*/
+.Spacebetween {
+    display: flex;
+    justify-content: space-between
+}
 
+.profile-thumb {
+    max-width: 40px;
+    max-height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#previewImage{
+    max-width:150px;
+    max-height: 150px;
+}
+#uploadPreviewBtn{
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+/* WRAPPERS AND CONTAINERS */
 .wrapper {
     background-color: var(--clr-bg);
     margin: 0 auto;
@@ -269,9 +297,20 @@ input {
     border-radius: .8rem;
     box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
     gap: 1rem;
-    .form-header
-
+    .form-input
 {
+    border-radius: .8rem;
+    padding: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    margin-bottom: 2rem;
+}
+    #projectPreviewImage{
+    max-width:150px;
+    max-height:150px;
+    border-radius:50%;
+     }
+    .form-header{
     display: grid;
     grid-template-columns: 1fr auto;
     justify-content: space-between;
@@ -281,11 +320,7 @@ input {
 }
 
 input {
-    border-radius: .8rem;
-    padding: 1rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    margin-bottom: 2rem;
+
 }
 
 textarea {
@@ -308,6 +343,7 @@ label {
 
 button {
     margin: 0 auto;
+    padding:0;
 }
 
 }
@@ -397,6 +433,12 @@ button {
     display: flex;
     flex-direction: column;
     width: 100%;
+    margin-bottom:1.5rem;
+}
+.form-control{
+    margin:1rem;
+    border-radius:.8rem;
+    height:50px
 }
 
 .project-view {
@@ -549,9 +591,13 @@ p {
 
 }
 
-.form-input {
+.form-input-login {
     width: 400px;
     height: 48px;
+    font-size: 16px;
+    border-radius: .8rem;
+}
+.form-input {
     font-size: 16px;
     border-radius: .8rem;
 }
@@ -580,16 +626,19 @@ p {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
-    #startdate
-
-{
+    #startdate{
     grid-row: 2;
-}
+    }
 
-#endate {
+    #enddate {
     grid-row: 2;
-}
-
+    }
+    .startdateerror{
+        grid-row:3;
+    }
+    .enddateerror {
+    grid-row: 3;
+    }
 }
 
 .dob-group {
@@ -794,16 +843,16 @@ button:hover {
 }
 
 .upload-btn {
-    width: 150px;
-    height: 150px;
+    min-width: 150px;
+    min-height: 150px;
     background-color: transparent;
     border: 1px dashed var(--clr-border300);
     border-radius: 1.2rem;
 }
 
 .upload-btn-team {
-    width: 150px;
-    height: 150px;
+    min-width: 150px;
+    min-height: 150px;
     background-color: transparent;
     border: 1px dashed var(--clr-border300);
     border-radius: 50%;

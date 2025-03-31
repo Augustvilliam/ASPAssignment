@@ -1,0 +1,79 @@
+﻿@model ASPAssignment.ViewModels.ProjectEditForm
+
+<div id="editprojectModal" class="project-modal modal fade" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-body project-container">
+                <div class="form-header">
+                    <h1 class="modal-title" id="projectModalLabel">Edit Project</h1>
+                    <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                </div>
+
+                <button type="button" class="upload-btn" id="editProjectUploadBtn">
+                    <img id="projectPreviewImage" src="@Model.ExistingImagePath ?? "/img/upload.svg"" alt="Project Image" />
+                </button>
+                <input asp-for="ProjectImage" type="file" id="editProjectImageInput" accept="image/*" style="display: none;" />
+
+                <form class="project-form" method="post" asp-controller="Project" asp-action="Update" enctype="multipart/form-data" novalidate>
+                    <input type="hidden" asp-for="Id" />
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="text-danger mb-2">Please correct the errors in the form.</div>
+                    }
+
+                    <label asp-for="ProjectName"></label>
+                    <input asp-for="ProjectName" class="form-input @(ViewData.ModelState["ProjectName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                    <span asp-validation-for="ProjectName" class="text-danger"></span>
+
+                    <label asp-for="ClientName"></label>
+                    <input asp-for="ClientName" class="form-input @(ViewData.ModelState["ClientName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                    <span asp-validation-for="ClientName" class="text-danger"></span>
+
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description" class="form-input" placeholder="Project Description"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+
+                    <div class="date-pick">
+                        <label asp-for="StartDate"></label>
+                        <input asp-for="StartDate" type="date" id="startdate" class="form-input @(ViewData.ModelState["StartDate"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                        <span asp-validation-for="StartDate" class="text-danger startdateerror"></span>
+
+                        <label asp-for="EndDate"></label>
+                        <input asp-for="EndDate" type="date" id="enddate" class="form-input" />
+                        <span asp-validation-for="EndDate" class="text-danger enddateerror"></span>
+                    </div>
+
+                    <label asp-for="SelectedMemberId"></label>
+                    <select asp-for="SelectedMemberId" asp-items="ViewBag.Members" multiple class="form-control @(ViewData.ModelState["SelectedMembersIds"]?.Errors.Any() == true ? "input-validation-error" : "")"></select>
+                    <span asp-validation-for="SelectedMemberId" class="text-danger"></span>
+
+                    <label asp-for="Budget"></label>
+                    <input asp-for="Budget" class="form-input @(ViewData.ModelState["Budget"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                    <span asp-validation-for="Budget" class="text-danger"></span>
+
+                    <button type="submit" class="project-form-btn">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("editProjectUploadBtn")?.addEventListener("click", function () {
+            document.getElementById("editProjectImageInput")?.click();
+        });
+
+        document.getElementById("editProjectImageInput")?.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("editProjectPreviewImage").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

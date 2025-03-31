@@ -1,6 +1,7 @@
-﻿@{
+﻿@using ASPAssignment.ViewModels
+@model IEnumerable<Data.Entities.ProjectEntity>
+@{
     ViewData["Title"] = "Project Menu";
-    @model IEnumerable<Data.Entities.ProjectEntity>
 }
 
 <div class="container">
@@ -10,11 +11,14 @@
             <div class="content">
                 @Html.Partial("Partials/_Topbar")
                 <div id="dynamic-content">
-                    @Html.Partial("Partials/_ProjectView")
+                    @Html.Partial("Partials/_ProjectView", Model)
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@Html.Partial("Partials/_Modals")
+<!-- Modals -->
+@Html.Partial("Partials/Modals/_CreateProjectModal", new ProjectCreateForm())
+@Html.Partial("Partials/Modals/_EditProjectModal", new ProjectEditForm())
+@Html.Partial("Partials/Modals/_EditMemberModal", new MemberUpdateForm())

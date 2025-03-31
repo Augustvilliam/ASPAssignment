@@ -13,31 +13,31 @@
     <form class="reg-form" asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" novalidate>
         @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
         {
-            <div class="text-danger mb-2">@ViewBag.ErrorMessage</div>
+            <div id="error-center" class="text-danger mb-2">@ViewBag.ErrorMessage</div>
         }
 
         <label asp-for="FirstName">First Name</label>
-        <input asp-for="FirstName" class="form-input" />
+        <input asp-for="FirstName" class="form-input-login @(ViewData.ModelState["FirstName"]?.Errors.Any() == true ? "input-error" : "")" />
         <span asp-validation-for="FirstName" class="text-danger"></span>
 
         <label asp-for="LastName">Last Name</label>
-        <input asp-for="LastName" class="form-input" />
+        <input asp-for="LastName" class="form-input-login @(ViewData.ModelState["LastName"]?.Errors.Any() == true ? "input-error" : "")" />
         <span asp-validation-for="LastName" class="text-danger"></span>
 
         <label asp-for="Email">Email</label>
-        <input asp-for="Email" class="form-input" />
+        <input asp-for="Email" class="form-input-login @(ViewData.ModelState["Email"]?.Errors.Any() == true ? "input-error" : "")" />
         <span asp-validation-for="Email" class="text-danger"></span>
 
         <label asp-for="Password">Password</label>
-        <input asp-for="Password" class="form-input" />
+        <input asp-for="Password" class="form-input-login @(ViewData.ModelState["Password"]?.Errors.Any() == true ? "input-error" : "")" />
         <span asp-validation-for="Password" class="text-danger"></span>
 
         <label asp-for="ConfirmPassword">Confirm Password</label>
-        <input asp-for="ConfirmPassword" class="form-input" />
+        <input asp-for="ConfirmPassword" class="form-input-login @(ViewData.ModelState["ConfirmPassword"]?.Errors.Any() == true ? "input-error" : "")" />
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
 
         <div class="form-check mb-3">
-            <input asp-for="Terms" class="form-check-input" type="checkbox" id="termsCheck" />
+            <input asp-for="Terms" class="form-check-input @(ViewData.ModelState["Terms"]?.Errors.Any() == true ? "input-error" : "")" type="checkbox" id="termsCheck" />
             <label asp-for="Terms" class="form-check-label">
                 I accept <a href="#">Terms and Conditions</a>
             </label>
@@ -52,3 +52,16 @@
         <a asp-controller="Account" asp-action="Login">Login</a>
     </p>
 </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('input', () => {
+                if (input.classList.contains('input-error')) {
+                    input.classList.remove('input-error');
+                }
+            });
+        });
+    </script>
+}
+

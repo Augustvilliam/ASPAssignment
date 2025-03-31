@@ -18,7 +18,9 @@ public class RegisterForm
 
     [Required]
     [DataType(DataType.EmailAddress)]
-    [Display(Name = "Email", Prompt = "Enter Email Adress")]
+    [EmailAddress(ErrorMessage = "Invalid email address. Use format name@example.com")]
+    [RegularExpression(@"^[\w\.-]+@[\w\.-]+\.\w{2,4}$", ErrorMessage = "Invalid email address. Use format name@example.com")]
+    [Display(Name = "Email", Prompt = "Enter Email Address")]
     public string Email { get; set; } = null!;
 
     [Required]

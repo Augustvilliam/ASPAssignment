@@ -7,28 +7,32 @@ namespace ASPAssignment.ViewModels
         [Display(Name = "Project Image")]
         public IFormFile? ProjectImage { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Project name is required.")]
         [Display(Name = "Project Name")]
         public string ProjectName { get; set; } = null!;
 
-        [Required]
+        [Required(ErrorMessage = "Client name is required.")]
         [Display(Name = "Client Name")]
         public string ClientName { get; set; } = null!;
+
         [Display(Name = "Description")]
         public string? Description { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Start date is required.")]
         [Display(Name = "Start Date")]
         public DateTime StartDate { get; set; } = DateTime.Now;
+
         [Display(Name = "End Date")]
         public DateTime EndDate { get; set; } = DateTime.Now;
 
-        [Required]
-        [Display(Name = "Project Members")]
-        public List<string> SelectedMembersIds { get; set; } = [];
+        [Required(ErrorMessage = "At least one member must be selected.")]
+        [Display(Name = "Project Member")]
+        public List<string> SelectedMemberId { get; set; } = [];
 
-        [Required]
+        [Required(ErrorMessage = "Budget is required.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Budget must be greater than 0.")]
         [Display(Name = "Budget")]
         public decimal Budget { get; set; }
     }
 }
+

@@ -10,18 +10,17 @@ public class AccountController(IAccountService accountService) : Controller
 {
     private readonly IAccountService _accountService = accountService;
 
+    [HttpGet]
     public IActionResult Login(string returnUrl = "~/")
     {
-        ViewBag.ErrorMessage = "";
         ViewBag.ReturnUrl = returnUrl;
+        ViewBag.ErrorMessage = string.Empty;
         return View();
     }
 
     [HttpPost]
     public async Task<IActionResult> Login(LoginForm form, string returnUrl = "/Home/Index")
     {
-        ViewBag.ErrorMessage = "";
-
         if (ModelState.IsValid)
         {
             var dto = new LoginDto
@@ -29,17 +28,21 @@ public class AccountController(IAccountService accountService) : Controller
                 Email = form.Email,
                 Password = form.Password
             };
+
             var result = await _accountService.LoginAsync(dto);
             if (result)
                 return LocalRedirect(returnUrl);
+
+            ViewBag.ErrorMessage = "Invalid login attempt.";
         }
-        ViewBag.ErrorMessage = "Invalid login attempt";
-        return View();
+
+        return View(form);
     }
 
+    [HttpGet]
     public IActionResult Register()
     {
-        ViewBag.ErrorMessage = "";
+        ViewBag.ErrorMessage = string.Empty;
         return View();
     }
 
@@ -55,15 +58,22 @@ public class AccountController(IAccountService accountService) : Controller
                 Email = form.Email,
                 Password = form.Password
             };
+
             var result = await _accountService.RegisterAsync(dto);
             if (result)
                 return LocalRedirect("~/");
+
+            ViewBag.ErrorMessage = "Registration failed. Please try again.";
         }
-        ViewBag.ErrorMessage = "";
+        else
+        {
+            ViewBag.ErrorMessage = "One or more fields are invalid.";
+        }
+
         return View(form);
     }
 
-        [Authorize]
+    [Authorize]
     public async Task<IActionResult> LogoutAsync()
     {
         await _accountService.SignOutAsync();

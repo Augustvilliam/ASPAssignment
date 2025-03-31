@@ -4,71 +4,64 @@ using Business.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ASPAssignment.Controllers
+namespace ASPAssignment.Controllers;
+
+public class ProjectController(IProjectService projectService, IMemberService memberService) : Controller
 {
-    public class ProjectController(IProjectService projectService, IMemberService memberService) : Controller
+    private readonly IProjectService _projectService = projectService;
+    private readonly IMemberService _memberService = memberService;
+
+    [HttpPost]
+    public async Task<IActionResult> Create(ProjectCreateForm form)
     {
-        private readonly IProjectService _projectService = projectService;
-        private readonly IMemberService _memberService = memberService;
+        await LoadMembersToViewBag();
 
-        [HttpGet]
-        public async Task<IActionResult> Create()
+        if (!ModelState.IsValid)
         {
-            await LoadMembersToViewBag();
-            return View();
+            // Återrenderar samma partial (modal) med valideringsfel
+            return PartialView("Partials/Modals/_CreateProjectModal", form);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateForm form)
+        string? imagePath = null;
+        if (form.ProjectImage is { Length: > 0 })
         {
-            if (ModelState.IsValid)
-            {
-                string? imagePath = null;
+            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (!Directory.Exists(uploadPath))
+                Directory.CreateDirectory(uploadPath);
 
-                if (form.ProjectImage != null && form.ProjectImage.Length > 0)
-                {
-                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                    if (!Directory.Exists(uploadPath))
-                        Directory.CreateDirectory(uploadPath);
+            var fileName = $"{Guid.NewGuid()}_{form.ProjectImage.FileName}";
+            var filePath = Path.Combine(uploadPath, fileName);
 
-                    var fileName = $"{Guid.NewGuid()}_{form.ProjectImage.FileName}";
-                    var filePath = Path.Combine(uploadPath, fileName);
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await form.ProjectImage.CopyToAsync(stream);
 
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await form.ProjectImage.CopyToAsync(stream);
-
-                    imagePath = $"/uploads/{fileName}";
-                }
-
-                var dto = new ProjectDto
-                {
-                    ProjectName = form.ProjectName,
-                    ClientName = form.ClientName,
-                    Description = form.Description,
-                    StartDate = form.StartDate,
-                    EndDate = form.EndDate,
-                    Budget = form.Budget,
-                    ProjectImagePath = imagePath,
-                    MemberIds = form.SelectedMembersIds
-                };
-
-                await _projectService.CreateProjectAsync(dto);
-                return RedirectToAction("Index", "Home");
-            }
-
-            await LoadMembersToViewBag();
-            return View(form);
+            imagePath = $"/uploads/{fileName}";
         }
 
-        private async Task LoadMembersToViewBag()
+        var dto = new ProjectDto
         {
-            var members = await _memberService.GetAllMembersAsync();
+            ProjectName = form.ProjectName,
+            ClientName = form.ClientName,
+            Description = form.Description,
+            StartDate = form.StartDate,
+            EndDate = form.EndDate,
+            Budget = form.Budget,
+            ProjectImagePath = imagePath,
+            MemberIds = form.SelectedMemberId
+        };
 
-            ViewBag.Members = new MultiSelectList(
-                members,
-                "Id",
-                "FullName"
-            );
-        }
+        await _projectService.CreateProjectAsync(dto);
+        return RedirectToAction("Index", "Home");
+    }
+
+    private async Task LoadMembersToViewBag()
+    {
+        var members = await _memberService.GetAllMembersAsync();
+
+        ViewBag.Member = new SelectList(
+            members,
+            "Id",
+            "FullName"
+        );
     }
 }
