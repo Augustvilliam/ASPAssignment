@@ -16,6 +16,7 @@ public static class MemberFactory
             LastName = entity.LastName ?? string.Empty,
             Email = entity.Email ?? string.Empty,
             Phone = entity.PhoneNumber,
+            JobTitle = entity.JobTitle,
             ProfileImagePath = entity.ProfileImagePath
         };
     }

@@ -7,5 +7,7 @@ namespace Business.Interface
     {
         Task CreateProjectAsync(ProjectDto dto);
         Task<IEnumerable<ProjectEntity>> GetAllProjectsAsync();
+        Task<ProjectDto?> GetProjectByIdAsync(Guid id);
+        Task<bool> UpdateProjectAsync(ProjectDto dto);
     }
 }

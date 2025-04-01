@@ -1,5 +1,6 @@
 ﻿@model ASPAssignment.ViewModels.ProjectEditForm
 
+
 <div id="editprojectModal" class="project-modal modal fade" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
@@ -10,46 +11,42 @@
                 </div>
 
                 <button type="button" class="upload-btn" id="editProjectUploadBtn">
-                    <img id="projectPreviewImage" src="@Model.ExistingImagePath ?? "/img/upload.svg"" alt="Project Image" />
+                    <img id="editProjectPreviewImage" src="@(!string.IsNullOrEmpty(Model.ExistingImagePath) ? Model.ExistingImagePath : "/img/upload.svg")" alt="Project Image" />
                 </button>
                 <input asp-for="ProjectImage" type="file" id="editProjectImageInput" accept="image/*" style="display: none;" />
 
-                <form class="project-form" method="post" asp-controller="Project" asp-action="Update" enctype="multipart/form-data" novalidate>
-                    <input type="hidden" asp-for="Id" />
-
-                    @if (!ViewData.ModelState.IsValid)
-                    {
-                        <div class="text-danger mb-2">Please correct the errors in the form.</div>
-                    }
+                <form id="edit-project-form" class="project-form" method="post" asp-controller="Project" asp-action="Update" enctype="multipart/form-data" novalidate>
+                    <div id="edit-project-errors" class="text-danger mb-2"></div>
+                    <input type="hidden" asp-for="Id" name="Id" />
 
                     <label asp-for="ProjectName"></label>
-                    <input asp-for="ProjectName" class="form-input @(ViewData.ModelState["ProjectName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                    <input asp-for="ProjectName" name="ProjectName" class="form-input" />
                     <span asp-validation-for="ProjectName" class="text-danger"></span>
 
                     <label asp-for="ClientName"></label>
-                    <input asp-for="ClientName" class="form-input @(ViewData.ModelState["ClientName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                    <input asp-for="ClientName" name="ClientName" class="form-input" />
                     <span asp-validation-for="ClientName" class="text-danger"></span>
 
                     <label asp-for="Description"></label>
-                    <textarea asp-for="Description" class="form-input" placeholder="Project Description"></textarea>
+                    <textarea asp-for="Description" name="Description" class="form-input" placeholder="Project Description"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
 
                     <div class="date-pick">
                         <label asp-for="StartDate"></label>
-                        <input asp-for="StartDate" type="date" id="startdate" class="form-input @(ViewData.ModelState["StartDate"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                        <input asp-for="StartDate" name="StartDate" type="date" class="form-input" />
                         <span asp-validation-for="StartDate" class="text-danger startdateerror"></span>
 
                         <label asp-for="EndDate"></label>
-                        <input asp-for="EndDate" type="date" id="enddate" class="form-input" />
+                        <input asp-for="EndDate" name="EndDate" type="date" class="form-input" />
                         <span asp-validation-for="EndDate" class="text-danger enddateerror"></span>
                     </div>
 
                     <label asp-for="SelectedMemberId"></label>
-                    <select asp-for="SelectedMemberId" asp-items="ViewBag.Members" multiple class="form-control @(ViewData.ModelState["SelectedMembersIds"]?.Errors.Any() == true ? "input-validation-error" : "")"></select>
+                    <select asp-for="SelectedMemberId" name="SelectedMemberId" asp-items="ViewBag.Members" multiple class="form-control"></select>
                     <span asp-validation-for="SelectedMemberId" class="text-danger"></span>
 
                     <label asp-for="Budget"></label>
-                    <input asp-for="Budget" class="form-input @(ViewData.ModelState["Budget"]?.Errors.Any() == true ? "input-validation-error" : "")" />
+                    <input asp-for="Budget" name="Budget" class="form-input" />
                     <span asp-validation-for="Budget" class="text-danger"></span>
 
                     <button type="submit" class="project-form-btn">Update</button>
@@ -58,6 +55,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script>

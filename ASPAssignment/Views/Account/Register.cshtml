@@ -52,16 +52,8 @@
         <a asp-controller="Account" asp-action="Login">Login</a>
     </p>
 </div>
+<script src="~/js/InputError.js"></script>
 
-@section Scripts {
-    <script>
-        document.querySelectorAll('.form-input').forEach(input => {
-            input.addEventListener('input', () => {
-                if (input.classList.contains('input-error')) {
-                    input.classList.remove('input-error');
-                }
-            });
-        });
-    </script>
-}
+
+
 

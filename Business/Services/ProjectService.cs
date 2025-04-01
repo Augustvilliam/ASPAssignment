@@ -45,12 +45,57 @@ public class ProjectService : IProjectService
             throw;
         }
     }
-
     public async Task<IEnumerable<ProjectEntity>> GetAllProjectsAsync()
     {
         return await _projectRepo.Context.Projects
             .Include(p => p.Members)
             .ToListAsync();
     }
+    public async Task<bool> UpdateProjectAsync(ProjectDto dto)
+    {
+        await _projectRepo.BeginTransactionAsync();
+
+        try
+        {
+            var existingProject = await _projectRepo.Context.Projects
+                .Include(p => p.Members)
+                .FirstOrDefaultAsync(p => p.Id == dto.Id);
+
+            if (existingProject == null)
+                return false;
+
+            var updatedMembers = new List<MemberEntity>();
+            foreach (var memberId in dto.MemberIds)
+            {
+                var member = await _memberRepo.GetByIdAsync(memberId);
+                if (member != null)
+                    updatedMembers.Add(member);
+            }
+
+            ProjectFactory.UpdateEntity(existingProject, dto, updatedMembers);
+
+            await _projectRepo.UpdateAsync(existingProject);
+            await _projectRepo.CommitTransactionAsync();
+
+            return true;
+        }
+        catch (Exception)
+        {
+            await _projectRepo.RollbackTransactionsAync();
+            throw;
+        }
+    }
+    public async Task<ProjectDto?> GetProjectByIdAsync(Guid id)
+    {
+        var project = await _projectRepo.Context.Projects
+            .Include(p => p.Members)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (project == null)
+            return null;
+
+        return ProjectFactory.FromEntity(project);
+    }
+
 
 }

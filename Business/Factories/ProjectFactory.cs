@@ -36,4 +36,20 @@ public static class ProjectFactory
             MemberIds = entity.Members.Select(m => m.Id).ToList()
         };
     }
+    public static void UpdateEntity(ProjectEntity entity, ProjectDto dto, IEnumerable<MemberEntity> members)
+    {
+        entity.ProjectName = dto.ProjectName;
+        entity.ClientName = dto.ClientName;
+        entity.Description = dto.Description;
+        entity.StartDate = dto.StartDate;
+        entity.EndDate = dto.EndDate;
+        entity.Budget = dto.Budget;
+
+        if (!string.IsNullOrWhiteSpace(dto.ProjectImagePath))
+            entity.ProjectImagePath = dto.ProjectImagePath;
+
+        entity.Members = new List<MemberEntity>(members);
+
+    }
+
 }

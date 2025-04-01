@@ -668,9 +668,15 @@ p {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto, 1fr;
-    #firstname
+    .text-danger{
+                    grid-row:3;
+                }
+        #FirstName
 
 {
+    grid-row: 2;
+}
+#LastName {
     grid-row: 2;
 }
 

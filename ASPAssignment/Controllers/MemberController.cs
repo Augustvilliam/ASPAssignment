@@ -26,10 +26,10 @@ public class MemberController(IMemberService memberService) : Controller
     [HttpPost("Update")]
     public async Task<IActionResult> UpdateMember(MemberUpdateForm form)
     {
-       if (ModelState.IsValid)
-       {
+        if (ModelState.IsValid)
+        {
             string? imagePath = null;
-            if ( form.ProfilePic != null && form.ProfilePic.Length > 0)
+            if (form.ProfilePic != null && form.ProfilePic.Length > 0)
             {
                 var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadPath))
@@ -43,6 +43,7 @@ public class MemberController(IMemberService memberService) : Controller
 
                 imagePath = $"/uploads/{fileName}";
             }
+
             var dto = new MemberDto
             {
                 Id = form.Id,
@@ -50,14 +51,25 @@ public class MemberController(IMemberService memberService) : Controller
                 LastName = form.LastName,
                 Email = form.Email,
                 Phone = form.Phone,
+                JobTitle = form.JobTitle,
                 ProfileImagePath = imagePath
             };
 
             var result = await _memberService.UpdateMemberAsync(dto, imagePath);
             if (result)
-                return RedirectToAction("Index", "Home");
+            {
+                // Skickar tillbaka en ny partialview eller JSON för uppdatering
+                return Json(new { success = true });
+            }
         }
-       return BadRequest("Could not update Member");
+
+        // Returnerar valideringsfel
+        var errors = ModelState
+            .Where(x => x.Value.Errors.Count > 0)
+            .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) });
+
+        return BadRequest(errors);
     }
+
 
 }

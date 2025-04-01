@@ -9,9 +9,13 @@
     </div>
 
     <div class="more-container">
-        <button class="more-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal">
+        <button class="more-btn"
+                data-project-id="@Model.Id"
+                data-bs-toggle="modal"
+                data-bs-target="#editprojectModal">
             <img src="~/img/More 2.svg" alt="More">
         </button>
+
     </div>
 
     <p class="p-description">@Model.Description</p>
@@ -27,4 +31,5 @@
             }
         }
     </div>
+    <p class="text-muted small">ID: @Model.Id</p> <!-- ✅ Temporärt ID-utskrift -->
 </div>
