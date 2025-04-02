@@ -96,6 +96,4 @@ public class ProjectService : IProjectService
 
         return ProjectFactory.FromEntity(project);
     }
-
-
 }
