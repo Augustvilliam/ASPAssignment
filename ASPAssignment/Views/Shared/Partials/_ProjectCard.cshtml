@@ -1,5 +1,22 @@
 ﻿@model ProjectEntity
 
+@{
+    var now = DateTime.Now;
+    var end = Model.EndDate;
+    string deadlineText;
+    bool isOverdue = end < now;
+
+    if (isOverdue)
+    {
+        deadlineText = "OVERDUE";
+    }
+    else
+    {
+        var daysLeft = (end - now).Days;
+        deadlineText = $"{daysLeft} day{(daysLeft != 1 ? "s" : "")} left";
+    }
+}
+
 <div class="project-card">
     <img class="project-img" src="@(!string.IsNullOrEmpty(Model.ProjectImagePath) ? Model.ProjectImagePath : "/img/Image.svg")" alt="Project Image" />
 
@@ -15,14 +32,19 @@
                 data-bs-target="#editprojectModal">
             <img src="~/img/More 2.svg" alt="More">
         </button>
-
     </div>
 
     <p class="p-description">@Model.Description</p>
 
-    <img class="temp-deadline" src="~/img/Deadline.svg" alt="Deadline">
+    <div class="temp-deadline-container d-flex align-items-center gap-2 mt-2">
+        <img src="~/img/Clock.svg" alt="More">
 
-    <div class="current-users">
+        <span class="temp-deadline-text @(isOverdue ? "text-danger fw-bold" : "")">
+            @deadlineText
+        </span>
+    </div>
+
+    <div class="current-users mt-2">
         @if (Model.Members != null && Model.Members.Any())
         {
             foreach (var member in Model.Members)

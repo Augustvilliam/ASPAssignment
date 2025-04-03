@@ -13,9 +13,10 @@
                 <button type="button" class="upload-btn" id="editProjectUploadBtn">
                     <img id="editProjectPreviewImage" src="@(!string.IsNullOrEmpty(Model.ExistingImagePath) ? Model.ExistingImagePath : "/img/upload.svg")" alt="Project Image" />
                 </button>
-                <input asp-for="ProjectImage" type="file" id="editProjectImageInput" accept="image/*" style="display: none;" />
 
                 <form id="edit-project-form" class="project-form" method="post" asp-controller="Project" asp-action="Update" enctype="multipart/form-data" novalidate>
+                    <input asp-for="ProjectImage" type="file" id="editProjectImageInput" accept="image/*" style="display: none;" />
+
                     <div id="edit-project-errors" class="text-danger mb-2"></div>
                     <input type="hidden" asp-for="Id" name="Id" />
 

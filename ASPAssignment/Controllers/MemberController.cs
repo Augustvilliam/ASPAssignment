@@ -52,8 +52,9 @@ public class MemberController(IMemberService memberService) : Controller
                 Email = form.Email,
                 Phone = form.Phone,
                 JobTitle = form.JobTitle,
-                ProfileImagePath = imagePath
+                ProfileImagePath = imagePath ?? form.ExistingProfileImagePath // ✅ detta är nyckeln!
             };
+
 
             var result = await _memberService.UpdateMemberAsync(dto, imagePath);
             if (result)

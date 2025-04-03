@@ -1,5 +1,4 @@
-﻿
-document.addEventListener("DOMContentLoaded", function () {
+﻿document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("load-projects").addEventListener("click", function () {
         loadPartialView("/Navigation/LoadProjects");
     });
@@ -9,11 +8,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function loadPartialView(url) {
+        const container = document.querySelector(".project-view");
+
+        container.classList.remove("visible");
+        container.classList.add("fade-in");
+        container.innerHTML = "";
+
         fetch(url)
             .then(response => response.text())
             .then(html => {
-                document.getElementById("dynamic-content").innerHTML = html;
+                container.innerHTML = html;
+                requestAnimationFrame(() => {
+                    container.classList.add("visible");
+                });
             })
-            .catch(error => console.error("Error loading view:", error));
+            .catch(error => {
+                container.innerHTML = "<div class='text-danger'>Kunde inte ladda innehållet.</div>";
+                console.error("Error loading view:", error);
+            });
     }
+
 });

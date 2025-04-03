@@ -12,7 +12,6 @@
                 <button type="button" class="upload-btn-team" id="projectUploadBtn">
                     <img id="projectPreviewImage" src="/img/upload.svg" alt="Project Image">
                 </button>
-                <input asp-for="ProjectImage" type="file" id="projectImageInput" name="ProjectImage" accept="image/*" style="display: none;" />
 
                 <form class="project-form" method="post" asp-controller="Project" asp-action="Create" enctype="multipart/form-data" novalidate>
                     <div id="create-project-errors" class="text-danger mb-2"></div>
@@ -20,6 +19,7 @@
                     {
                         <div class="text-danger mb-2">Please correct the errors in the form.</div>
                     }
+                    <input asp-for="ProjectImage" type="file" id="projectImageInput" name="ProjectImage" accept="image/*" style="display: none;" />
 
                     <label for="projectname">Project Name</label>
                     <input asp-for="ProjectName" id="projectname" name="ProjectName" placeholder="Project Name" class="form-input @(ViewData.ModelState["ProjectName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
