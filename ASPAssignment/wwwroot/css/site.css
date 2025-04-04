@@ -91,6 +91,7 @@
     --opac-red: rgba(130, 106, 249, 0.1);
     --opac-purple: rgba(130, 106, 249, 0.1);
     --clr-danger-red: #fff0f0;
+    --clr-shadow-dark: #040F15;
 }
 
     :root[data-theme="dark"] {
@@ -125,6 +126,7 @@
         --opac-red: rgba(130, 106, 249, 0.1);
         --opac-purple: rgba(130, 106, 249, 0.1);
         --clr-danger-red: #fff0f0;
+        --clr-shadow-dark: rgba(4, 15, 21, .15);
     }
 
 a {
@@ -165,7 +167,13 @@ label{
 .form-check {
     color: var(--clr-body-light);
 }
+
 /*Misc*/
+
+.d-none{
+    display:none!important;
+}
+
 
 .fade-in {
     opacity: 0;
@@ -458,6 +466,16 @@ button {
 }
 
 /* Components */
+
+.usersummary {
+    padding-left: .5rem;
+    padding-right: 1rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    .profile-thumb{
+                      border: 3px solid var(--clr-surface);
+                  }
+}
 .project-form {
     display: flex;
     flex-direction: column;
@@ -632,17 +650,36 @@ p {
     grid-template-rows: auto auto auto;
     align-items: center;
     justify-content: start;
-    button
 
+    i,button,p,a,span
+{
+    font-size: 15px;
+}
+p{
+    color:var(--clr-heading);
+    font-weight:bold
+}
+i, button, span{
+    color: var(--clr-body-dark);
+}
+    button
 {
     margin: 1rem;
 }
 
 .darkmode-box {
-    margin-left: 1rem;
-    margin-right: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: .5rem;
+    margin-top: .5rem;
+    padding-top: .5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--clr-border200);
+    align-items: center;
+    justify-content: center;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding-left: 4px;
 }
 
 }
@@ -796,6 +833,19 @@ h2 {
 }
 
 /*BUTTONS*/
+
+.btn-logout{
+    background-color:transparent;
+    padding:.5rem 1rem;
+    padding-left:4px;
+    margin-top:.5rem;
+    margin-bottom:.5rem;
+    border:none;
+    a{
+         color:var(--clr-body-dark);
+         margin-left:.5rem;
+     }
+}
 .profile-btn {
     border: none;
     background-color: transparent;
@@ -950,11 +1000,35 @@ button:hover {
     font-weight: 800;
 }
 
+.edit-btn, .delete-btn, .addmember-btn {
+    background-color: transparent;
+    text-align: start;
+    width: 215px;
+    border: none;
+    border-radius: .8rem;
+    padding: .5rem;
+    font-size: 16px;
+}
+
+.edit-btn:focus, .addmember-btn:focus {
+    background-color: var(--clr-grey100);
+}
+
+.delete-btn{
+    border-top:1px solid var(--clr-border100);
+    color:var(--clr-red);
+    border-radius:0;
+}
+.delete-btn:focus{
+    background-color:var(--clr-danger-red);
+    border-radius:.8rem;
+}
 /*Darkmode*/
 .darkmode-box {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+
 }
 
 .switch {
@@ -1054,6 +1128,11 @@ input:checked + .slider:before {
     border-radius: .8rem;
     width: 270px;
     box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+    z-index:1100;
+}
+
+.modal-body{
+    z-index:1100;
 }
 
 .profile-modal .modal-dialog {
@@ -1090,6 +1169,28 @@ input:checked + .slider:before {
 .project-modal .modal-body {
     overflow-y: auto; /* Gör enbart innehållet skrollbart */
     flex-grow: 1;
+}
+
+.more-container {
+    position: relative; /* Viktigt för att .more-menu ska positioneras korrekt */
+}
+
+.more-menu {
+    position: absolute;
+    top: 100%; /* Direkt under knappen */
+    right: 0; /* Högerjusterad till knappen */
+    min-width: 160px;
+    z-index: 999;
+    background-color: var(--clr-surface);
+    border-radius: .8rem;
+    display: flex;
+    flex-direction: Column;
+    gap: .2rem;
+    box-shadow: 0px 6px 20px var(--clr-shadow-dark);
+    padding:1rem;
+    i{
+         margin-right:1rem;
+     }
 }
 
 @media(width > 1920px) {

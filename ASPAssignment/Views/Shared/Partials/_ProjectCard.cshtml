@@ -27,11 +27,15 @@
 
     <div class="more-container">
         <button class="more-btn"
-                data-project-id="@Model.Id"
-                data-bs-toggle="modal"
-                data-bs-target="#editprojectModal">
+                data-project-id="@Model.Id">
             <img src="~/img/More 2.svg" alt="More">
         </button>
+
+        <div class="more-menu d-none">
+            <button class="dropdown-item text-start w-100 edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal"><i class="fa-solid fa-pen-to-square"></i>Edit Project</button>
+            <button class="dropdown-item text-start w-100 addmember-btn" data-project-id="@Model.Id"><i class="fa-solid fa-user"></i>Add Member</button>
+            <button class="dropdown-item text-start w-100 delete-btn" data-project-id="@Model.Id"><i class="fa-solid fa-trash-can"></i>Delete Project</button>
+        </div>
     </div>
 
     <p class="p-description">@Model.Description</p>

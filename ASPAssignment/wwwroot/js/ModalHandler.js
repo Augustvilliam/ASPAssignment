@@ -2,6 +2,7 @@
     initCreateProjectModal();
     initEditProjectModal();
     initEditTeamMemberModal();
+    initMoreMenu();
 });
 
 function initCreateProjectModal() {
@@ -164,6 +165,9 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
             const viewResponse = await fetch(reloadUrl);
             const html = await viewResponse.text();
             dynamicContent.innerHTML = html;
+
+            // 👇 Kör igen efter innehållet laddats in
+            initMoreMenu();
         }
     } else {
         const errors = await response.json();
@@ -179,8 +183,74 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
         }
     }
 }
+function initMoreMenu() {
+    document.querySelectorAll(".more-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const container = btn.closest(".more-container");
+            const menu = container.querySelector(".more-menu");
+
+            // Stäng andra öppna menyer
+            document.querySelectorAll(".more-menu").forEach(m => {
+                if (m !== menu) m.classList.add("d-none");
+            });
+
+            // Toggle meny för denna
+            menu.classList.toggle("d-none");
+        });
+    });
+
+    // Klick utanför = stäng alla menyer
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".more-container")) {
+            document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
+        }
+    });
+
+    // 🛠 "Edit Project"-knapp i dropdown
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            // Stäng meny direkt
+            document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
+
+            const container = btn.closest(".more-container");
+            const projectId = container?.querySelector(".more-btn")?.getAttribute("data-project-id");
+            if (!projectId) return;
+
+            const modal = document.getElementById("editprojectModal");
+            const form = modal?.querySelector("form");
+
+            try {
+                const response = await fetch(`/Project/GetProject/${projectId}`);
+                const project = await response.json();
+
+                form.querySelector('[name="Id"]').value = project.id;
+                form.querySelector('[name="ProjectName"]').value = project.projectName;
+                form.querySelector('[name="ClientName"]').value = project.clientName;
+                form.querySelector('[name="Description"]').value = project.description ?? "";
+                form.querySelector('[name="StartDate"]').value = project.startDate.substring(0, 10);
+                form.querySelector('[name="EndDate"]').value = project.endDate.substring(0, 10);
+                form.querySelector('[name="Budget"]').value = project.budget;
+                document.getElementById("editProjectPreviewImage").src = project.projectImagePath ?? "/img/upload.svg";
+
+                const select = form.querySelector('[name="SelectedMemberId"]');
+                if (select) {
+                    Array.from(select.options).forEach(option => {
+                        option.selected = project.memberIds.includes(option.value);
+                    });
+                }
+
+                bootstrap.Modal.getOrCreateInstance(modal).show();
+
+            } catch (error) {
+                console.error("❌ Kunde inte hämta projektdata:", error);
+            }
+        });
+    });
+}
 
 function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));
     form.querySelectorAll("span[data-valmsg-for]").forEach(s => s.textContent = "");
 }
+
