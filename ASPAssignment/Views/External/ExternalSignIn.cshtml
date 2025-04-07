@@ -1,0 +1,42 @@
+﻿@model ASPAssignment.ViewModels.LoginForm
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Login";
+}
+
+<div class="reg-form-container">
+    <h1>Login</h1>
+
+    <button type="button" class="media-btn">
+        <img src="~/img/google-icon.svg" alt="Google Icon" />
+        <p>Sign in with Google</p>
+    </button>
+    <button type="button" class="media-btn">
+        <img src="~/img/icons8-facebook.svg" alt="Meta Icon" />
+        <p>Sign in with Facebook</p>
+    </button>
+    <button type="button" class="media-btn">
+        <img src="~/img/github-mark-white.svg" alt="GitHub Icon" />
+        <p>Sign in with GitHub</p>
+    </button>
+    <button type="button" class="media-btn">
+        <img src="~/img/Microsoft_icon.svg" alt="Microsoft Icon" />
+        <p>Sign in with Microsoft</p>
+    </button> 
+
+    <img class="splitter" src="~/img/splitter.svg" alt="Splitter" />
+
+    <p>
+        Don't have an account?
+        <a asp-controller="External" asp-action="ExternalRegister">Sign Up</a>
+    </p>
+    <p>
+        Want to Login to a in app Account?
+        <a asp-controller="Account" asp-action="Login">Press Here</a>
+    </p>
+
+</div>
+
+<script src="~/js/InputError.js"></script>
+

@@ -1,0 +1,39 @@
+﻿@model ASPAssignment.ViewModels.RegisterForm
+
+<div class="reg-form-container">
+    <h1>Create Account</h1>
+
+    <button type="button" class="media-btn">
+        <img src="~/img/google-icon.svg" alt="Google Icon" />
+        <p>Sign up with Google</p>
+    </button>
+    <button type="button" class="media-btn">
+        <img src="~/img/icons8-facebook.svg" alt="Meta Icon" />
+        <p>Sign up with Facebook</p>
+    </button>
+    <button type="button" class="media-btn">
+        <img src="~/img/github-mark-white.svg" alt="GitHub Icon" />
+        <p>Sign up with GitHub</p>
+    </button>
+    <button type="button" class="media-btn">
+        <img src="~/img/Microsoft_icon.svg" alt="Microsoft Icon" />
+        <p>Sign up with Microsoft</p>
+    </button>
+
+    <img class="splitter" src="~/img/splitter.svg" alt="Splitter" />
+    <p>
+        Already have an account?
+        <a asp-controller="External" asp-action="ExternalSignIn">Login</a>
+    </p>
+
+    <p>
+        Want to register an in app Account?
+        <a asp-controller="Account" asp-action="Register">Press Here</a>
+    </p>
+</div>
+
+<script src="~/js/InputError.js"></script>
+
+
+
+

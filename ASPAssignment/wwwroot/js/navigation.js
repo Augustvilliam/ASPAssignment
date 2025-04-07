@@ -8,7 +8,7 @@
     });
 
     function loadPartialView(url) {
-        const container = document.querySelector(".project-view");
+        const container = document.querySelector("#dynamic-content");
 
         container.classList.remove("visible");
         container.classList.add("fade-in");
@@ -27,5 +27,6 @@
                 console.error("Error loading view:", error);
             });
     }
+
 
 });

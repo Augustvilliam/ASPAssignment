@@ -247,7 +247,63 @@ function initMoreMenu() {
             }
         });
     });
+    // 🗑 Delete-knapp
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
+
+            const container = btn.closest(".more-container");
+            const projectId = container?.querySelector(".more-btn")?.getAttribute("data-project-id");
+
+            if (!projectId) return;
+
+            document.getElementById("deleteProjectId").value = projectId;
+            document.getElementById("deleteConfirmationInput").value = "";
+            document.getElementById("deleteError").classList.add("d-none");
+
+            const modal = new bootstrap.Modal(document.getElementById("deleteProjectModal"));
+            modal.show();
+        });
+    });
+
 }
+document.getElementById("confirmDeleteForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const input = document.getElementById("deleteConfirmationInput").value.trim();
+    const error = document.getElementById("deleteError");
+    const projectId = document.getElementById("deleteProjectId").value;
+
+    if (input !== "Delete") {
+        error.classList.remove("d-none");
+        return;
+    }
+
+    error.classList.add("d-none");
+
+    try {
+        const response = await fetch(`/Project/Delete/${projectId}`, { method: "DELETE" });
+
+        if (response.ok) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById("deleteProjectModal"));
+            modal.hide();
+
+            const html = await (await fetch("/Navigation/LoadProjects")).text();
+            document.getElementById("projectListContainer").innerHTML = html;
+
+            // ✅ Visa toast
+            const toastEl = document.getElementById("deleteToast");
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        } else {
+            throw new Error("Delete failed");
+        }
+
+    } catch (err) {
+        console.error("❌ Delete error:", err);
+    }
+});
+
 
 function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));

@@ -13,9 +13,9 @@
 
     <div class="log-form-container">
         <h1>Login</h1>
-        <button class="media-btn">
-            <img src="~/img/google-icon.svg" alt="">
-            <p>Login with Google</p>
+        <h2>Sign in with Third Party?</h2>
+        <button type="button" class="gotomedia-btn">
+            <a asp-controller="Account">Sign In with Third Party Sites!</a>
         </button>
         <img class="splitter" src="~/img/splitter.svg" alt="">
 
@@ -35,8 +35,6 @@
             <button class="login-btn">Login</button>
             <a class="center-me" href="@Url.Action("Index", "Home")">CHEAT BUTTON SKIP LOGIN!</a>
         </form>
-        <p>Don't Have an Account? <a href="@Url.Action("Register", "Account")">Sign Up</a></p>
+        <p>Not an admin? <a href="@Url.Action("Login", "Account")">Return!</a></p>
     </div>
 </div>
-
-<script src="~/js/Darkmode.js"></script>

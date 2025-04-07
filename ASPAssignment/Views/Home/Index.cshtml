@@ -5,14 +5,12 @@
 }
 
 <div class="container">
-    <div class="container">
-        <div class="mainpage">
-            @Html.Partial("Partials/_Sidebar")
-            <div class="content">
-                @Html.Partial("Partials/_Topbar")
-                <div id="dynamic-content">
-                    @Html.Partial("Partials/_ProjectView", Model)
-                </div>
+    <div class="mainpage">
+        @Html.Partial("Partials/_Sidebar")
+        @Html.Partial("Partials/_Topbar")
+        <div class="hero">
+            <div id="dynamic-content">
+                @Html.Partial("Partials/_ProjectView", Model)
             </div>
         </div>
     </div>
@@ -23,6 +21,8 @@
 @Html.Partial("Partials/Modals/_EditProjectModal", new ProjectEditForm())
 @Html.Partial("Partials/Modals/_EditMemberModal", new MemberUpdateForm())
 @Html.Partial("Partials/Modals/_UserCardPartial")
+@Html.Partial("Partials/Modals/_DeleteModal")
+
 
 
 

@@ -8,28 +8,10 @@
 <div class="reg-form-container">
     <h1>Login</h1>
 
-
     <h2>Sign in with Third Party?</h2>
     <button type="button" class="gotomedia-btn">
-        <a asp-controller="Account">Sign In with Third Party Sites!</a>
+        <a asp-controller="External" asp-action="ExternalSignIn">Sign In with Third Party Sites!</a>
     </button>
-@* 
-    <button type="button" class="media-btn">
-        <img src="~/img/google-icon.svg" alt="Google Icon" />
-        <p>Sign up with Google</p>
-    </button>
-    <button type="button" class="media-btn">
-        <img src="~/img/icons8-facebook.svg" alt="Meta Icon" />
-        <p>Sign up with Facebook</p>
-    </button>
-    <button type="button" class="media-btn">
-        <img src="~/img/github-mark-white.svg" alt="GitHub Icon" />
-        <p>Sign up with GitHub</p>
-    </button>
-    <button type="button" class="media-btn">
-        <img src="~/img/Microsoft_icon.svg" alt="Microsoft Icon" />
-        <p>Sign up with Microsoft</p>
-    </button> *@
 
     <img class="splitter" src="~/img/splitter.svg" alt="Splitter" />
 
@@ -61,6 +43,10 @@
     <p>
         Don't have an account?
         <a asp-controller="Account" asp-action="Register">Sign Up</a>
+    </p>
+    <p>
+        Are you an Admin?
+        <a asp-controller="Admin" asp-action="Index"> Press Here</a>
     </p>
 </div>
 
