@@ -96,4 +96,22 @@ public class ProjectService : IProjectService
 
         return ProjectFactory.FromEntity(project);
     }
+    public async Task<bool> DeleteProjectAsync(Guid id)
+    {
+        await _projectRepo.BeginTransactionAsync();
+        try
+        {
+            var project = await _projectRepo.GetByIdAsync(id);
+            if (project == null)
+                return false;
+            await _projectRepo.DeleteAsync(project);
+            await _projectRepo.CommitTransactionAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            await _projectRepo.RollbackTransactionsAync();
+            throw;
+        }
+    }
 }

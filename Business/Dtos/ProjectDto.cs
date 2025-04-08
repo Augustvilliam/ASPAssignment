@@ -17,4 +17,5 @@ public class ProjectDto
     public decimal Budget { get; set; }
     public string? ProjectImagePath { get; set; }
     public List<string> MemberIds { get; set; } = [];
+    public string Status { get; set; } = "Ongoing";
 }

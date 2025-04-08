@@ -15,18 +15,19 @@ public class NavigationController : Controller
         _projectService = projectService;
     }
     [Authorize]
-
-    public async Task<IActionResult> LoadProjects()
+    public async Task<IActionResult> LoadProjects(string? status)
     {
-        var projects = await _projectService.GetAllProjectsAsync();
+        var allProjects = await _projectService.GetAllProjectsAsync();
 
-        if (projects == null || !projects.Any())
-        {
+        if (!string.IsNullOrEmpty(status) && (status == "Ongoing" || status == "Completed"))
+            allProjects = allProjects.Where(p => p.Status == status);
+
+        if (!allProjects.Any())
             return Content("No projects found.");
-        }
 
-        return PartialView("~/Views/Shared/Partials/_ProjectView.cshtml", projects);
+        return PartialView("~/Views/Shared/Partials/_ProjectView.cshtml", allProjects);
     }
+
     [Authorize]
 
     public async Task<IActionResult> LoadTeamMembers()

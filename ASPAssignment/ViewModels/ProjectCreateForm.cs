@@ -33,6 +33,10 @@ namespace ASPAssignment.ViewModels
         [Range(0.01, double.MaxValue, ErrorMessage = "Budget must be greater than 0.")]
         [Display(Name = "Budget")]
         public decimal Budget { get; set; }
+
+        [Required(ErrorMessage = "Status is required.")]
+        [Display(Name = "Project Status")]
+        public string Status { get; set; } = "Ongoing";
     }
 }
 

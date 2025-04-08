@@ -17,7 +17,8 @@ public static class ProjectFactory
             EndDate = dto.EndDate,
             Budget = dto.Budget,
             ProjectImagePath = dto.ProjectImagePath,
-            Members = members.ToList()
+            Members = members.ToList(),
+            Status = dto.Status
         };
     }
 
@@ -33,7 +34,8 @@ public static class ProjectFactory
             EndDate = entity.EndDate,
             Budget = entity.Budget,
             ProjectImagePath = entity.ProjectImagePath,
-            MemberIds = entity.Members.Select(m => m.Id).ToList()
+            MemberIds = entity.Members.Select(m => m.Id).ToList(),
+            Status = entity.Status
         };
     }
     public static void UpdateEntity(ProjectEntity entity, ProjectDto dto, IEnumerable<MemberEntity> members)
@@ -44,6 +46,7 @@ public static class ProjectFactory
         entity.StartDate = dto.StartDate;
         entity.EndDate = dto.EndDate;
         entity.Budget = dto.Budget;
+        entity.Status = dto.Status;
 
         if (!string.IsNullOrWhiteSpace(dto.ProjectImagePath))
             entity.ProjectImagePath = dto.ProjectImagePath;

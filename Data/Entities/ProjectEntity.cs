@@ -18,6 +18,6 @@ public class ProjectEntity
     [Column(TypeName = "money")]
     public decimal Budget { get; set; }
     public string? ProjectImagePath { get; set; }
-
+    public string Status { get; set; } = "Ongoing";
     public ICollection<MemberEntity> Members { get; set; } = new List<MemberEntity>();
 }

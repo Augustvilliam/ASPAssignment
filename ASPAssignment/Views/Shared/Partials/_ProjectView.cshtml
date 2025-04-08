@@ -6,9 +6,9 @@
         <button class="project-btn" data-bs-toggle="modal" data-bs-target="#createprojectModal">+ Add projects</button>
     </div>
     <div class="status-bar">
-        <a class="navbar-link" href="#">ALL</a>
-        <a class="navbar-link" href="#">STARTED</a>
-        <a class="navbar-link" href="#">COMPLETED</a>
+        <a class="navbar-link" href="#" data-status="">ALL</a>
+        <a class="navbar-link" href="#" data-status="Ongoing">STARTED</a>
+        <a class="navbar-link" href="#" data-status="Completed">COMPLETED</a>
     </div>
     @if (Model == null || !Model.Any())
     {

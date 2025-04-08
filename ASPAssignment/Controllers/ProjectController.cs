@@ -55,7 +55,8 @@ public class ProjectController(IProjectService projectService, IMemberService me
             EndDate = form.EndDate,
             Budget = form.Budget,
             ProjectImagePath = imagePath,
-            MemberIds = form.SelectedMemberId
+            MemberIds = form.SelectedMemberId,
+            Status = form.Status // ✅ Lägger till status från form
         };
 
         await _projectService.CreateProjectAsync(dto);
@@ -106,7 +107,8 @@ public class ProjectController(IProjectService projectService, IMemberService me
             EndDate = form.EndDate,
             Budget = form.Budget,
             ProjectImagePath = imagePath,
-            MemberIds = form.SelectedMemberId
+            MemberIds = form.SelectedMemberId,
+            Status = form.Status // ✅ Uppdaterad status
         };
 
         var result = await _projectService.UpdateProjectAsync(dto);
@@ -127,6 +129,15 @@ public class ProjectController(IProjectService projectService, IMemberService me
             return NotFound();
 
         return Json(project);
+    }
+
+    [HttpDelete("Delete/{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _projectService.DeleteProjectAsync( id);
+        if (!result)
+            return NotFound(new { message = "Project Not Found" });
+        return Ok(new { sucess = true });
     }
 
     private async Task LoadMembersToViewBag()
