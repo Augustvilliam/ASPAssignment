@@ -6,7 +6,10 @@
         <input class="searchbar" placeholder="Search anything" />
         <div class="service-group">
             <button class="service-btn"><img src="~/img/Notification.svg" alt=""></button>
-            <button class="service-btn"><img src="~/img/Setting.svg" alt=""></button>
+
+            <a class="service-btn" asp-controller="Settings" asp-action="Index">
+               <img src="~/img/Setting.svg" alt="">
+            </a>
         </div>
         <button class="profile-btn" data-bs-toggle="modal" data-bs-target="#userModal">
             <img class="profile-thumb" src="@ViewBag.ProfileImage" alt="Profile Image" />

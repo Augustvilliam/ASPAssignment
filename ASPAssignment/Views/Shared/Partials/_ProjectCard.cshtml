@@ -5,6 +5,8 @@
     var end = Model.EndDate;
     string deadlineText;
     bool isOverdue = end < now;
+    var isAdmin = User.IsInRole("Admin");
+    var isUser = User.IsInRole("User");
 
     if (isOverdue)
     {
@@ -25,24 +27,42 @@
         <h3>@Model.ClientName</h3>
     </div>
 
-    <div class="more-container">
-        <button class="more-btn"
-                data-project-id="@Model.Id">
-            <img src="~/img/More 2.svg" alt="More">
-        </button>
+    @if (isAdmin || isUser)
+    {
+        <div class="more-container">
+            <button class="more-btn" data-project-id="@Model.Id">
+                <img src="~/img/More 2.svg" alt="More">
+            </button>
 
-        <div class="more-menu d-none">
-            <button class="dropdown-item text-start w-100 edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal"><i class="fa-solid fa-pen-to-square"></i>Edit Project</button>
-            <button class="dropdown-item text-start w-100 addmember-btn" data-project-id="@Model.Id"><i class="fa-solid fa-user"></i>Add Member</button>
-            <button class="dropdown-item text-start w-100 delete-btn" data-project-id="@Model.Id"><i class="fa-solid fa-trash-can"></i>Delete Project</button>
+            <div class="more-menu d-none">
+                @if (isAdmin)
+                {
+                    <button class="dropdown-item text-start w-100 edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Project
+                    </button>
+                    <button class="dropdown-item text-start w-100 addmember-btn" data-project-id="@Model.Id">
+                        <i class="fa-solid fa-user"></i> Add Member
+                    </button>
+                    <button class="dropdown-item text-start w-100 delete-btn" data-project-id="@Model.Id">
+                        <i class="fa-solid fa-trash-can"></i> Delete Project
+                    </button>
+                }
+                else if (isUser)
+                {
+                    <button class="dropdown-item text-start w-100 mark-complete-btn"
+                            data-project-id="@Model.Id"
+                            data-status="Completed">
+                        <i class="fa-solid fa-check"></i> Mark as Complete
+                    </button>
+                }
+            </div>
         </div>
-    </div>
+    }
 
     <p class="p-description">@Model.Description</p>
 
     <div class="temp-deadline-container d-flex align-items-center gap-2 mt-2">
-        <img src="~/img/Clock.svg" alt="More">
-
+        <img src="~/img/Clock.svg" alt="Clock">
         <span class="temp-deadline-text @(isOverdue ? "text-danger fw-bold" : "")">
             @deadlineText
         </span>

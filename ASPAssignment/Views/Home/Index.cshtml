@@ -6,22 +6,23 @@
 
 <div class="container">
     <div class="mainpage">
-        @Html.Partial("Partials/_Sidebar")
-        @Html.Partial("Partials/_Topbar")
+        <partial name="Partials/_Sidebar" />
+        <partial name="Partials/_Topbar" />
         <div class="hero">
             <div id="dynamic-content">
-                @Html.Partial("Partials/_ProjectView", Model)
+                <partial name="Partials/_ProjectView" model="Model" />
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modals -->
-@Html.Partial("Partials/Modals/_CreateProjectModal", new ProjectCreateForm())
-@Html.Partial("Partials/Modals/_EditProjectModal", new ProjectEditForm())
-@Html.Partial("Partials/Modals/_EditMemberModal", new MemberUpdateForm())
-@Html.Partial("Partials/Modals/_UserCardPartial")
-@Html.Partial("Partials/Modals/_DeleteModal")
+@* <partial name="Partials/Modals/_CreateProjectModal" model="new ProjectCreateForm()" />
+<partial name="Partials/Modals/_EditProjectModal" model="new ProjectEditForm()" />
+<partial name="Partials/Modals/_EditMemberModal" model="new MemberUpdateForm()" />
+<partial name="Partials/Modals/_UserCardPartial" />
+<partial name="Partials/Modals/_DeleteModal" /> *@
+
 
 
 
