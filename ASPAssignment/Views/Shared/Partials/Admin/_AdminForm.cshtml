@@ -1,0 +1,63 @@
+﻿@model ASPAssignment.ViewModels.AdminLoginForm
+
+<div class="log-form-container">
+    <h1>Login</h1>
+
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="text-danger mb-3">@ViewBag.ErrorMessage</div>
+    }
+
+    <form class="log-form" asp-action="Login" asp-controller="Admin" method="post">
+        <p>Email</p>
+        <input asp-for="Email" class="form-input" placeholder="Your Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+
+        <p>Password</p>
+        <input asp-for="Password" class="form-input" placeholder="Your Password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+
+        <div class="forgot-password">
+            <input asp-for="RememberMe" type="checkbox" id="rememberMe" />
+            <label for="rememberMe">Remember Me</label>
+            <a href="#">Forgot Password?</a>
+        </div>
+
+        <button class="login-btn" type="submit">Login</button>
+        <a class="center-me" href="@Url.Action("Index", "Home")">CHEAT BUTTON SKIP LOGIN!</a>
+    </form>
+
+    <p>Not an admin? <a asp-controller="Account" asp-action="Login">Return!</a></p>
+</div>
+
+
+
+
+
+@* 
+<div class="log-form-container">
+    <h1>Login</h1>
+    <h2>Sign in with Third Party?</h2>
+    <button type="button" class="gotomedia-btn">
+        <a asp-controller="Account">Sign In with Third Party Sites!</a>
+    </button>
+    <img class="splitter" src="~/img/splitter.svg" alt="">
+
+    <form class="log-form">
+        <p>Email</p>
+        <input class="form-input" placeholder="Your Email">
+
+        <p>password</p>
+        <input class="form-input" placeholder="Your Password">
+
+        <div class="forgot-password">
+            <input type="checkbox" name="" id="checkbox2">
+            <label for="checkbox2">Remember Me</label>
+            <a href="#">Forgot Password?</a>
+        </div>
+
+        <button class="login-btn">Login</button>
+        <a class="center-me" href="@Url.Action("Index", "Home")">CHEAT BUTTON SKIP LOGIN!</a>
+    </form>
+    <p>Not an admin? <a href="@Url.Action("Login", "Account")">Return!</a></p>
+</div> *@

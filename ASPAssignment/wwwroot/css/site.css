@@ -181,7 +181,9 @@ label{
 .d-none {
     display: none !important;
 }
-
+.top-space{
+    min-height:40px;
+}
 
 .fade-in {
     opacity: 0;
@@ -502,7 +504,11 @@ button {
 }
 
 /* Components */
-
+.satus-select{
+    background-color:transparent;
+    border:1px solid var(--clr-grey300);
+    color:var(--clr-body-light);
+}
 .usersummary {
     padding-left: .5rem;
     padding-right: 1rem;
@@ -756,11 +762,11 @@ i, button, span{
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
-    #startdate{
+    #StartDate{
     grid-row: 2;
     }
 
-    #enddate {
+    #EndDate {
     grid-row: 2;
     }
     .startdateerror{

@@ -1,4 +1,10 @@
 ﻿@model IEnumerable<Business.Dtos.MemberDto>
+
+
+@{
+	var isAdmin = User.IsInRole("Admin");
+}
+
 <div id="MemberView">
     <div class="header">
         <h1>Team Members</h1>
@@ -11,12 +17,18 @@
         @foreach (var member in Model)
         {
             <div class="team-card">
-                <button data-member-id="@member.Id"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editTeamMemberModal"
-                        class="more-btn">
-                    <img src="~/img/More 2.svg" alt="More Options" />
-                </button>
+                <div class="top-space">
+
+                @if (isAdmin)
+                {
+                    <button data-member-id="@member.Id"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editTeamMemberModal"
+                            class="more-btn">
+                        <img src="~/img/More 2.svg" alt="More Options" />
+                    </button>
+                }
+                </div>
 
                 <img class="profile-img"
                      src="@(string.IsNullOrWhiteSpace(member.ProfileImagePath) ? "/img/Employee.svg" : member.ProfileImagePath)"

@@ -1,4 +1,5 @@
 
+using Azure.Identity;
 using Business.Interface;
 using Business.Services;
 using Data.Contexts;
@@ -7,6 +8,7 @@ using Data.Interface;
 using Data.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,9 +57,38 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roleNames = { "Admin", "User" };
+
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await roleManager.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<MemberEntity>>();
+    var user = new MemberEntity { UserName = "admin@admin.com", Email = "admin@admin.com" };
+
+    var userExist = await userManager.Users.AnyAsync(x => x.Email == user.Email);
+    if (!userExist)
+    {
+        var result = await userManager.CreateAsync(user, "Admin1234!");
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(user, "Admin");
+    }
+}
+
+
+
+
+
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+        name: "default",
+        pattern: "{controller=Account}/{action=Login}/{id?}");
 
 
 app.Run();
