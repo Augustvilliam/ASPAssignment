@@ -31,16 +31,21 @@ namespace ASPAssignment.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            ViewBag.ProfileImage = user?.ProfileImagePath ?? "/img/Employee.svg";
-            ViewBag.FullName = user?.Profile != null && !string.IsNullOrEmpty(user.Profile.FirstName)
-                ? $"{user.Profile.FirstName} {user.Profile.LastName}"
-                : "User";
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            var profile = user.Profile;
+
+            ViewBag.ProfileImage = user.ProfileImagePath ?? "/img/Employee.svg";
+            ViewBag.FullName = profile != null ? $"{profile.FirstName} {profile.LastName}".Trim() : "User";
+
+            ViewBag.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "User";
+            ViewBag.Email = user.Email ?? "-";
 
             var members = await _memberService.GetAllMembersAsync();
             ViewBag.Members = new MultiSelectList(members, "Id", "FullName");
 
             var projects = await _projectService.GetAllProjectsAsync();
-
             return View(projects);
         }
 

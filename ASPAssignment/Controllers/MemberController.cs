@@ -52,7 +52,7 @@ public class MemberController(IMemberService memberService) : Controller
                 Email = form.Email,
                 Phone = form.Phone,
                 JobTitle = form.JobTitle,
-                ProfileImagePath = imagePath ?? form.ExistingProfileImagePath // ✅ detta är nyckeln!
+                ProfileImagePath = imagePath ?? form.ExistingProfileImagePath
             };
 
 
@@ -76,11 +76,9 @@ public class MemberController(IMemberService memberService) : Controller
     [Route("Member/Search")]
     public async Task<IActionResult> Search(string? term = null)
     {
-        Console.WriteLine("🔍 Search endpoint hit!");
 
         var members = await _memberService.GetAllMembersAsync();
 
-        Console.WriteLine($"📦 Found {members.Count()} members");
 
         var result = members.Select(m => new
         {

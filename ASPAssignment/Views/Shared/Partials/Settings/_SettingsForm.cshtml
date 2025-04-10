@@ -1,47 +1,54 @@
-﻿
+﻿@model ASPAssignment.ViewModels.SettingsFormViewModel
 
-<form action="">
-    <div>
-        <p>Här mr chatgpt ska prfilbilden gå att ändra</p>
-        <input type="text">
+<form asp-controller="Settings" asp-action="Update" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ExistingProfileImagePath" />
+
+    <button type="button" class="upload-btn-team" id="uploadPreviewBtn">
+        <img id="previewImage" src="@(!string.IsNullOrEmpty(Model.ExistingProfileImagePath) ? Model.ExistingProfileImagePath : "/img/upload.svg")" alt="Profile Image" />
+    </button>
+
+    <div class="input-group">
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="settings-input" placeholder="First Name" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
 
     <div class="input-group">
-        <label for="settings-firstname">First Name</label>
-        <input class="settings-input" id="settings-firstname" placeholder="First Name" type="text">
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="settings-input" placeholder="Last Name" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
 
     <div class="input-group">
-        <label for="settings-lastname">Last Name</label>
-        <input class="settings-input" id="settings-lastname" placeholder="Last Name" type="text">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="settings-input" readonly />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
     <div class="input-group">
-        <label for="settings-email">Email </label>
-        <input class="settings-input" id="settings-email" placeholder="You can not change you Email at this time." type="text">
+        <label asp-for="Phone"></label>
+        <input asp-for="Phone" class="settings-input" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
     </div>
 
     <div class="input-group">
-        <label for="settings-phone">Phone Number</label>
-        <input class="settings-input" id="settings-phone" placeholder="First Name" type="text">
+        <label asp-for="StreetAddress"></label>
+        <input asp-for="StreetAddress" class="settings-input" />
+        <span asp-validation-for="StreetAddress" class="text-danger"></span>
     </div>
 
     <div class="input-group">
-        <label for="settings-adress">Adress</label>
-        <input class="settings-input" id="settings-adress" placeholder="First Name" type="text">
+        <label asp-for="PostalCode"></label>
+        <input asp-for="PostalCode" class="settings-input" />
+        <span asp-validation-for="PostalCode" class="text-danger"></span>
     </div>
 
     <div class="input-group">
-        <label for="settings-zip">Zip-Code</label>
-        <input class="settings-input" id="settings-zip" placeholder="First Name" type="text">
+        <label asp-for="City"></label>
+        <input asp-for="City" class="settings-input" />
+        <span asp-validation-for="City" class="text-danger"></span>
     </div>
 
-    <div class="input-group">
-        <label for="settings-loc">Locality</label>
-        <input class="settings-input" id="settings-loc" placeholder="First Name" type="text">
-    </div>
-    <button class="login-btn">Save</button>
+    <button type="submit" class="login-btn">Save Changes</button>
 </form>
-
-
-

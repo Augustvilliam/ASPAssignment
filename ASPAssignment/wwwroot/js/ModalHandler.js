@@ -51,6 +51,7 @@ function initCreateProjectModal() {
     });
 }
 function initEditProjectModal() {
+    console.log("✅ Kör initEditMemberPicker!");
     const modal = document.getElementById("editprojectModal");
     if (!modal) return;
 
@@ -65,6 +66,7 @@ function initEditProjectModal() {
     initImagePreview(fileInput, previewImg, uploadBtn);
 
     modal.addEventListener("show.bs.modal", async (event) => {
+        initEditMemberPicker(modal); // Kör alltid!
         const button = event.relatedTarget;
         const projectId = button?.getAttribute("data-project-id");
         if (!projectId) return;
@@ -82,14 +84,14 @@ function initEditProjectModal() {
         form.querySelector('[name="Status"]').value = project.status;
         previewImg.src = project.projectImagePath ?? "/img/upload.svg";
 
-        // ⬇️ Ladda in valda medlemmar innan pickern initieras
-        if (typeof window.renderEditSelectedMembers === "function") {
-            window.renderEditSelectedMembers(project.members);
-        }
-
         if (!isEditMemberPickerInitialized) {
             initEditMemberPicker(modal);
             isEditMemberPickerInitialized = true;
+        }
+
+        // Nu finns renderEditSelectedMembers
+        if (typeof window.renderEditSelectedMembers === "function") {
+            window.renderEditSelectedMembers(project.members);
         }
     });
 

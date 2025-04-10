@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Business.Dtos;
 
 public class MemberDto

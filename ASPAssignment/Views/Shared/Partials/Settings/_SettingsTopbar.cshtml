@@ -1,8 +1,8 @@
 ﻿<div class="settings-topbar">
     <h1>Settings</h1>
     <div class="user-info">
-        <p>Role: Admin</p>
-        <p>Email: Admin@admin.com</p>
+        <p>Role: @ViewBag.Role</p>
+        <p>Email: @ViewBag.Email</p>
     </div>
 
     <div class="service-group">
@@ -13,25 +13,4 @@
         <img class="profile-thumb" src="@ViewBag.ProfileImage" alt="Profile Image" />
     </button>
 
-    <div id="userModal" class="user-card profile-modal modal fade" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <button class="usersummary">
-                        '
-                        <img src="img/userimage.svg" alt="">
-                        <p>Villiam Fagrelius</p>
-                    </button>
-                    <div class="darkmode-box">
-                        <span class="dark-mode-lable">Dark mode</span>
-                        <label for="darkmode-switch" class="switch">
-                            <input type="checkbox" id="darkmode-switch" />
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <button class="btn-custom btn-logout">Logout</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
