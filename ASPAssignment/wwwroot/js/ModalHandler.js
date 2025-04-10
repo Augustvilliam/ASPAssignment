@@ -1,4 +1,9 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+﻿let isMemberPickerInitialized = false;
+let isEditMemberPickerInitialized = false;
+
+let editSelectedMembers = [];
+
+document.addEventListener("DOMContentLoaded", () => {
     initCreateProjectModal();
     initEditProjectModal();
     initEditTeamMemberModal();
@@ -7,17 +12,26 @@
 
 function initCreateProjectModal() {
     const modal = document.getElementById("createprojectModal");
-    const form = modal?.querySelector("form");
+    if (!modal) return;
+
+    console.log("🔁 initCreateProjectModal körs");
+
+    const form = modal.querySelector("form");
     const fileInput = document.getElementById("projectImageInput");
     const previewImg = document.getElementById("projectPreviewImage");
     const uploadBtn = document.getElementById("projectUploadBtn");
     const errorContainer = document.getElementById("create-project-errors");
 
-    if (!modal || !form) return;
-
     initImagePreview(fileInput, previewImg, uploadBtn);
 
-    form.addEventListener("submit", async (e) => {
+    modal.addEventListener("show.bs.modal", () => {
+        if (!isMemberPickerInitialized) {
+            initMemberPicker(modal);
+            isMemberPickerInitialized = true;
+        }
+    });
+
+    form?.addEventListener("submit", async (e) => {
         e.preventDefault();
         clearValidation(form);
 
@@ -36,16 +50,17 @@ function initCreateProjectModal() {
         }
     });
 }
-
 function initEditProjectModal() {
     const modal = document.getElementById("editprojectModal");
-    const form = modal?.querySelector("form");
+    if (!modal) return;
+
+    console.log("🔁 initEditProjectModal körs");
+
+    const form = modal.querySelector("form");
     const fileInput = document.getElementById("editProjectImageInput");
     const previewImg = document.getElementById("editProjectPreviewImage");
     const uploadBtn = document.getElementById("editProjectUploadBtn");
     const errorContainer = document.getElementById("edit-project-errors");
-
-    if (!modal || !form) return;
 
     initImagePreview(fileInput, previewImg, uploadBtn);
 
@@ -64,13 +79,17 @@ function initEditProjectModal() {
         form.querySelector('[name="StartDate"]').value = project.startDate.substring(0, 10);
         form.querySelector('[name="EndDate"]').value = project.endDate.substring(0, 10);
         form.querySelector('[name="Budget"]').value = project.budget;
+        form.querySelector('[name="Status"]').value = project.status;
         previewImg.src = project.projectImagePath ?? "/img/upload.svg";
 
-        const select = form.querySelector('[name="SelectedMemberId"]');
-        if (select) {
-            Array.from(select.options).forEach(option => {
-                option.selected = project.memberIds.includes(option.value);
-            });
+        // ⬇️ Ladda in valda medlemmar innan pickern initieras
+        if (typeof window.renderEditSelectedMembers === "function") {
+            window.renderEditSelectedMembers(project.members);
+        }
+
+        if (!isEditMemberPickerInitialized) {
+            initEditMemberPicker(modal);
+            isEditMemberPickerInitialized = true;
         }
     });
 
@@ -93,16 +112,17 @@ function initEditProjectModal() {
         }
     });
 }
-
 function initEditTeamMemberModal() {
     const modal = document.getElementById("editTeamMemberModal");
-    const form = document.getElementById("edit-member-form");
+    if (!modal) return;
+
+    console.log("🔁 initEditTeamMemberModal körs");
+
+    const form = modal.querySelector("form");
     const fileInput = document.getElementById("profilepic");
     const previewImg = document.getElementById("previewImage");
     const uploadBtn = document.getElementById("uploadPreviewBtn");
     const errorContainer = document.getElementById("edit-member-errors");
-
-    if (!modal || !form) return;
 
     initImagePreview(fileInput, previewImg, uploadBtn);
 
@@ -141,47 +161,6 @@ function initEditTeamMemberModal() {
             console.error("Update member error:", err);
         }
     });
-}
-
-function initImagePreview(fileInput, previewImg, uploadBtn) {
-    if (!fileInput || !previewImg) return;
-    uploadBtn?.addEventListener("click", () => fileInput.click());
-    fileInput.addEventListener("change", function () {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => previewImg.src = e.target.result;
-            reader.readAsDataURL(file);
-        }
-    });
-}
-
-async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
-    if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-            bootstrap.Modal.getInstance(modal)?.hide();
-            const dynamicContent = document.getElementById("dynamic-content");
-            const viewResponse = await fetch(reloadUrl);
-            const html = await viewResponse.text();
-            dynamicContent.innerHTML = html;
-
-            // 👇 Kör igen efter innehållet laddats in
-            initMoreMenu();
-        }
-    } else {
-        const errors = await response.json();
-        errors.forEach(field => {
-            const input = document.querySelector(`[name="${field.field}"]`);
-            const span = document.querySelector(`span[data-valmsg-for="${field.field}"]`);
-            if (input) input.classList.add("input-validation-error");
-            if (span) span.textContent = field.errors.join(" ");
-        });
-
-        if (errorContainer) {
-            errorContainer.innerHTML += "<div>Validation failed.</div>";
-        }
-    }
 }
 function initMoreMenu() {
     document.querySelectorAll(".more-btn").forEach(btn => {
@@ -267,46 +246,246 @@ function initMoreMenu() {
     });
 
 }
-document.getElementById("confirmDeleteForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+function initImagePreview(fileInput, previewImg, uploadBtn) {
+    if (!fileInput || !previewImg) return;
 
-    const input = document.getElementById("deleteConfirmationInput").value.trim();
-    const error = document.getElementById("deleteError");
-    const projectId = document.getElementById("deleteProjectId").value;
+    uploadBtn?.addEventListener("click", () => fileInput.click());
 
-    if (input !== "Delete") {
-        error.classList.remove("d-none");
+    fileInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => previewImg.src = e.target.result;
+            reader.readAsDataURL(file);
+        }
+    });
+}
+function initMemberPicker(modal) {
+    console.log("🧩 Initierar member picker");
+
+    const toggleBtn = modal.querySelector('#toggle-member-list');
+    const suggestionList = modal.querySelector('#member-suggestions');
+    const selectedContainer = modal.querySelector('#selected-members');
+    const selectedIdsInput = modal.querySelector('#selected-member-ids');
+
+    if (!toggleBtn || !suggestionList || !selectedContainer || !selectedIdsInput) {
+        console.warn("⚠️ Member picker-element saknas i DOM");
         return;
     }
 
-    error.classList.add("d-none");
+    let selectedMembers = [];
+    let allMembers = [];
 
-    try {
-        const response = await fetch(`/Project/Delete/${projectId}`, { method: "DELETE" });
+    toggleBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
 
-        if (response.ok) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById("deleteProjectModal"));
-            modal.hide();
+        const isVisible = suggestionList.style.display === 'block';
+        suggestionList.style.display = isVisible ? 'none' : 'block';
 
-            const html = await (await fetch("/Navigation/LoadProjects")).text();
-            document.getElementById("projectListContainer").innerHTML = html;
+        if (!isVisible && allMembers.length === 0) {
+            try {
+                console.log("🔍 Hämtar användare från /Member/Search");
+                const response = await fetch('/Member/Search');
+                allMembers = await response.json();
 
-            // ✅ Visa toast
-            const toastEl = document.getElementById("deleteToast");
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
+                if (!Array.isArray(allMembers) || allMembers.length === 0) {
+                    console.warn("❌ Inga medlemmar hittades från /Member/Search");
+                }
+
+                renderSuggestionList(allMembers);
+            } catch (error) {
+                console.error("🚨 Fel vid hämtning av medlemmar:", error);
+            }
         } else {
-            throw new Error("Delete failed");
+            renderSuggestionList(allMembers);
         }
+    });
 
-    } catch (err) {
-        console.error("❌ Delete error:", err);
+    function renderSuggestionList(data) {
+        suggestionList.innerHTML = '';
+        data.forEach(member => {
+            if (selectedMembers.some(m => m.id === member.id)) return;
+
+            const li = document.createElement('li');
+            li.innerHTML = `<img src="${member.avatarUrl}" alt=""> ${member.fullName}`;
+            li.addEventListener('click', () => selectMember(member));
+            suggestionList.appendChild(li);
+        });
     }
-});
 
+    function selectMember(member) {
+        selectedMembers.push(member);
+        renderSelectedMembers();
+        updateSelectedIds();
+        suggestionList.style.display = 'none';
+    }
 
+    function renderSelectedMembers() {
+        selectedContainer.innerHTML = '';
+        selectedMembers.forEach(member => {
+            const div = document.createElement('div');
+            div.classList.add('selected-member');
+            div.innerHTML = `
+                <img src="${member.avatarUrl}" alt="">
+                ${member.fullName}
+                <button type="button" class="remove-btn" data-id="${member.id}" style="margin-left: 6px; background:none; border:none;">&times;</button>
+            `;
+            selectedContainer.appendChild(div);
+        });
+
+        selectedContainer.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                removeMember(this.dataset.id);
+            });
+        });
+    }
+
+    function removeMember(id) {
+        selectedMembers = selectedMembers.filter(m => m.id !== id);
+        renderSelectedMembers();
+        updateSelectedIds();
+        renderSuggestionList(allMembers);
+    }
+
+    function updateSelectedIds() {
+        selectedIdsInput.innerHTML = '';
+        selectedMembers.forEach(member => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'SelectedMemberId';
+            input.value = member.id;
+            selectedIdsInput.appendChild(input);
+        });
+    }
+}
+function initEditMemberPicker(modal) {
+    console.log("🧩 Initierar EDIT member picker");
+
+    const toggleBtn = modal.querySelector('#edit-toggle-member-list');
+    const suggestionList = modal.querySelector('#edit-member-suggestions');
+    const selectedContainer = modal.querySelector('#edit-selected-members');
+    const selectedIdsInput = modal.querySelector('#edit-selected-member-ids');
+
+    if (!toggleBtn || !suggestionList || !selectedContainer || !selectedIdsInput) {
+        console.warn("⚠️ Edit member picker-element saknas i DOM");
+        return;
+    }
+
+    let allMembers = [];
+
+    toggleBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const isVisible = suggestionList.style.display === 'block';
+        suggestionList.style.display = isVisible ? 'none' : 'block';
+
+        if (!isVisible && allMembers.length === 0) {
+            try {
+                const response = await fetch('/Member/Search');
+                allMembers = await response.json();
+                renderSuggestionList(allMembers);
+            } catch (err) {
+                console.error("❌ Kunde inte hämta medlemmar:", err);
+            }
+        } else {
+            renderSuggestionList(allMembers);
+        }
+    });
+
+    function renderSuggestionList(data) {
+        suggestionList.innerHTML = '';
+        data.forEach(member => {
+            if (editSelectedMembers.some(m => m.id === member.id)) return;
+
+            const li = document.createElement('li');
+            li.innerHTML = `<img src="${member.avatarUrl}" alt=""> ${member.fullName}`;
+            li.addEventListener('click', () => selectMember(member));
+            suggestionList.appendChild(li);
+        });
+    }
+
+    function selectMember(member) {
+        editSelectedMembers.push(member);
+        renderEditSelectedMembers();
+        updateSelectedIds();
+        suggestionList.style.display = 'none';
+    }
+
+    function renderEditSelectedMembers() {
+        selectedContainer.innerHTML = '';
+        editSelectedMembers.forEach(member => {
+            const div = document.createElement('div');
+            div.classList.add('selected-member');
+            div.innerHTML = `
+                <img src="${member.avatarUrl}" alt="">
+                ${member.fullName}
+                <button type="button" class="remove-btn" data-id="${member.id}" style="margin-left: 6px; background:none; border:none;">&times;</button>
+            `;
+            selectedContainer.appendChild(div);
+        });
+
+        selectedContainer.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                removeMember(this.dataset.id);
+            });
+        });
+
+        updateSelectedIds();
+    }
+
+    function removeMember(id) {
+        editSelectedMembers = editSelectedMembers.filter(m => m.id !== id);
+        renderEditSelectedMembers();
+        updateSelectedIds();
+        renderSuggestionList(allMembers);
+    }
+
+    function updateSelectedIds() {
+        selectedIdsInput.innerHTML = '';
+        editSelectedMembers.forEach(member => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'SelectedMemberId';
+            input.value = member.id;
+            selectedIdsInput.appendChild(input);
+        });
+    }
+
+    // Gör tillgänglig globalt
+    window.renderEditSelectedMembers = renderEditSelectedMembers;
+}
 function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));
     form.querySelectorAll("span[data-valmsg-for]").forEach(s => s.textContent = "");
 }
+async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
+    if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+            bootstrap.Modal.getInstance(modal)?.hide();
+            const dynamicContent = document.getElementById("dynamic-content");
+            const viewResponse = await fetch(reloadUrl);
+            const html = await viewResponse.text();
+            dynamicContent.innerHTML = html;
+
+            // Återinitiera meny och filter
+            initMoreMenu?.();
+        }
+    } else {
+        const errors = await response.json();
+        errors.forEach(field => {
+            const input = document.querySelector(`[name="${field.field}"]`);
+            const span = document.querySelector(`span[data-valmsg-for="${field.field}"]`);
+            if (input) input.classList.add("input-validation-error");
+            if (span) span.textContent = field.errors.join(" ");
+        });
+
+        if (errorContainer) {
+            errorContainer.innerHTML += "<div>Validation failed.</div>";
+        }
+    }
+}
+
+
+
 

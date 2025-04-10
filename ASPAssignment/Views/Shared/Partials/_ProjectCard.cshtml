@@ -78,3 +78,29 @@
         }
     </div>
 </div>
+<script>
+    async function preloadProjectData(projectId) {
+        const response = await fetch(`/Project/GetProject/${projectId}`);
+        const data = await response.json();
+
+        if (data.members) {
+            selectedMembers = data.members;
+            renderSelectedMembers();
+            updateSelectedIds();
+        }
+
+        document.querySelector('[name="ProjectName"]').value = data.projectName;
+        document.querySelector('[name="ClientName"]').value = data.clientName;
+        document.querySelector('[name="Description"]').value = data.description || '';
+        document.querySelector('[name="StartDate"]').value = data.startDate.slice(0, 10);
+        document.querySelector('[name="EndDate"]').value = data.endDate.slice(0, 10);
+        document.querySelector('[name="Budget"]').value = data.budget;
+        document.querySelector('[name="Status"]').value = data.status;
+
+        if (data.projectImagePath) {
+            document.getElementById("editProjectPreviewImage").src = data.projectImagePath;
+        }
+
+        document.querySelector('[name="Id"]').value = data.id;
+    }
+</script>

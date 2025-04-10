@@ -43,15 +43,18 @@
                         <span asp-validation-for="EndDate" class="text-danger enddateerror"></span>
                     </div>
 
-                    <label for="members">Project Member</label>
-                    <select asp-for="SelectedMemberId"
-                            asp-items="ViewBag.Members"
-                            id="members"
-                            name="SelectedMemberId"
-                            multiple
-                            class="form-control @(ViewData.ModelState["SelectedMemberId"]?.Errors.Any() == true ? "input-validation-error" : "")">
-                    </select>
-                    <span asp-validation-for="SelectedMemberId" class="text-danger"></span>
+                    <label for="member-search">Members</label>
+                    <div class="member-picker">
+                        <div class="member-picker-header" id="accordion-toggle">
+                            <div class="selected-members" id="selected-members"></div>
+                            <button type="button" id="toggle-member-list" class="search-btn">
+                                🔍
+                            </button>
+                        </div>
+                        <ul id="member-suggestions" class="suggestions-list" style="display: none;"></ul>
+                    </div>
+                    <div id="selected-member-ids"></div>
+
 
                     <label for="budget">Budget</label>
                     <input asp-for="Budget" id="budget" name="Budget" placeholder="Budget i kr" class="form-input @(ViewData.ModelState["Budget"]?.Errors.Any() == true ? "input-validation-error" : "")" />
@@ -69,96 +72,3 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* @model ASPAssignment.ViewModels.ProjectCreateForm
-
-<div id="createprojectModal" class="project-modal modal fade" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-body project-container">
-                <div class="form-header">
-                    <h1 class="modal-title" id="projectModalLabel">Create Project</h1>
-                    <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
-                </div>
-
-                <button type="button" class="upload-btn-team" id="projectUploadBtn">
-                    <img id="projectPreviewImage" src="/img/upload.svg" alt="Project Image">
-                </button>
-
-                <form class="project-form" method="post" asp-controller="Project" asp-action="Create" enctype="multipart/form-data" novalidate>
-                    <div id="create-project-errors" class="text-danger mb-2"></div>
-                    @if (!ViewData.ModelState.IsValid)
-                    {
-                        <div class="text-danger mb-2">Please correct the errors in the form.</div>
-                    }
-                    <input asp-for="ProjectImage" type="file" id="projectImageInput" name="ProjectImage" accept="image/*" style="display: none;" />
-
-                    <label for="projectname">Project Name</label>
-                    <input asp-for="ProjectName" id="projectname" name="ProjectName" placeholder="Project Name" class="form-input @(ViewData.ModelState["ProjectName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
-                    <span asp-validation-for="ProjectName" class="text-danger"></span>
-
-                    <label for="clientname">Client Name</label>
-                    <input asp-for="ClientName" id="clientname" name="ClientName" placeholder="Client Name" class="form-input @(ViewData.ModelState["ClientName"]?.Errors.Any() == true ? "input-validation-error" : "")" />
-                    <span asp-validation-for="ClientName" class="text-danger"></span>
-
-                    <label for="desc">Description</label>
-                    <textarea asp-for="Description" id="desc" name="Description" placeholder="Project Description" class="form-input"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-
-                    <div class="date-pick">
-                        <label for="startdate">Start Date</label>
-                        <input asp-for="StartDate" id="startdate" name="StartDate" type="date" class="form-input @(ViewData.ModelState["StartDate"]?.Errors.Any() == true ? "input-validation-error" : "")" />
-                        <span asp-validation-for="StartDate" class="text-danger startdateerror"></span>
-
-                        <label for="enddate">End Date</label>
-                        <input asp-for="EndDate" id="enddate" name="EndDate" type="date" class="form-input" />
-                        <span asp-validation-for="EndDate" class="text-danger enddateerror"></span>
-                    </div>
-
-                    <label for="members">Project Member</label>
-                    <select asp-for="SelectedMemberId"
-                            asp-items="ViewBag.Members"
-                            id="members"
-                            name="SelectedMemberId"
-                            class="form-control @(ViewData.ModelState["SelectedMemberId"]?.Errors.Any() == true ? "input-validation-error" : "")">
-                        <option disabled selected value="">-- Select a member --</option>
-                    </select>
-                    <span asp-validation-for="SelectedMemberId" class="text-danger"></span>
-
-
-                    <label for="budget">Budget</label>
-                    <input asp-for="Budget" id="budget" name="Budget" placeholder="Budget i kr" class="form-input @(ViewData.ModelState["Budget"]?.Errors.Any() == true ? "input-validation-error" : "")" />
-                    <span asp-validation-for="Budget" class="text-danger"></span>
-
-                    <button type="submit" class="project-form-btn">Create</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
- *@

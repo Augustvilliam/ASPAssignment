@@ -1,6 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ASPAssignment.ViewModels;
 
@@ -22,6 +20,19 @@ public class MemberUpdateForm
     public string Email { get; set; } = null!;
 
     public string? Phone { get; set; }
+
+    [Display(Name = "Street Address")]
+    public string? StreetAddress { get; set; }
+
+    [Display(Name = "City")]
+    public string? City { get; set; }
+
+    [Display(Name = "Postal Code")]
+    public string? PostalCode { get; set; }
+
+    [Display(Name = "Birth Date")]
+    [DataType(DataType.Date)]
+    public DateTime? BirthDate { get; set; }
 
     public IFormFile? ProfilePic { get; set; }
 

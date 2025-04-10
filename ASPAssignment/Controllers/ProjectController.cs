@@ -128,8 +128,33 @@ public class ProjectController(IProjectService projectService, IMemberService me
         if (project == null)
             return NotFound();
 
-        return Json(project);
+        // Hämta medlemmar separat från service
+        var members = await _memberService.GetAllMembersAsync();
+        var assignedMembers = members
+            .Where(m => project.MemberIds.Contains(m.Id))
+            .Select(m => new
+            {
+                id = m.Id,
+                fullName = $"{m.FirstName} {m.LastName}",
+                avatarUrl = Url.Content(m.ProfileImagePath ?? "/images/default-avatar.png")
+            })
+            .ToList();
+
+        return Json(new
+        {
+            project.Id,
+            project.ProjectName,
+            project.ClientName,
+            project.Description,
+            project.StartDate,
+            project.EndDate,
+            project.Budget,
+            project.Status,
+            project.ProjectImagePath,
+            members = assignedMembers
+        });
     }
+
 
     [HttpDelete("Delete/{id}")]
     public async Task<IActionResult> Delete(Guid id)

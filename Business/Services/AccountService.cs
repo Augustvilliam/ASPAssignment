@@ -22,10 +22,10 @@ namespace Business.Services
         {
             var memberEntity = new MemberEntity
             {
-                UserName = redgisterDto.Email,
-                FirstName = redgisterDto.FirstName,
-                LastName = redgisterDto.LastName,
-                Email = redgisterDto.Email,
+                //UserName = redgisterDto.Email,
+                //FirstName = redgisterDto.FirstName,
+                //LastName = redgisterDto.LastName,
+                //Email = redgisterDto.Email,
             };
 
             var result = await _userManager.CreateAsync(memberEntity, redgisterDto.Password);

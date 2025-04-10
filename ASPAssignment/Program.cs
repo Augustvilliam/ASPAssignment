@@ -8,7 +8,6 @@ using Data.Interface;
 using Data.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +30,7 @@ builder.Services.AddIdentity<MemberEntity, IdentityRole>(options =>
     .AddEntityFrameworkStores<DataContext>();
 
 
-builder.Services.ConfigureApplicationCookie(options =>
+builder.Services.ConfigureApplicationCookie(options =>  
 {
     options.LoginPath = "/Account/Login";
     options.SlidingExpiration = true;

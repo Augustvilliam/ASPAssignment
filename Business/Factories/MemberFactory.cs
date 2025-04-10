@@ -1,6 +1,4 @@
-﻿
-
-using Business.Dtos;
+﻿using Business.Dtos;
 using Data.Entities;
 
 namespace Business.Factories;
@@ -12,20 +10,42 @@ public static class MemberFactory
         return new MemberDto
         {
             Id = entity.Id,
-            FirstName = entity.FirstName ?? string.Empty,
-            LastName = entity.LastName ?? string.Empty,
+            FirstName = entity.Profile?.FirstName ?? string.Empty,
+            LastName = entity.Profile?.LastName ?? string.Empty,
             Email = entity.Email ?? string.Empty,
             Phone = entity.PhoneNumber,
-            JobTitle = entity.JobTitle,
+            JobTitle = entity.Profile?.JobTitle,
+            BirthDate = entity.Profile?.BirthDate,
+            StreetAddress = entity.Profile?.StreetAddress,
+            City = entity.Profile?.City,
+            PostalCode = entity.Profile?.PostalCode,
             ProfileImagePath = entity.ProfileImagePath
         };
     }
+
     public static void UpdateEntity(MemberEntity entity, MemberDto dto)
     {
-        entity.FirstName = dto.FirstName;
-        entity.LastName = dto.LastName;
+        if (entity.Profile == null)
+        {
+            entity.Profile = new MemberProfileEntity
+            {
+                MemberId = entity.Id
+            };
+        }
+
         entity.PhoneNumber = dto.Phone;
-        entity.JobTitle = dto.JobTitle;
-        entity.ProfileImagePath = dto.ProfileImagePath;
+
+        if (!string.IsNullOrWhiteSpace(dto.ProfileImagePath))
+        {
+            entity.ProfileImagePath = dto.ProfileImagePath;
+        }
+
+        entity.Profile.FirstName = dto.FirstName;
+        entity.Profile.LastName = dto.LastName;
+        entity.Profile.JobTitle = dto.JobTitle;
+        entity.Profile.BirthDate = dto.BirthDate;
+        entity.Profile.StreetAddress = dto.StreetAddress;
+        entity.Profile.City = dto.City;
+        entity.Profile.PostalCode = dto.PostalCode;
     }
 }

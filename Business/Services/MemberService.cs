@@ -1,12 +1,8 @@
-﻿
-using Business.Dtos;
+﻿using Business.Dtos;
 using Business.Factories;
 using Business.Interface;
-using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
-namespace Business.Services;
 
 public class MemberService(UserManager<MemberEntity> userManager) : IMemberService
 {
@@ -14,27 +10,53 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
     public async Task<IEnumerable<MemberDto>> GetAllMembersAsync()
     {
-        var list = await _userManager.Users.ToListAsync();
-        return list.Select(MemberFactory.FromEntity);
+        var list = await _userManager.Users
+            .Include(u => u.Profile)
+            .ToListAsync();
 
+        return list.Select(MemberFactory.FromEntity);
     }
-    public async Task<MemberDto> GetMemberByIdAsync(string id)
+
+    public async Task<MemberDto?> GetMemberByIdAsync(string id)
     {
-        var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+        var user = await _userManager.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        return user == null ? null : MemberFactory.FromEntity(user);
+    }
+
+    public async Task<MemberDto?> GetMemberForUpdateAsync(string id)
+    {
+        var user = await _userManager.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
         return user == null ? null : MemberFactory.FromEntity(user);
     }
 
     public async Task<bool> UpdateMemberAsync(MemberDto dto, string? imagePath)
     {
-        var user = await _userManager.FindByIdAsync(dto.Id);
-        if (user == null) return false;
+        var user = await _userManager.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(x => x.Id == dto.Id);
+
+        if (user == null)
+            return false;
+
+        // Skapa profil om den inte finns
+        if (user.Profile == null)
+        {
+            user.Profile = new MemberProfileEntity
+            {
+                MemberId = user.Id
+            };
+        }
 
         MemberFactory.UpdateEntity(user, dto);
 
         if (!string.IsNullOrEmpty(imagePath))
-        {
             user.ProfileImagePath = imagePath;
-        }
 
         var result = await _userManager.UpdateAsync(user);
         return result.Succeeded;
@@ -42,19 +64,14 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
     public async Task<bool> DeleteMemberAsync(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user == null) return false;
+        var user = await _userManager.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        var resualt = await _userManager.DeleteAsync(user);
-        return resualt.Succeeded;
-    }
+        if (user == null)
+            return false;
 
-    public async Task<MemberDto?> GetMemberForUpdateAsync(string id)
-    {
-        var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-        return user == null ? null : MemberFactory.FromEntity(user);
+        var result = await _userManager.DeleteAsync(user);
+        return result.Succeeded;
     }
 }
-
-
-

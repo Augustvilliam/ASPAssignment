@@ -72,5 +72,25 @@ public class MemberController(IMemberService memberService) : Controller
         return BadRequest(errors);
     }
 
+    [HttpGet("Search")]
+    [Route("Member/Search")]
+    public async Task<IActionResult> Search(string? term = null)
+    {
+        Console.WriteLine("🔍 Search endpoint hit!");
+
+        var members = await _memberService.GetAllMembersAsync();
+
+        Console.WriteLine($"📦 Found {members.Count()} members");
+
+        var result = members.Select(m => new
+        {
+            id = m.Id,
+            fullName = $"{m.FirstName} {m.LastName}",
+            avatarUrl = Url.Content(m.ProfileImagePath ?? "/images/default-avatar.png")
+        });
+
+        return Json(result);
+    }
+
 
 }

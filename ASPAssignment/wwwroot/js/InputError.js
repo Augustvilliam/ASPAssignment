@@ -1,15 +1,7 @@
-﻿document.querySelectorAll('.form-input').forEach(input => {
-input.addEventListener('input', () => {
-    if (input.classList.contains('input-error')) {
-        input.classList.remove('input-error');
-    }
-});
-});
-
-document.querySelectorAll('.form-input-login').forEach(input => {
-    input.addEventListener('input', () => {
-        if (input.classList.contains('input-error')) {
+﻿document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.form-input, .form-input-login').forEach(input => {
+        input.addEventListener('input', () => {
             input.classList.remove('input-error');
-        }
+        });
     });
 });

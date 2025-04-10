@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using ASPAssignment.Models;
-using ASPAssignment.ViewModels;
 using Business.Interface;
-using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +32,9 @@ namespace ASPAssignment.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             ViewBag.ProfileImage = user?.ProfileImagePath ?? "/img/Employee.svg";
-            ViewBag.FullName = string.IsNullOrEmpty(user?.FirstName) ? "User" : $"{user.FirstName} {user.LastName}";
+            ViewBag.FullName = user?.Profile != null && !string.IsNullOrEmpty(user.Profile.FirstName)
+                ? $"{user.Profile.FirstName} {user.Profile.LastName}"
+                : "User";
 
             var members = await _memberService.GetAllMembersAsync();
             ViewBag.Members = new MultiSelectList(members, "Id", "FullName");

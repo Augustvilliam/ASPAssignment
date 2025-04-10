@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 
 namespace Business.Dtos;
 
@@ -11,5 +11,9 @@ public class MemberDto
     public string? Phone { get; set; }
     public string? JobTitle { get; set; }
     public string? ProfileImagePath { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public string? StreetAddress { get; set; }
+    public string? City { get; set; }
+    public string? PostalCode { get; set; }
     public string FullName => $"{FirstName} {LastName}";
 }

@@ -1,14 +1,16 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("load-projects").addEventListener("click", function () {
-        loadPartialView("/Navigation/LoadProjects");
-    });
+    const projectsBtn = document.getElementById("load-projects");
+    const teamBtn = document.getElementById("load-team-members");
+    const container = document.querySelector(".hero");
 
-    document.getElementById("load-team-members").addEventListener("click", function () {
-        loadPartialView("/Navigation/LoadTeamMembers");
-    });
+    if (projectsBtn)
+        projectsBtn.addEventListener("click", () => loadPartialView("/Navigation/LoadProjects"));
+
+    if (teamBtn)
+        teamBtn.addEventListener("click", () => loadPartialView("/Navigation/LoadTeamMembers"));
 
     function loadPartialView(url) {
-        const container = document.querySelector(".hero");
+        if (!container) return;
 
         container.classList.remove("visible");
         container.classList.add("fade-in");
@@ -18,13 +20,14 @@
             .then(response => response.text())
             .then(html => {
                 container.innerHTML = html;
-                requestAnimationFrame(() => {
-                    container.classList.add("visible");
-                });
+                requestAnimationFrame(() => container.classList.add("visible"));
 
                 // Re-init funktionalitet efter reload
                 initMoreMenu();
                 initStatusFilter();
+                initCreateProjectModal?.();   // Lägg till om du använder modaler
+                initEditProjectModal?.();
+                initEditTeamMemberModal?.();
             })
             .catch(error => {
                 container.innerHTML = "<div class='text-danger'>Kunde inte ladda innehållet.</div>";
@@ -36,10 +39,8 @@
         document.querySelectorAll(".status-bar .navbar-link").forEach(link => {
             link.addEventListener("click", function (e) {
                 e.preventDefault();
-
                 const status = this.getAttribute("data-status") || "";
 
-                // Markera aktiv
                 document.querySelectorAll(".status-bar .navbar-link").forEach(l => l.classList.remove("active"));
                 this.classList.add("active");
 
@@ -53,9 +54,10 @@
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
                 const container = btn.closest(".more-container");
-                const menu = container.querySelector(".more-menu");
+                const menu = container?.querySelector(".more-menu");
 
-                // Stäng andra menyer
+                if (!menu) return;
+
                 document.querySelectorAll(".more-menu").forEach(m => {
                     if (m !== menu) m.classList.add("d-none");
                 });
@@ -71,6 +73,5 @@
         });
     }
 
-    // Initiera filter vid första laddning
     initStatusFilter();
 });

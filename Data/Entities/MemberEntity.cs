@@ -1,22 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Metadata;
-
-namespace Data.Entities;
+﻿using Data.Entities;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class MemberEntity : IdentityUser
 {
-    [ProtectedPersonalData]
-    public string? FirstName { get; set; }
-
-    [ProtectedPersonalData]
-    public string? LastName { get; set; }
-    
-    [ProtectedPersonalData]
-    public string? JobTitle { get; set; }
-
-    public virtual MemberAdressEntity Adress { get; set; }
-
     public string? ProfileImagePath { get; set; }
 
-    public ICollection<ProjectEntity> Projects { get; set; } = new List<ProjectEntity>();
+    public virtual MemberProfileEntity? Profile { get; set; }
+
+    public ICollection<ProjectEntity> Projects { get; set; } = [];
 }

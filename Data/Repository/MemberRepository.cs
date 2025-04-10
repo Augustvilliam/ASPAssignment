@@ -1,5 +1,4 @@
 ﻿using Data.Contexts;
-using Data.Entities;
 
 namespace Data.Repository
 {

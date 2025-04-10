@@ -43,6 +43,22 @@
                         <input asp-for="JobTitle" id="JobTitle" name="JobTitle" class="form-input" />
                         <span asp-validation-for="JobTitle" class="text-danger"></span>
 
+                        <label asp-for="StreetAddress"></label>
+                        <input asp-for="StreetAddress" class="form-input" />
+                        <span asp-validation-for="StreetAddress" class="text-danger"></span>
+
+                        <label asp-for="City"></label>
+                        <input asp-for="City" class="form-input" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+
+                        <label asp-for="PostalCode"></label>
+                        <input asp-for="PostalCode" class="form-input" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+
+                        <label asp-for="BirthDate"></label>
+                        <input asp-for="BirthDate" type="date" class="form-input" />
+                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+
                         <button type="submit" class="project-form-btn">Update</button>
                     </form>
                 </div>
