@@ -6,9 +6,9 @@
         <button class="project-btn" data-bs-toggle="modal" data-bs-target="#createprojectModal">+ Add projects</button>
     </div>
     <div class="status-bar">
-        <a class="navbar-link" href="#" data-status="">ALL</a>
-        <a class="navbar-link" href="#" data-status="Ongoing">STARTED</a>
-        <a class="navbar-link" href="#" data-status="Completed">COMPLETED</a>
+        <a class="navbar-link" href="#" data-status="">ALL[antal projekt totalt]</a>
+        <a class="navbar-link" href="#" data-status="Ongoing">STARTED[antal projekt ongoing]</a>
+        <a class="navbar-link" href="#" data-status="Completed">COMPLETED[antal projekt Completed]</a>
     </div>
     @if (Model == null || !Model.Any())
     {
@@ -19,7 +19,8 @@
         <div class="project-view">
             @foreach (var project in Model)
             {
-                @Html.Partial("Partials/_ProjectCard", project)
+                 @Html.Partial("Partials/_ProjectCard", project) 
+
             }
         </div>
     }

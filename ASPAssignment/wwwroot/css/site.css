@@ -1545,3 +1545,236 @@ h1 {
             border-radius: 50%;
             margin-right: 8px;
         }
+
+
+        /*ChatDelar*/
+.bubble-group {
+    position: sticky;
+    width: 40px;
+    height: 40px;
+    top: 90%;
+    margin-right: 3rem;
+    .chat-bubble
+
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border: none;
+    .fa-comment-dots
+
+{
+    font-size: 40px;
+    color: var(--clr-accent);
+}
+
+}
+}
+
+.chat-modal {
+    border: 2px solid var(--clr-border300);
+    border-radius: .8rem;
+    box-shadow: -9px 22px 31px -18px rgba(0,0,0,0.75);
+    background-color: white;
+    height: 50%;
+    width: 60%;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+    .chat-sidebar
+
+{
+    border-right: 1px solid var(--clr-border300);
+    grid-row: 1/4;
+    overflow-y: auto;
+    .chat-card
+
+{
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: .5rem;
+    background-color: var(--clr-grey100);
+    border-radius: .8rem;
+    margin: .5rem;
+    padding: .5rem;
+    overflow: hidden;
+    scroll-behavior: smooth;
+}
+
+.chat-card:active {
+    background-color: var(--opac-accent);
+}
+
+}
+
+.chat-view {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    .chat-message
+
+{
+    align-self: flex-start;
+    flex-direction: column;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    max-width: 45%;
+    margin: .5rem;
+    padding: 1rem;
+    height: auto;
+    width: fit-content;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+    background-color: var(--clr-accent);
+    border-radius: .8rem;
+    p
+
+{
+    font-size: 8px;
+}
+
+span {
+    font-size: 12px;
+    color: var(--clr-body-dark);
+}
+
+}
+
+.chat-message-response {
+    width: fit-content;
+    align-self: flex-end;
+    flex-direction: column;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: .8rem;
+    margin: .5rem;
+    max-width: 45%;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+    background-color: var(--clr-grey300);
+    p
+
+{
+    font-size: 8px;
+}
+
+span {
+    font-size: 12px;
+    color: var(--clr-body-dark);
+}
+
+}
+}
+
+.chat-input-container {
+    border-top: 1px solid var(--clr-border200);
+    grid-column: 2;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    form
+
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    width: 100%;
+    padding: 1rem;
+    input
+
+{
+    border: 1px solid var(--clr-border200);
+    border-radius: .8rem;
+    width: 70%;
+    padding: .2rem;
+    padding-left: 1rem;
+    overflow-y: auto;
+}
+
+button {
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--clr-accent);
+    background-color: transparent;
+}
+
+}
+}
+
+.chat-exit {
+    border-bottom: 1px solid var(--clr-border200);
+    margin: 0;
+    grid-column: 2;
+    grid-row: 1;
+    max-height: 30px;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    button
+
+{
+    background-color: transparent;
+    border: none;
+    margin-right: 1rem;
+}
+
+button:focus {
+    color: var(--clr-accent);
+}
+
+}
+}
+
+.temp-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    margin: 0 auto;
+    width: 100%;
+    height: 110%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.11);
+}
+
+.chat-message, .chat-message-response {
+    opacity: 100%;
+    animation: bounceIn 0.5s ease forwards;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.chat-card:active {
+    background-color: var(--opac-accent);
+}
