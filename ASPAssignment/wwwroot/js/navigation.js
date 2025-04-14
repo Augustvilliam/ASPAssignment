@@ -22,19 +22,23 @@
                 container.innerHTML = html;
                 requestAnimationFrame(() => container.classList.add("visible"));
 
-                // Re-init funktionalitet efter reload
-                initMoreMenu();
-                initStatusFilter();
-                initCreateProjectModal?.();   // Lägg till om du använder modaler
-                initEditProjectModal?.();
-                initEditTeamMemberModal?.();
+                if (typeof resetInitFlags === "function") {
+                    resetInitFlags();
+                }
+
+                if (typeof initAll === "function") {
+                    initAll();
+                }
+
+                if (typeof initStatusFilter === "function") {
+                    initStatusFilter();
+                }
             })
             .catch(error => {
                 container.innerHTML = "<div class='text-danger'>Kunde inte ladda innehållet.</div>";
                 console.error("Error loading view:", error);
             });
     }
-
     function initStatusFilter() {
         document.querySelectorAll(".status-bar .navbar-link").forEach(link => {
             link.addEventListener("click", function (e) {

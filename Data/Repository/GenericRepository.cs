@@ -38,9 +38,34 @@ public class GenericRepository<T>(DataContext context) : IGenericRepository<T> w
 
     public async Task DeleteAsync(T entity)
     {
-        _dbSet.Remove(entity);
+        var entry = _context.Entry(entity);
+
+        if (entry.State == EntityState.Detached)
+        {
+            var key = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey();
+            if (key == null) throw new InvalidOperationException("Ingen primärnyckel hittades på entiteten.");
+
+            var keyValues = key.Properties
+                .Select(p => p.PropertyInfo?.GetValue(entity))
+                .ToArray();
+
+            var attachedEntity = await _dbSet.FindAsync(keyValues);
+
+            if (attachedEntity == null)
+            {
+                return;
+            }
+
+            _dbSet.Remove(attachedEntity);
+        }
+        else
+        {
+            _dbSet.Remove(entity);
+        }
+
         await _context.SaveChangesAsync();
     }
+
 
     public async Task BeginTransactionAsync()
     {

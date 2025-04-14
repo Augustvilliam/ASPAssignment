@@ -4,7 +4,7 @@
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ExistingProfileImagePath" />
 
-    <button type="button" class="upload-btn-team" id="uploadPreviewBtn">
+    <button type="button" class="upload-btn-team-settings" id="uploadPreviewBtn">
         <img id="previewImage" src="@(!string.IsNullOrEmpty(Model.ExistingProfileImagePath) ? Model.ExistingProfileImagePath : "/img/upload.svg")" alt="Profile Image" />
     </button>
 

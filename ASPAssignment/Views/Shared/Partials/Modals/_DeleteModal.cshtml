@@ -1,5 +1,4 @@
-﻿
-<div id="deleteProjectModal" class="delete-modal modal fade" tabindex="-1" aria-labelledby="deleteProjectModal" aria-hidden="true">
+﻿<div id="deleteProjectModal" class="delete-modal modal fade" tabindex="-1" aria-labelledby="deleteProjectModal" aria-hidden="true">
     <div class="delete-modal-dialog modal-dialog">
         <div class="modal-content">
             <div class="modal-body delete-container">
@@ -7,12 +6,14 @@
                     <div class="modal-header">
                         <h5 class="modal-title">Confirm Deletion</h5>
                     </div>
-                        <p>Type <strong>Delete</strong> below to confirm project deletion:</p>
-                        <input type="text" class="form-control" id="deleteConfirmationInput" required />
-                        <input type="hidden" id="deleteProjectId" />
-                        <div id="deleteError" class="text-danger mt-2 d-none">You must type "Delete" exactly.</div>
+
+                    <p>Type <strong>DELETE</strong> below to confirm project deletion:</p>
+                    <input type="text" class="form-control" id="deleteConfirmationInput" required />
+                    <input type="hidden" id="deleteProjectId" />
+                    <div id="deleteError" class="text-danger mt-2 d-none">You must type "DELETE" exactly.</div>
+
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-delete">Delete</button>
+                        <button id="confirmDeleteProjectBtn" type="submit" class="btn btn-delete">Delete</button>
                         <button type="button" class="btn btn-can" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>

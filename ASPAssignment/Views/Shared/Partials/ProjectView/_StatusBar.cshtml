@@ -1,0 +1,14 @@
+﻿@model IEnumerable<ProjectEntity>
+
+@{
+    var totalCount = Model.Count();
+    var ongoingCount = Model.Count(p => p.Status == "Ongoing");
+    var compleateCount = Model.Count(p => p.Status == "Compleated");
+
+}
+
+<div class="status-bar">
+    <a class="navbar-link" href="#" data-status="">ALL[@totalCount]</a>
+    <a class="navbar-link" href="#" data-status="Ongoing">STARTED[@ongoingCount]</a>
+    <a class="navbar-link" href="#" data-status="Completed">COMPLETED[@compleateCount]</a>
+</div>

@@ -1,12 +1,15 @@
 ﻿using ASPAssignment.ViewModels;
 using Business.Dtos;
 using Business.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace ASPAssignment.Controllers;
 
 [Route("Project")]
+[Authorize]
 public class ProjectController(IProjectService projectService, IMemberService memberService) : Controller
 {
     private readonly IProjectService _projectService = projectService;
@@ -65,6 +68,7 @@ public class ProjectController(IProjectService projectService, IMemberService me
     }
 
     [HttpPost("Update")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(ProjectEditForm form)
     {
         if (!ModelState.IsValid)
@@ -157,6 +161,7 @@ public class ProjectController(IProjectService projectService, IMemberService me
 
 
     [HttpDelete("Delete/{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _projectService.DeleteProjectAsync( id);

@@ -1,18 +1,32 @@
 ﻿let isMemberPickerInitialized = false;
 let isEditMemberPickerInitialized = false;
+let isCreateProjectModalInitialized = false;
 
 let editSelectedMembers = [];
 
 document.addEventListener("DOMContentLoaded", () => {
+    initAll();
+    resetInitFlags();
+});
+
+
+function initAll(){
     initCreateProjectModal();
     initEditProjectModal();
     initEditTeamMemberModal();
     initMoreMenu();
-});
-
+    initDeleteModal();
+}
+function resetInitFlags() {
+    isCreateProjectModalInitialized = false;
+    isMemberPickerInitialized = false;
+    isEditMemberPickerInitialized = false;
+    editSelectedMembers = [];
+}
 function initCreateProjectModal() {
     const modal = document.getElementById("createprojectModal");
-    if (!modal) return;
+    if (!modal || isCreateProjectModalInitialized) return;
+    isCreateProjectModalInitialized = true;
 
     console.log("🔁 initCreateProjectModal körs");
 
@@ -31,24 +45,29 @@ function initCreateProjectModal() {
         }
     });
 
-    form?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        clearValidation(form);
+    // 🧠 Skydda mot dubbelbindning
+    if (!form?.dataset.submitBound) {
+        form?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            clearValidation(form);
 
-        const data = new FormData(form);
-        if (errorContainer) errorContainer.innerHTML = "";
+            const data = new FormData(form);
+            if (errorContainer) errorContainer.innerHTML = "";
 
-        try {
-            const response = await fetch("/Project/Create", {
-                method: "POST",
-                body: data
-            });
+            try {
+                const response = await fetch("/Project/Create", {
+                    method: "POST",
+                    body: data
+                });
 
-            await handleFormResponse(response, modal, "/Navigation/LoadProjects", errorContainer);
-        } catch (err) {
-            console.error("Create project error:", err);
-        }
-    });
+                await handleFormResponse(response, modal, "/Navigation/LoadProjects", errorContainer);
+            } catch (err) {
+                console.error("Create project error:", err);
+            }
+        });
+
+        form.dataset.submitBound = "true"; // ✔️ Markera som bunden
+    }
 }
 function initEditProjectModal() {
     console.log("✅ Kör initEditMemberPicker!");
@@ -171,27 +190,23 @@ function initMoreMenu() {
             const container = btn.closest(".more-container");
             const menu = container.querySelector(".more-menu");
 
-            // Stäng andra öppna menyer
             document.querySelectorAll(".more-menu").forEach(m => {
                 if (m !== menu) m.classList.add("d-none");
             });
 
-            // Toggle meny för denna
             menu.classList.toggle("d-none");
         });
     });
 
-    // Klick utanför = stäng alla menyer
     document.addEventListener("click", (e) => {
         if (!e.target.closest(".more-container")) {
             document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
         }
     });
 
-    // 🛠 "Edit Project"-knapp i dropdown
+    // 🛠 Edit-knapp
     document.querySelectorAll(".edit-btn").forEach(btn => {
         btn.addEventListener("click", async (e) => {
-            // Stäng meny direkt
             document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
 
             const container = btn.closest(".more-container");
@@ -222,12 +237,12 @@ function initMoreMenu() {
                 }
 
                 bootstrap.Modal.getOrCreateInstance(modal).show();
-
             } catch (error) {
                 console.error("❌ Kunde inte hämta projektdata:", error);
             }
         });
     });
+
     // 🗑 Delete-knapp
     document.querySelectorAll(".delete-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
@@ -235,18 +250,25 @@ function initMoreMenu() {
 
             const container = btn.closest(".more-container");
             const projectId = container?.querySelector(".more-btn")?.getAttribute("data-project-id");
-
             if (!projectId) return;
 
-            document.getElementById("deleteProjectId").value = projectId;
-            document.getElementById("deleteConfirmationInput").value = "";
-            document.getElementById("deleteError").classList.add("d-none");
+            const deleteIdInput = document.getElementById("deleteProjectId");
+            const confirmationInput = document.getElementById("deleteConfirmationInput");
+            const errorDiv = document.getElementById("deleteError");
+
+            if (!deleteIdInput || !confirmationInput || !errorDiv) {
+                console.warn("⚠️ Delete-modalens element saknas – hoppar över delete-init.");
+                return;
+            }
+
+            deleteIdInput.value = projectId;
+            confirmationInput.value = "";
+            errorDiv.classList.add("d-none");
 
             const modal = new bootstrap.Modal(document.getElementById("deleteProjectModal"));
             modal.show();
         });
     });
-
 }
 function initImagePreview(fileInput, previewImg, uploadBtn) {
     if (!fileInput || !previewImg) return;
@@ -456,6 +478,37 @@ function initEditMemberPicker(modal) {
     // Gör tillgänglig globalt
     window.renderEditSelectedMembers = renderEditSelectedMembers;
 }
+function initDeleteModal() {
+    const form = document.getElementById("confirmDeleteForm");
+    if (!form || form.dataset.submitBound) return;
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const confirmationInput = document.getElementById("deleteConfirmationInput");
+        const projectId = document.getElementById("deleteProjectId");
+        const errorDiv = document.getElementById("deleteError");
+
+        if (confirmationInput.value !== "DELETE") {
+            errorDiv.classList.remove("d-none");
+            return;
+        }
+
+        fetch(`/Project/Delete/${projectId.value}`, {
+            method: "DELETE"
+        }).then(response => {
+            handleDeleteResponse(
+                response,
+                document.getElementById("deleteProjectModal"),
+                "/Navigation/LoadProjects"
+            );
+        }).catch(err => {
+            console.error("🚨 Fetch error vid delete:", err);
+        });
+    });
+
+    form.dataset.submitBound = "true"; // 🔒 Förhindrar multipla bindningar
+}
 function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));
     form.querySelectorAll("span[data-valmsg-for]").forEach(s => s.textContent = "");
@@ -470,8 +523,8 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
             const html = await viewResponse.text();
             dynamicContent.innerHTML = html;
 
-            // Återinitiera meny och filter
-            initMoreMenu?.();
+            resetInitFlags();
+            initAll();  
         }
     } else {
         const errors = await response.json();
@@ -485,6 +538,21 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
         if (errorContainer) {
             errorContainer.innerHTML += "<div>Validation failed.</div>";
         }
+    }
+}
+async function handleDeleteResponse(response, modal, reloadUrl) {
+    if (response.ok) {
+        bootstrap.Modal.getInstance(modal)?.hide();
+        const dynamicContent = document.getElementById("dynamic-content");
+        const viewResponse = await fetch(reloadUrl);
+        const html = await viewResponse.text();
+        dynamicContent.innerHTML = html;
+
+        resetInitFlags();
+        initAll();
+
+    } else {
+        console.error("❌ Delete misslyckades, status:", response.status);
     }
 }
 

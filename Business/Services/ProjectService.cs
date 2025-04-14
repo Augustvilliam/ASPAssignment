@@ -101,12 +101,34 @@ public class ProjectService : IProjectService
         await _projectRepo.BeginTransactionAsync();
         try
         {
-            var project = await _projectRepo.GetByIdAsync(id);
+            var context = _projectRepo.Context;
+
+            var project = await context.Projects
+                .Include(p => p.Members)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (project == null)
+            {
+                await _projectRepo.RollbackTransactionsAync();
                 return false;
-            await _projectRepo.DeleteAsync(project);
+            }
+
+            context.Projects.Remove(project);
+
+            var affected = await context.SaveChangesAsync();
+            if (affected == 0)
+            {
+                await _projectRepo.RollbackTransactionsAync();
+                return false; // Inget togs bort
+            }
+
             await _projectRepo.CommitTransactionAsync();
             return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await _projectRepo.RollbackTransactionsAync();
+            return false; // Projektet togs troligen redan bort
         }
         catch (Exception)
         {
