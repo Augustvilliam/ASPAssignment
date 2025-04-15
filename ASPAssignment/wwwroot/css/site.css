@@ -178,6 +178,11 @@ label{
     margin:0 auto;
 }
 /*Misc*/
+
+.WIP{
+    width:400px;
+    height:400px;
+}
 .d-none {
     display: none !important;
 }
@@ -205,8 +210,8 @@ label{
 }
 
 .profile-thumb {
-    max-width: 40px;
-    max-height: 40px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -354,7 +359,7 @@ input {
 
 .project-container {
     width: 550px;
-    height: 1131px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     background-color: var(--clr-surface);
@@ -1605,10 +1610,11 @@ h1 {
 
         /*ChatDelar*/
 .bubble-group {
-    position: sticky;
+    position: fixed;
     width: 40px;
     height: 40px;
     top: 90%;
+    left:95%;
     margin-right: 3rem;
     .chat-bubble
 
@@ -1833,4 +1839,8 @@ button:focus {
 
 .chat-card:active {
     background-color: var(--opac-accent);
+}
+
+.chat-modal-containter {
+
 }

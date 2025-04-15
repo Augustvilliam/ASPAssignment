@@ -1,11 +1,24 @@
-﻿<div id="userModal" class="user-card profile-modal modal fade" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<MemberEntity> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var profile = user?.Profile;
+
+    var fullName = profile != null
+        ? $"{profile.FirstName} {profile.LastName}".Trim()
+        : "User";
+    var profileImagePath = user?.ProfileImagePath ?? "/img/Employee.svg";
+}
+
+
+<div id="userModal" class="user-card profile-modal modal fade" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
                 <button class="usersummary">
-                    <img class="profile-thumb" src="@ViewBag.ProfileImage" alt="Profile" />
-                    <p>@ViewBag.FullName</p>
-                    <p>@ViewBag.FullName ?? "Ingen ViewBag.FullName hittad"</p>
+                    <img class="profile-thumb" src="@profileImagePath" alt="Profile" />
+                    <p>@fullName</p>
                 </button>
                 <div class="darkmode-box">
                     <i class="fa-solid fa-gear"></i>

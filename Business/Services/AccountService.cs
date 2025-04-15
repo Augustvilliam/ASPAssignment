@@ -18,18 +18,25 @@ namespace Business.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> RegisterAsync(RegisterDto redgisterDto)
+        public async Task<bool> RegisterAsync(RegisterDto registerDto)
         {
             var memberEntity = new MemberEntity
             {
-                //UserName = redgisterDto.Email,
-                //FirstName = redgisterDto.FirstName,
-                //LastName = redgisterDto.LastName,
-                //Email = redgisterDto.Email,
+                UserName = registerDto.Email,
+                Email = registerDto.Email,
+                Profile = new MemberProfileEntity
+                {
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName
+                }
             };
 
-            var result = await _userManager.CreateAsync(memberEntity, redgisterDto.Password);
-            return result.Succeeded;
+            var result = await _userManager.CreateAsync(memberEntity, registerDto.Password);
+            if (!result.Succeeded)
+                return false;
+
+            await _userManager.AddToRoleAsync(memberEntity, "User");
+            return true;
         }
 
         public async Task SignOutAsync()

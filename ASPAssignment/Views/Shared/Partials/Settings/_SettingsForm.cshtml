@@ -1,5 +1,9 @@
 ﻿@model ASPAssignment.ViewModels.SettingsFormViewModel
 
+
+<div class="header">
+    <h1>User Settings</h1>
+</div>
 <form asp-controller="Settings" asp-action="Update" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ExistingProfileImagePath" />

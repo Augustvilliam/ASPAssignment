@@ -49,29 +49,29 @@ public class AccountController(IAccountService accountService) : Controller
     [HttpPost]
     public async Task<IActionResult> Register(RegisterForm form)
     {
-        if (ModelState.IsValid)
-        {
-            var dto = new RegisterDto
-            {
-                FirstName = form.FirstName,
-                LastName = form.LastName,
-                Email = form.Email,
-                Password = form.Password
-            };
-
-            var result = await _accountService.RegisterAsync(dto);
-            if (result)
-                return LocalRedirect("~/");
-
-            ViewBag.ErrorMessage = "Registration failed. Please try again.";
-        }
-        else
+        if (!ModelState.IsValid)
         {
             ViewBag.ErrorMessage = "One or more fields are invalid.";
+            return View(form);
         }
 
+        var dto = new RegisterDto
+        {
+            FirstName = form.FirstName,
+            LastName = form.LastName,
+            Email = form.Email,
+            Password = form.Password
+        };
+
+        var result = await _accountService.RegisterAsync(dto);
+
+        if (result)
+            return RedirectToAction("Login", "Account");
+
+        ViewBag.ErrorMessage = "Registration failed. Please try again.";
         return View(form);
     }
+
 
     [Authorize]
     public async Task<IActionResult> LogoutAsync()

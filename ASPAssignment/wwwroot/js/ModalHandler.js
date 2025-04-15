@@ -8,8 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initAll();
     resetInitFlags();
 });
-
-
 function initAll(){
     initCreateProjectModal();
     initEditProjectModal();
@@ -184,11 +182,16 @@ function initEditTeamMemberModal() {
     });
 }
 function initMoreMenu() {
-    document.querySelectorAll(".more-btn").forEach(btn => {
+    const buttons = document.querySelectorAll(".more-btn");
+    if (!buttons.length) return; // ✔️ finns inget att initiera
+
+    buttons.forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             const container = btn.closest(".more-container");
-            const menu = container.querySelector(".more-menu");
+            const menu = container?.querySelector(".more-menu");
+
+            if (!menu) return;
 
             document.querySelectorAll(".more-menu").forEach(m => {
                 if (m !== menu) m.classList.add("d-none");
@@ -519,12 +522,17 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
         if (result.success) {
             bootstrap.Modal.getInstance(modal)?.hide();
             const dynamicContent = document.getElementById("dynamic-content");
-            const viewResponse = await fetch(reloadUrl);
-            const html = await viewResponse.text();
-            dynamicContent.innerHTML = html;
+            if (dynamicContent) {
+                const viewResponse = await fetch(reloadUrl);
+                const html = await viewResponse.text();
+                dynamicContent.innerHTML = html;
+                resetInitFlags();
+                initAll();
+            }
+            else {
+                console.error("❌ Dynamic content-element saknas i DOM. ingen reload är gjord.");
 
-            resetInitFlags();
-            initAll();  
+            }
         }
     } else {
         const errors = await response.json();
@@ -534,7 +542,6 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
             if (input) input.classList.add("input-validation-error");
             if (span) span.textContent = field.errors.join(" ");
         });
-
         if (errorContainer) {
             errorContainer.innerHTML += "<div>Validation failed.</div>";
         }
