@@ -1114,10 +1114,14 @@ button:hover {
     background-color: var(--clr-grey100);
 }
 
-.delete-btn{
-    border-top:1px solid var(--clr-border100);
-    color:var(--clr-red);
-    border-radius:0;
+
+.btn-delete {
+    color: var(--clr-body-dark);
+    background-color: var(--clr-dark-red);
+    padding: .5rem 1rem;
+    border-radius: .8rem;
+    border: none;
+    width: 90px;
 }
 .delete-btn:focus{
     background-color:var(--clr-danger-red);
@@ -1216,6 +1220,7 @@ input:checked + .slider:before {
 
 .show {
     display: flex;
+    opacity: 100%;
 }
 
 .modal-backdrop {
@@ -1248,10 +1253,10 @@ input:checked + .slider:before {
 .profile-modal .modal-dialog {
     position: absolute;
     top: 60px; /* Justera så det hamnar under topbaren */
-    right: 25rem; /* Flytta modalen till höger */
     margin: 0; /* Se till att Bootstrap inte centrera modalen */
     transform: none; /* Ta bort Bootstrap-transformering */
     width: 300px; /* Sätt en fast bredd */
+    z-index:999;
 }
 
 .project-modal .modal-dialog {
@@ -1263,6 +1268,19 @@ input:checked + .slider:before {
     width: 600px; /* Sätt en fast bredd */
     background-color: transparent;
     box-shadow: none;
+}
+
+
+.project-modal {
+    display: none; /* Bootstrap hanterar visningen */
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    align-items: center;
 }
 
 .project-modal .modal-dialog-project {
@@ -1316,7 +1334,6 @@ input:checked + .slider:before {
 }
 
 .project-modal .modal-dialog-project {
-    max-height: 95vh; /* Gör att modalens maxhöjd är 90% av skärmen */
     overflow: hidden; /* Förhindrar overflow */
 }
 
@@ -1387,14 +1404,7 @@ input:checked + .slider:before {
     border: none;
     width: 90px;
 }
-.btn-delete {
-    color: var(--clr-body-dark);
-    background-color: var(--clr-dark-red);
-    padding: .5rem 1rem;
-    border-radius: .8rem;
-    border: none;
-    width:90px;
-}
+
 }
 
 @media(width > 1920px) {
@@ -1410,7 +1420,7 @@ input:checked + .slider:before {
     .project-modal .modal-dialog {
         position: absolute;
         top: 2rem; /* Justera så det hamnar under topbaren */
-        right: 55rem; /* Flytta modalen till höger */
+        right: 47rem; /* Flytta modalen till höger */
         margin: 0; /* Se till att Bootstrap inte centrera modalen */
         transform: none; /* Ta bort Bootstrap-transformering */
         width: 600px; /* Sätt en fast bredd */
@@ -1635,18 +1645,46 @@ h1 {
 
 }
 }
-
 .chat-modal {
+    display: none; /* Bootstrap hanterar visningen */
+    opacity:0;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    align-items: center;
+    .modal-dialog
+{
+    width: 1400px;
+    height:900px;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    margin:5rem auto;
+}
+}
+
+.chat-modal.show{
+    opacity: 100%;
+    animation: bounceIn 0.5s ease forwards;
+}
+
+
+.chat-modal-container{
     border: 2px solid var(--clr-border300);
     border-radius: .8rem;
     box-shadow: -9px 22px 31px -18px rgba(0,0,0,0.75);
     background-color: white;
-    height: 50%;
-    width: 60%;
+    height: 900px;
+    width: 1400px;
     display: grid;
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-rows: 1fr auto;
     overflow: hidden;
+    margin:0 auto;
     .chat-sidebar
 
 {
@@ -1668,6 +1706,9 @@ h1 {
     overflow: hidden;
     scroll-behavior: smooth;
 }
+
+}
+
 
 .chat-card:active {
     background-color: var(--opac-accent);
