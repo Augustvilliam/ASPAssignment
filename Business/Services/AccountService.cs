@@ -18,7 +18,7 @@ namespace Business.Services
             return result.Succeeded;
         }
 
-        public async Task<bool> RegisterAsync(RegisterDto registerDto)
+        public async Task<IdentityResult> RegisterAsync(RegisterDto registerDto)
         {
             var memberEntity = new MemberEntity
             {
@@ -31,17 +31,27 @@ namespace Business.Services
                 }
             };
 
-            var result = await _userManager.CreateAsync(memberEntity, registerDto.Password);
+            var result = await _userManager.CreateAsync(memberEntity, registerDto.Password ?? "ExternalLogin123!");
             if (!result.Succeeded)
-                return false;
+                return result;
 
             await _userManager.AddToRoleAsync(memberEntity, "User");
-            return true;
+            return result;
         }
 
         public async Task SignOutAsync()
         {
             await _signInManager.SignOutAsync();
+        }
+
+
+        public async Task AddLoginAsync(string email, ExternalLoginInfo loginInfo)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                await _userManager.AddLoginAsync(user, loginInfo);
+            }
         }
 
     }

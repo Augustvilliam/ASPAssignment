@@ -65,13 +65,16 @@ public class AccountController(IAccountService accountService) : Controller
 
         var result = await _accountService.RegisterAsync(dto);
 
-        if (result)
+        if (result.Succeeded)
             return RedirectToAction("Login", "Account");
 
         ViewBag.ErrorMessage = "Registration failed. Please try again.";
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError("", error.Description);
+        }
         return View(form);
     }
-
 
     [Authorize]
     public async Task<IActionResult> LogoutAsync()
