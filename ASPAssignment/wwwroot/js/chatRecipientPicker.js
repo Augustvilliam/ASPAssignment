@@ -1,11 +1,22 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.querySelector(".chat-sidebar");
-    if (!sidebar) {
-        console.warn("❌ Ingen .chat-sidebar hittades – kan inte initiera recipient picker.");
-        return;
-    }
+    const chatView = document.querySelector(".chat-view");
+    if (!sidebar || !chatView) return;
 
-    let selectedId = null;
+    // 1) Definiera renderHistory här
+    function renderHistory(history) {
+        history.forEach(msg => {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add(
+                msg.senderId === window.currentUserId
+                    ? "chat-message"
+                    : "chat-message-response"
+            );
+            msgDiv.innerHTML = `<span>${msg.text}</span><p>${msg.senderName}</p>`;
+            chatView.appendChild(msgDiv);
+        });
+        chatView.scrollTop = chatView.scrollHeight;
+    }
 
     window.selectedRecipientId = null;
 
@@ -15,23 +26,20 @@
             sidebar.innerHTML = `<h3 style="margin-left: 1rem;">Members:</h3>`;
             members.forEach(member => {
                 const button = document.createElement("button");
-                button.classList.add("chat-card");
-                button.dataset.userid = member.id;
-                button.innerHTML = `
-                    <img src="${member.avatarUrl}" alt="">
-                    <span>${member.fullName}</span>
-                `;
+                /* … bygg din knapp … */
                 button.addEventListener("click", () => {
-                    document.querySelectorAll(".chat-card").forEach(b => b.classList.remove("active"));
-                    button.classList.add("active");
-                    selectedId = member.id;
-                    window.selectedRecipientId = selectedId;
-                    console.log("🔹 Vald mottagare:", member.fullName);
+                    // töm vy
+                    chatView.innerHTML = "";
+
+                    // setta ny recipient
+                    window.selectedRecipientId = member.id;
+
+                    // hämta & rendera historik
+                    fetch(`/Chat/History?otherUserId=${member.id}`)
+                        .then(r => r.json())
+                        .then(history => renderHistory(history));
                 });
                 sidebar.appendChild(button);
             });
-        })
-        .catch(err => {
-            console.error("🚨 Kunde inte hämta medlemmar:", err);
         });
 });

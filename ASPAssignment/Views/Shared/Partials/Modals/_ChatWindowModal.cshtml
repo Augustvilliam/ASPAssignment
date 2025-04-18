@@ -1,4 +1,11 @@
-﻿<div id="chatModal" class="chat-modal fade" tabindex="-1" aria-hidden="true">
+﻿@using System.Security.Claims
+@{
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+
+
+<div id="chatModal" class="chat-modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
@@ -10,34 +17,11 @@
                 </div>
 
                 <div class="chat-sidebar">
-                    <h3 style="margin-left: 1rem;">Members:</h3>
-                    <button class="chat-card">
-                        <img src="/img/Employee.svg" alt="">
-                        <span>Användarnamn 1</span>
-                    </button>
-                    <button class="chat-card">
-                        <img src="/img/Employee.svg" alt="">
-                        <span>Användarnamn 2</span>
-                    </button>
-                    <button class="chat-card">
-                        <img src="/img/Employee.svg" alt="">
-                        <span>Användarnamn 3</span>
-                    </button>
-                    <button class="chat-card">
-                        <img src="/img/Employee.svg" alt="">
-                        <span>Användarnamn 4</span>
-                    </button>
+
                 </div>
 
                 <div class="chat-view">
-                    <div class="chat-message">
-                        <span>Första meddelandet i chatten.</span>
-                        <p>Användare A</p>
-                    </div>
-                    <div class="chat-message-response">
-                        <span>Svar på första meddelandet.</span>
-                        <p>Användare B</p>
-                    </div>
+
                 </div>
 
                 <div class="chat-input-container">
@@ -51,3 +35,7 @@
         </div>
     </div>
 </div>
+
+<script>
+    window.currentUserId = "@currentUserId";
+</script>

@@ -19,5 +19,5 @@ public class ProjectEntity
     public decimal Budget { get; set; }
     public string? ProjectImagePath { get; set; }
     public string Status { get; set; } = "Ongoing";
-    public ICollection<MemberEntity> Members { get; set; } = new List<MemberEntity>();
+    public ICollection<MemberEntity> Members { get; set; } = [];
 }
