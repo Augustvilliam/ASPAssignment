@@ -1727,7 +1727,7 @@ h1 {
 }
 
 
-.chat-card:active {
+.chat-card.active {
     background-color: var(--opac-accent);
 }
 

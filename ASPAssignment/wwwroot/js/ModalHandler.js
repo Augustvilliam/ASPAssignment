@@ -4,133 +4,208 @@ let isCreateProjectModalInitialized = false;
 
 let editSelectedMembers = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-    initAll();
-    resetInitFlags();
-});
-function initAll(){
+// Kör alla initieringar och nollställ flags
+function initAll() {
     initCreateProjectModal();
     initEditProjectModal();
     initEditTeamMemberModal();
     initMoreMenu();
     initDeleteModal();
+    resetInitFlags();
 }
-function resetInitFlags() {
-    isCreateProjectModalInitialized = false;
-    isMemberPickerInitialized = false;
-    isEditMemberPickerInitialized = false;
-    editSelectedMembers = [];
+
+document.addEventListener("DOMContentLoaded", initAll);
+
+// Generisk member-picker
+function initMemberPickerGeneric(modal, opts) {
+    if (modal.dataset.memberPickerInited) return;
+    modal.dataset.memberPickerInited = 'true';
+
+    const btnSel = modal.querySelector(opts.toggleBtnSelector);
+    const ulSel = modal.querySelector(opts.suggestionListSelector);
+    const contSel = modal.querySelector(opts.selectedContainerSel);
+    const idsSel = modal.querySelector(opts.selectedIdsInputSel);
+    if (!btnSel || !ulSel || !contSel || !idsSel) {
+        console.warn("⚠️ Member picker-element saknas i DOM");
+        return;
+    }
+
+    let selectedMembers = Array.isArray(opts.existingMembers)
+        ? opts.existingMembers.slice()
+        : [];
+    let allMembers = [];
+
+    modal.addEventListener('show.bs.modal', () => {
+        selectedMembers = [];
+        contSel.innerHTML = '';
+        idsSel.innerHTML = '';
+        ulSel.innerHTML = '';
+        ulSel.style.display = 'none';
+
+        if (Array.isArray(opts.existingMembers) && opts.existingMembers.length) {
+            selectedMembers = opts.existingMembers.map(m => ({ id: m.id, fullName: m.fullName, avatarUrl: m.avatarUrl }));
+            renderSelected();
+            updateHidden();
+        }
+    });
+
+    btnSel.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const isVisible = ulSel.style.display === 'block';
+        ulSel.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible && allMembers.length === 0) {
+            try { allMembers = await fetch('/Member/Search').then(r => r.json()); }
+            catch (err) { console.error("🚨 Fel vid hämtning av medlemmar:", err); }
+        }
+        renderSuggestions(allMembers);
+    });
+
+    function renderSuggestions(list) {
+        ulSel.innerHTML = '';
+        list.forEach(m => {
+            if (selectedMembers.some(x => x.id === m.id)) return;
+            const li = document.createElement('li');
+            li.innerHTML = `<img src="${m.avatarUrl}" alt=""> ${m.fullName}`;
+            li.addEventListener('click', () => { selectedMembers.push(m); renderSelected(); updateHidden(); ulSel.style.display = 'none'; });
+            ulSel.appendChild(li);
+        });
+    }
+
+    function renderSelected() {
+        contSel.innerHTML = '';
+        selectedMembers.forEach(m => {
+            const div = document.createElement('div');
+            div.classList.add('selected-member');
+            div.innerHTML = `
+                <img src="${m.avatarUrl}" alt="">
+                ${m.fullName}
+                <button type="button" class="remove-btn" data-id="${m.id}">&times;</button>
+            `;
+            contSel.appendChild(div);
+        });
+        contSel.querySelectorAll('.remove-btn').forEach(btn => btn.addEventListener('click', () => {
+            selectedMembers = selectedMembers.filter(x => x.id !== btn.dataset.id);
+            renderSelected();
+            updateHidden();
+            renderSuggestions(allMembers);
+        }));
+    }
+
+    function updateHidden() {
+        idsSel.innerHTML = '';
+        selectedMembers.forEach(m => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'SelectedMemberId';
+            inp.value = m.id;
+            idsSel.appendChild(inp);
+        });
+    }
 }
+
+// CREATE project modal
 function initCreateProjectModal() {
     const modal = document.getElementById("createprojectModal");
     if (!modal || isCreateProjectModalInitialized) return;
     isCreateProjectModalInitialized = true;
-
-    console.log("🔁 initCreateProjectModal körs");
 
     const form = modal.querySelector("form");
     const fileInput = document.getElementById("projectImageInput");
     const previewImg = document.getElementById("projectPreviewImage");
     const uploadBtn = document.getElementById("projectUploadBtn");
     const errorContainer = document.getElementById("create-project-errors");
-
     initImagePreview(fileInput, previewImg, uploadBtn);
 
-    modal.addEventListener("show.bs.modal", () => {
-        if (!isMemberPickerInitialized) {
-            initMemberPicker(modal);
-            isMemberPickerInitialized = true;
-        }
+    // Initiera pickern med tom existingMembers
+    initMemberPickerGeneric(modal, {
+        toggleBtnSelector: '#toggle-member-list',
+        suggestionListSelector: '#member-suggestions',
+        selectedContainerSel: '#selected-members',
+        selectedIdsInputSel: '#selected-member-ids',
+        existingMembers: []
     });
 
-    // 🧠 Skydda mot dubbelbindning
-    if (!form?.dataset.submitBound) {
-        form?.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            clearValidation(form);
-
-            const data = new FormData(form);
-            if (errorContainer) errorContainer.innerHTML = "";
-
-            try {
-                const response = await fetch("/Project/Create", {
-                    method: "POST",
-                    body: data
-                });
-
-                await handleFormResponse(response, modal, "/Navigation/LoadProjects", errorContainer);
-            } catch (err) {
-                console.error("Create project error:", err);
-            }
-        });
-
-        form.dataset.submitBound = "true"; // ✔️ Markera som bunden
-    }
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault(); clearValidation(form);
+        const data = new FormData(form);
+        if (errorContainer) errorContainer.innerHTML = '';
+        try {
+            const resp = await fetch("/Project/Create", { method: "POST", body: data });
+            await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
+        } catch (err) { console.error("Create project error:", err); }
+    });
+    form.dataset.submitBound = 'true';
 }
+
+// EDIT project modal
 function initEditProjectModal() {
-    console.log("✅ Kör initEditMemberPicker!");
     const modal = document.getElementById("editprojectModal");
     if (!modal) return;
-
-    console.log("🔁 initEditProjectModal körs");
 
     const form = modal.querySelector("form");
     const fileInput = document.getElementById("editProjectImageInput");
     const previewImg = document.getElementById("editProjectPreviewImage");
     const uploadBtn = document.getElementById("editProjectUploadBtn");
     const errorContainer = document.getElementById("edit-project-errors");
-
     initImagePreview(fileInput, previewImg, uploadBtn);
 
+    // Initiera pickern EN gång med tom befintlig lista
+    initMemberPickerGeneric(modal, {
+        toggleBtnSelector: '#edit-toggle-member-list',
+        suggestionListSelector: '#edit-member-suggestions',
+        selectedContainerSel: '#edit-selected-members',
+        selectedIdsInputSel: '#edit-selected-member-ids',
+        existingMembers: []
+    });
+
+    // Vid varje öppning: hämta project, fyll form och återfylla pickern
     modal.addEventListener("show.bs.modal", async (event) => {
-        initEditMemberPicker(modal); // Kör alltid!
         const button = event.relatedTarget;
         const projectId = button?.getAttribute("data-project-id");
         if (!projectId) return;
 
-        const response = await fetch(`/Project/GetProject/${projectId}`);
-        const project = await response.json();
+        try {
+            const resp = await fetch(`/Project/GetProject/${projectId}`);
+            const project = await resp.json();
 
-        form.querySelector('[name="Id"]').value = project.id;
-        form.querySelector('[name="ProjectName"]').value = project.projectName;
-        form.querySelector('[name="ClientName"]').value = project.clientName;
-        form.querySelector('[name="Description"]').value = project.description ?? "";
-        form.querySelector('[name="StartDate"]').value = project.startDate.substring(0, 10);
-        form.querySelector('[name="EndDate"]').value = project.endDate.substring(0, 10);
-        form.querySelector('[name="Budget"]').value = project.budget;
-        form.querySelector('[name="Status"]').value = project.status;
-        previewImg.src = project.projectImagePath ?? "/img/upload.svg";
+            // Fyll i formulärfälten
+            form.querySelector('[name="Id"]').value = project.id;
+            form.querySelector('[name="ProjectName"]').value = project.projectName;
+            form.querySelector('[name="ClientName"]').value = project.clientName;
+            form.querySelector('[name="Description"]').value = project.description || '';
+            form.querySelector('[name="StartDate"]').value = project.startDate.substring(0, 10);
+            form.querySelector('[name="EndDate"]').value = project.endDate.substring(0, 10);
+            form.querySelector('[name="Budget"]').value = project.budget;
+            form.querySelector('[name="Status"]').value = project.status;
+            previewImg.src = project.projectImagePath || "/img/upload.svg";
 
-        if (!isEditMemberPickerInitialized) {
-            initEditMemberPicker(modal);
-            isEditMemberPickerInitialized = true;
-        }
-
-        // Nu finns renderEditSelectedMembers
-        if (typeof window.renderEditSelectedMembers === "function") {
-            window.renderEditSelectedMembers(project.members);
+            // Återställ pickerns state så den kan fyllas på med nya medlemmar
+            delete modal.dataset.memberPickerInited;
+            initMemberPickerGeneric(modal, {
+                toggleBtnSelector: '#edit-toggle-member-list',
+                suggestionListSelector: '#edit-member-suggestions',
+                selectedContainerSel: '#edit-selected-members',
+                selectedIdsInputSel: '#edit-selected-member-ids',
+                existingMembers: project.members
+            });
+        } catch (err) {
+            console.error("❌ Kunde inte hämta projektdata:", err);
         }
     });
 
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        clearValidation(form);
-
+        e.preventDefault(); clearValidation(form);
         const data = new FormData(form);
-        if (errorContainer) errorContainer.innerHTML = "";
-
+        if (errorContainer) errorContainer.innerHTML = '';
         try {
-            const response = await fetch("/Project/Update", {
-                method: "POST",
-                body: data
-            });
-
-            await handleFormResponse(response, modal, "/Navigation/LoadProjects", errorContainer);
-        } catch (err) {
-            console.error("Update project error:", err);
-        }
+            const resp = await fetch("/Project/Update", { method: "POST", body: data });
+            await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
+        } catch (err) { console.error("Update project error:", err); }
     });
+    form.dataset.editSubmitBound = 'true';
 }
+
+
 function initEditTeamMemberModal() {
     const modal = document.getElementById("editTeamMemberModal");
     if (!modal) return;
@@ -287,199 +362,11 @@ function initImagePreview(fileInput, previewImg, uploadBtn) {
         }
     });
 }
-function initMemberPicker(modal) {
-    console.log("🧩 Initierar member picker");
-
-    const toggleBtn = modal.querySelector('#toggle-member-list');
-    const suggestionList = modal.querySelector('#member-suggestions');
-    const selectedContainer = modal.querySelector('#selected-members');
-    const selectedIdsInput = modal.querySelector('#selected-member-ids');
-
-    if (!toggleBtn || !suggestionList || !selectedContainer || !selectedIdsInput) {
-        console.warn("⚠️ Member picker-element saknas i DOM");
-        return;
-    }
-
-    let selectedMembers = [];
-    let allMembers = [];
-
-    toggleBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        const isVisible = suggestionList.style.display === 'block';
-        suggestionList.style.display = isVisible ? 'none' : 'block';
-
-        if (!isVisible && allMembers.length === 0) {
-            try {
-                console.log("🔍 Hämtar användare från /Member/Search");
-                const response = await fetch('/Member/Search');
-                allMembers = await response.json();
-
-                if (!Array.isArray(allMembers) || allMembers.length === 0) {
-                    console.warn("❌ Inga medlemmar hittades från /Member/Search");
-                }
-
-                renderSuggestionList(allMembers);
-            } catch (error) {
-                console.error("🚨 Fel vid hämtning av medlemmar:", error);
-            }
-        } else {
-            renderSuggestionList(allMembers);
-        }
-    });
-
-    function renderSuggestionList(data) {
-        suggestionList.innerHTML = '';
-        data.forEach(member => {
-            if (selectedMembers.some(m => m.id === member.id)) return;
-
-            const li = document.createElement('li');
-            li.innerHTML = `<img src="${member.avatarUrl}" alt=""> ${member.fullName}`;
-            li.addEventListener('click', () => selectMember(member));
-            suggestionList.appendChild(li);
-        });
-    }
-
-    function selectMember(member) {
-        selectedMembers.push(member);
-        renderSelectedMembers();
-        updateSelectedIds();
-        suggestionList.style.display = 'none';
-    }
-
-    function renderSelectedMembers() {
-        selectedContainer.innerHTML = '';
-        selectedMembers.forEach(member => {
-            const div = document.createElement('div');
-            div.classList.add('selected-member');
-            div.innerHTML = `
-                <img src="${member.avatarUrl}" alt="">
-                ${member.fullName}
-                <button type="button" class="remove-btn" data-id="${member.id}" style="margin-left: 6px; background:none; border:none;">&times;</button>
-            `;
-            selectedContainer.appendChild(div);
-        });
-
-        selectedContainer.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                removeMember(this.dataset.id);
-            });
-        });
-    }
-
-    function removeMember(id) {
-        selectedMembers = selectedMembers.filter(m => m.id !== id);
-        renderSelectedMembers();
-        updateSelectedIds();
-        renderSuggestionList(allMembers);
-    }
-
-    function updateSelectedIds() {
-        selectedIdsInput.innerHTML = '';
-        selectedMembers.forEach(member => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'SelectedMemberId';
-            input.value = member.id;
-            selectedIdsInput.appendChild(input);
-        });
-    }
-}
-function initEditMemberPicker(modal) {
-    console.log("🧩 Initierar EDIT member picker");
-
-    const toggleBtn = modal.querySelector('#edit-toggle-member-list');
-    const suggestionList = modal.querySelector('#edit-member-suggestions');
-    const selectedContainer = modal.querySelector('#edit-selected-members');
-    const selectedIdsInput = modal.querySelector('#edit-selected-member-ids');
-
-    if (!toggleBtn || !suggestionList || !selectedContainer || !selectedIdsInput) {
-        console.warn("⚠️ Edit member picker-element saknas i DOM");
-        return;
-    }
-
-    let allMembers = [];
-
-    toggleBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        const isVisible = suggestionList.style.display === 'block';
-        suggestionList.style.display = isVisible ? 'none' : 'block';
-
-        if (!isVisible && allMembers.length === 0) {
-            try {
-                const response = await fetch('/Member/Search');
-                allMembers = await response.json();
-                renderSuggestionList(allMembers);
-            } catch (err) {
-                console.error("❌ Kunde inte hämta medlemmar:", err);
-            }
-        } else {
-            renderSuggestionList(allMembers);
-        }
-    });
-
-    function renderSuggestionList(data) {
-        suggestionList.innerHTML = '';
-        data.forEach(member => {
-            if (editSelectedMembers.some(m => m.id === member.id)) return;
-
-            const li = document.createElement('li');
-            li.innerHTML = `<img src="${member.avatarUrl}" alt=""> ${member.fullName}`;
-            li.addEventListener('click', () => selectMember(member));
-            suggestionList.appendChild(li);
-        });
-    }
-
-    function selectMember(member) {
-        editSelectedMembers.push(member);
-        renderEditSelectedMembers();
-        updateSelectedIds();
-        suggestionList.style.display = 'none';
-    }
-
-    function renderEditSelectedMembers() {
-        selectedContainer.innerHTML = '';
-        editSelectedMembers.forEach(member => {
-            const div = document.createElement('div');
-            div.classList.add('selected-member');
-            div.innerHTML = `
-                <img src="${member.avatarUrl}" alt="">
-                ${member.fullName}
-                <button type="button" class="remove-btn" data-id="${member.id}" style="margin-left: 6px; background:none; border:none;">&times;</button>
-            `;
-            selectedContainer.appendChild(div);
-        });
-
-        selectedContainer.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                removeMember(this.dataset.id);
-            });
-        });
-
-        updateSelectedIds();
-    }
-
-    function removeMember(id) {
-        editSelectedMembers = editSelectedMembers.filter(m => m.id !== id);
-        renderEditSelectedMembers();
-        updateSelectedIds();
-        renderSuggestionList(allMembers);
-    }
-
-    function updateSelectedIds() {
-        selectedIdsInput.innerHTML = '';
-        editSelectedMembers.forEach(member => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'SelectedMemberId';
-            input.value = member.id;
-            selectedIdsInput.appendChild(input);
-        });
-    }
-
-    // Gör tillgänglig globalt
-    window.renderEditSelectedMembers = renderEditSelectedMembers;
+function resetInitFlags() {
+    isCreateProjectModalInitialized = false;
+    isMemberPickerInitialized = false;
+    isEditMemberPickerInitialized = false;
+    editSelectedMembers = [];
 }
 function initDeleteModal() {
     const form = document.getElementById("confirmDeleteForm");
