@@ -44,7 +44,6 @@ namespace Business.Services
             await _signInManager.SignOutAsync();
         }
 
-
         public async Task AddLoginAsync(string email, ExternalLoginInfo loginInfo)
         {
             var user = await _userManager.FindByEmailAsync(email);

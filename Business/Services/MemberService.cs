@@ -25,7 +25,27 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
         return user == null ? null : MemberFactory.FromEntity(user);
     }
+    public async Task<MemberDto?> GetMemberByEmailAsync(string email)
+    {
+        var user = await _userManager.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(u => u.Email == email);
 
+        if (user == null)
+            return null;
+
+        var dto = MemberFactory.FromEntity(user);
+        // Se till att ditt MemberDto innehåller dessa egenskaper:
+        dto.ProfileImageUrl = user.ProfileImagePath;
+        dto.HasCompleteProfile =
+            !string.IsNullOrEmpty(user.ProfileImagePath)
+            && !string.IsNullOrEmpty(user.PhoneNumber)
+            && !string.IsNullOrEmpty(user.Profile?.StreetAddress)
+            && !string.IsNullOrEmpty(user.Profile?.City)
+            && !string.IsNullOrEmpty(user.Profile?.PostalCode);
+
+        return dto;
+    }
     public async Task<MemberDto?> GetMemberForUpdateAsync(string id)
     {
         var user = await _userManager.Users

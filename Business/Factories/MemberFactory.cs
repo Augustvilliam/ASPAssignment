@@ -7,7 +7,7 @@ public static class MemberFactory
 {
     public static MemberDto FromEntity(MemberEntity entity)
     {
-        return new MemberDto
+        var dto = new MemberDto
         {
             Id = entity.Id,
             FirstName = entity.Profile?.FirstName ?? string.Empty,
@@ -21,6 +21,16 @@ public static class MemberFactory
             PostalCode = entity.Profile?.PostalCode,
             ProfileImagePath = entity.ProfileImagePath
         };
+
+        // Profilcomplete flag
+        dto.HasCompleteProfile =
+            !string.IsNullOrWhiteSpace(dto.ProfileImagePath) &&
+            !string.IsNullOrWhiteSpace(dto.Phone) &&
+            !string.IsNullOrWhiteSpace(dto.StreetAddress) &&
+            !string.IsNullOrWhiteSpace(dto.City) &&
+            !string.IsNullOrWhiteSpace(dto.PostalCode);
+
+        return dto;
     }
 
     public static void UpdateEntity(MemberEntity entity, MemberDto dto)
