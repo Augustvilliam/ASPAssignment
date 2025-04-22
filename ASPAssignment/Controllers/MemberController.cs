@@ -52,7 +52,12 @@ public class MemberController(IMemberService memberService) : Controller
                 Email = form.Email,
                 Phone = form.Phone,
                 JobTitle = form.JobTitle,
-                ProfileImagePath = imagePath ?? form.ExistingProfileImagePath
+                ProfileImagePath = imagePath ?? form.ExistingProfileImagePath,
+                StreetAddress = form.StreetAddress,
+                City = form.City,
+                PostalCode = form.PostalCode
+
+
             };
 
 

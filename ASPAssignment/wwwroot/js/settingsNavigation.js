@@ -2,6 +2,8 @@
     const navLinks = document.querySelectorAll(".settings-nav");
     const content = document.querySelector(".settings-content");
 
+    if (navLinks.length > 0) navLinks[0].classList.add("active");
+
     navLinks.forEach(link => {
         link.addEventListener("click", async (e) => {
             e.preventDefault();

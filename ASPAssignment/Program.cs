@@ -1,4 +1,3 @@
-
 using ASPAssignment.Hubs;
 using Business.Interface;
 using Business.Services;
@@ -9,15 +8,20 @@ using Data.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
+using ASPAssignment.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Databas & DI
 builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// MVC + Identity
 builder.Services.AddControllersWithViews();
 builder.Services.AddIdentity<MemberEntity, IdentityRole>(options =>
 {
@@ -26,16 +30,17 @@ builder.Services.AddIdentity<MemberEntity, IdentityRole>(options =>
     options.Password.RequiredLength = 8;
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
-
 })
     .AddEntityFrameworkStores<DataContext>();
-builder.Services.ConfigureApplicationCookie(options =>  
+
+builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.SlidingExpiration = true;
     options.Cookie.SameSite = SameSiteMode.None;
-
 });
+
+// External auth
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -44,13 +49,13 @@ builder.Services.AddAuthentication(options =>
     .AddGoogle(options =>
     {
         options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!; ;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     })
     .AddFacebook(options =>
-     {
-         options.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
-         options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
-     })
+    {
+        options.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
+        options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+    })
     .AddGitHub(options =>
     {
         options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"]!;
@@ -62,16 +67,21 @@ builder.Services.AddAuthentication(options =>
         options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
         options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
     });
+
+// SignalR
 builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
 
 var app = builder.Build();
-app.MapHub<Chathub>("/chathub");
 
-// Configure the HTTP request pipeline.
+// Mappa hubs
+app.MapHub<Chathub>("/chathub");
+app.MapHub<NotificationHub>("/notificationHub");
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -91,3 +101,5 @@ app.MapControllerRoute(
         pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
+
+

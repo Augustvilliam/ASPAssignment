@@ -1,11 +1,16 @@
-﻿<div class="container">
+﻿@model ASPAssignment.ViewModels.SettingsFormViewModel
+
+<div class="container">
     <div class="mainpage">
-        <partial name="Partials/Settings/_SettingsSidebar" />
-        <partial name="Partials/Settings/_SettingsTopbar" />
+        <partial name="Partials/Settings/_SettingsSidebar" model="Model" />
+        <partial name="Partials/Settings/_SettingsTopbar" model="Model" />
+
         <div class="settings-section">
-            <partial name="Partials/Settings/_SettingsHero" />
+            <partial name="Partials/Settings/_SettingsHero" model="Model" />
         </div>
     </div>
 </div>
 
-<script asp-append-version="true" src="~/js/settingsNavigation.js"></script>
+@section Scripts {
+
+}

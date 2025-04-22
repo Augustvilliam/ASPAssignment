@@ -1148,6 +1148,18 @@ button:hover {
 
 }
 
+#settingsUploadBtn {
+    max-width: 150px;
+    max-height: 150px;
+    overflow:hidden;
+    #settingsPreviewImage
+{
+    max-width: 150px;
+    max-height: 150px;
+    overflow: hidden;
+}
+}
+
 .switch {
     position: relative;
     display: inline-block;
@@ -1672,6 +1684,7 @@ h1 {
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.3);
     align-items: center;
+    z-index:900;
     .modal-dialog
 {
     width: 1400px;
@@ -1910,6 +1923,10 @@ button:focus {
 
 
 /* COOKIES 99% COPYPASTE CHATGPT 4o */
+.cookie-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
 .cookie-overlay {
     position: fixed;
     top: 0;
@@ -1932,8 +1949,14 @@ button:focus {
     width: 90%;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     font-size: 0.95rem;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
 }
-
+.cookie-overlay .cookie-banner {
+    transform: translateY(0);
+    opacity: 1;
+}
 .cookie-content {
     display: flex;
     flex-direction: column;
@@ -2018,7 +2041,7 @@ button:focus {
 
 .notis-container {
     background-color: var(--clr-surface);
-    display: flex;
+    display: none;
     flex-direction: column;
     position: absolute;
     right: 21%;
@@ -2054,7 +2077,7 @@ span {
     justify-content: center;
     background-color: red;
     border-radius: 50%;
-    z-index:20;
+    z-index: 20;
 }
 
 }
@@ -2117,4 +2140,7 @@ p {
     margin-right: .5rem;
     font-size: 14px;
 }
+}
+.d-flex{
+    display:flex;
 }

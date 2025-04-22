@@ -8,9 +8,19 @@
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ExistingProfileImagePath" />
 
-    <button type="button" class="upload-btn-team-settings" id="uploadPreviewBtn">
-        <img id="previewImage" src="@(!string.IsNullOrEmpty(Model.ExistingProfileImagePath) ? Model.ExistingProfileImagePath : "/img/upload.svg")" alt="Profile Image" />
+    <button type="button" id="settingsUploadBtn">
+        <img id="settingsPreviewImage"
+             src="@(!string.IsNullOrEmpty(Model.ExistingProfileImagePath)
+               ? Model.ExistingProfileImagePath
+               : "/img/upload.svg")"
+             alt="Profile Image" />
     </button>
+
+    <input type="file"
+           asp-for="ProfileImage"
+           id="settingsImageInput"
+           style="display:none"
+           accept="image/*" />
 
     <div class="input-group">
         <label asp-for="FirstName"></label>

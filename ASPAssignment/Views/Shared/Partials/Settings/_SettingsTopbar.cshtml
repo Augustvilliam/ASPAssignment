@@ -4,16 +4,15 @@
         <p>Role: @ViewBag.Role</p>
         <p>Email: @ViewBag.Email</p>
     </div>
-    <partial name="Partials/_NotisPartial" />
 
     <div class="service-group">
-        <button class="service-btn"><a asp-controller="Home" asp-action="Index">Return</a></button>
+        <partial name="Partials/_NotisPartial" />
+        <button class="service-btn"><a asp-controller="Home" asp-action="Index"><i class="fa-solid fa-house"></i></a></button>
     </div>
 
     <button class="profile-btn" data-bs-toggle="modal" data-bs-target="#userModal">
         <img class="profile-thumb" src="@ViewBag.ProfileImage" alt="Profile Image" />
     </button>
     <partial name="Partials/Modals/_UserCardPartial" />
-
 
 </div>

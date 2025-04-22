@@ -20,4 +20,7 @@ public class ProjectEntity
     public string? ProjectImagePath { get; set; }
     public string Status { get; set; } = "Ongoing";
     public ICollection<MemberEntity> Members { get; set; } = [];
+    [Timestamp]
+    [Column(TypeName = "rowversion")]
+    public byte[] RowVersion { get; set; } = null!;
 }

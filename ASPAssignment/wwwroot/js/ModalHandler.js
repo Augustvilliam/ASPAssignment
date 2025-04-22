@@ -195,7 +195,11 @@ function initEditProjectModal() {
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault(); clearValidation(form);
+
         const data = new FormData(form);
+        console.log("⚙️ Hidden SelectedMemberId inputs:",
+            Array.from(data.getAll("SelectedMemberId"))
+        );
         if (errorContainer) errorContainer.innerHTML = '';
         try {
             const resp = await fetch("/Project/Update", { method: "POST", body: data });
@@ -209,6 +213,9 @@ function initEditProjectModal() {
 function initEditTeamMemberModal() {
     const modal = document.getElementById("editTeamMemberModal");
     if (!modal) return;
+
+    if (modal.dataset.teamModalBound) return;
+    modal.dataset.teamModalBound = 'true';
 
     console.log("🔁 initEditTeamMemberModal körs");
 
@@ -367,6 +374,28 @@ function resetInitFlags() {
     isMemberPickerInitialized = false;
     isEditMemberPickerInitialized = false;
     editSelectedMembers = [];
+
+    // Ta bort alla dataset‑flaggor på dina modals och formulär
+    const clearDataSet = (el, keys) => {
+        if (!el) return;
+        keys.forEach(k => delete el.dataset[k]);
+    };
+
+    // CREATE
+    const createModal = document.getElementById("createprojectModal");
+    clearDataSet(createModal, ["memberPickerInited"]);
+    const createForm = createModal?.querySelector("form");
+    clearDataSet(createForm, ["submitBound"]);
+
+    // EDIT PROJECT
+    const editProjModal = document.getElementById("editprojectModal");
+    clearDataSet(editProjModal, ["memberPickerInited", "editModalBound"]);
+    const editProjForm = editProjModal?.querySelector("form");
+    clearDataSet(editProjForm, ["editSubmitBound"]);
+
+    // EDIT TEAM MEMBER
+    const teamModal = document.getElementById("editTeamMemberModal");
+    clearDataSet(teamModal, ["teamModalBound"]);
 }
 function initDeleteModal() {
     const form = document.getElementById("confirmDeleteForm");

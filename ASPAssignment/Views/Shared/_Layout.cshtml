@@ -34,12 +34,16 @@
     <script asp-append-version="true" src="~/js/navigation.js"></script>
     <script asp-append-version="true" src="~/js/ModalHandler.js"></script>
     <script asp-append-version="true" src="~/js/Cookie.js"></script>
+    <script asp-append-version="true" src="~/js/Notis.js"></script>
+    <script asp-append-version="true" src="~/js/SettingsNavigation.js"></script>
+    <script asp-append-version="true" src="~/js/Settings.js"></script>
+
 
     @await RenderSectionAsync("Scripts", required: false)
 
     @*Chat*@
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
-    <script src="~/js/chat.js"></script>
-	<script src="~/js/chatRecipientPicker.js"></script>
+    <script asp-append-version="true" src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script asp-append-version="true" src="~/js/chat.js"></script>
+    <script asp-append-version="true" src="~/js/chatRecipientPicker.js"></script>
 </body>
 </html>
