@@ -13,7 +13,7 @@
                 <div class=" chat-modal-container">
 
                 <div class="chat-exit">
-                    <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">X</button>
+                        <button type="button" class="close-btn" aria-label="Close">X</button>
                 </div>
 
                 <div class="chat-sidebar">
@@ -38,4 +38,17 @@
 
 <script>
     window.currentUserId = "@currentUserId";
+
+        document.addEventListener("DOMContentLoaded", () => {
+        const closeBtn = document.querySelector("#chatModal .close-btn");
+        const chatModalEl = document.getElementById("chatModal");
+
+        if (closeBtn && chatModalEl) {
+            closeBtn.addEventListener("click", () => {
+                const modalInstance = bootstrap.Modal.getInstance(chatModalEl)
+                    || new bootstrap.Modal(chatModalEl); // fallback om inte instansierad
+                modalInstance.hide();
+            });
+        }
+    });
 </script>

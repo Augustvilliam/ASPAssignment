@@ -5,6 +5,7 @@ namespace Business.Interface
     public interface IMemberService
     {
         Task<bool> DeleteMemberAsync(string id);
+        Task<List<MemberDto>> GetAllAdminsAsync();
         Task<IEnumerable<MemberDto>> GetAllMembersAsync();
         Task<MemberDto?> GetMemberByEmailAsync(string email);
         Task<MemberDto> GetMemberByIdAsync(string id);

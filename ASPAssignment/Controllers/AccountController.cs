@@ -99,8 +99,23 @@ namespace ASPAssignment.Controllers
             var result = await _accountService.RegisterAsync(dto);
 
             if (result.Succeeded)
-                return RedirectToAction("Login", "Account");
+            {
+                var name = !string.IsNullOrEmpty(form.FirstName) && !string.IsNullOrEmpty(form.LastName)
+                    ? $"{form.FirstName} {form.LastName}"
+                    : form.Email;
 
+                var notification = new NotificationDto
+                {
+                    ImageUrl = "/img/default-user.svg",
+                    Message = $"{name} har registrerat sig! Hälsa hen välkomna i chatten!",
+                    Timestamp = DateTime.UtcNow,
+                    NotificationId = Guid.NewGuid().ToString(),
+                    NotificationType = "UserJoined"
+                };
+                await _notificationService.BroadcastNotificationAsync(notification);
+                return RedirectToAction("Login", "Account");
+            }
+            // Om registreringen misslyckas, lägg till felmeddelanden i ModelState
             ViewBag.ErrorMessage = "Registration failed. Please try again.";
             foreach (var error in result.Errors)
             {
@@ -108,7 +123,6 @@ namespace ASPAssignment.Controllers
             }
             return View(form);
         }
-
         [Authorize]
         public async Task<IActionResult> LogoutAsync()
         {

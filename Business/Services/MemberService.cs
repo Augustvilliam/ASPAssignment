@@ -46,6 +46,17 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
         return dto;
     }
+    public async Task<List<MemberDto>> GetAllAdminsAsync()
+    {
+        var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+
+        return adminUsers.Select(user =>
+        {
+            var dto = MemberFactory.FromEntity(user);
+            dto.ProfileImageUrl = user.ProfileImagePath ?? "/img/default-user.svg";
+            return dto;
+        }).ToList();
+    }
     public async Task<MemberDto?> GetMemberForUpdateAsync(string id)
     {
         var user = await _userManager.Users

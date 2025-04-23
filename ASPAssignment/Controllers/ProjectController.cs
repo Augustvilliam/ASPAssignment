@@ -1,4 +1,5 @@
-﻿using ASPAssignment.ViewModels;
+﻿using ASPAssignment.Services;
+using ASPAssignment.ViewModels;
 using Business.Dtos;
 using Business.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -10,10 +11,13 @@ namespace ASPAssignment.Controllers;
 
 [Route("Project")]
 [Authorize]
-public class ProjectController(IProjectService projectService, IMemberService memberService) : Controller
+public class ProjectController(IProjectService projectService,
+    IMemberService memberService,
+    INotificationService notificationService) : Controller
 {
     private readonly IProjectService _projectService = projectService;
     private readonly IMemberService _memberService = memberService;
+    private readonly INotificationService _notificationService = notificationService;
 
     [HttpPost("Create")]
     public async Task<IActionResult> Create(ProjectCreateForm form)
@@ -63,6 +67,31 @@ public class ProjectController(IProjectService projectService, IMemberService me
         };
 
         await _projectService.CreateProjectAsync(dto);
+
+        // Hämta admin som tilldelar
+        var assigningUser = await _memberService.GetMemberByEmailAsync(User.Identity.Name);
+        var assignerName = $"{assigningUser.FirstName} {assigningUser.LastName}".Trim();
+
+        // Hämta medlemmar som tilldelats
+        var assignedMembers = await _memberService.GetAllMembersAsync();
+        var selectedMembers = assignedMembers
+            .Where(m => form.SelectedMemberId.Contains(m.Id))
+            .ToList();
+
+        // Skicka en notis till varje tilldelad medlem
+        foreach (var member in selectedMembers)
+        {
+            var notification = new NotificationDto
+            {
+                ImageUrl = assigningUser.ProfileImagePath ?? "/img/default-user.svg",
+                Message = $"{assignerName} har tilldelat dig projektet {form.ProjectName}",
+                Timestamp = DateTime.UtcNow,
+                NotificationId = Guid.NewGuid().ToString(),
+                NotificationType = "ProjectAssigned"
+            };
+
+            await _notificationService.SendNotificationAsync(member.Email, notification);
+        }
 
         return Json(new { success = true });
     }
@@ -117,8 +146,26 @@ public class ProjectController(IProjectService projectService, IMemberService me
 
         var result = await _projectService.UpdateProjectAsync(dto);
         if (result)
-            return Json(new { success = true });
+        {
+            var changer = await _memberService.GetMemberByEmailAsync(User.Identity.Name);
+            var changerName = $"{changer.FirstName} {changer.LastName}".Trim();
 
+            var notification = new NotificationDto
+            {
+                ImageUrl = changer.ProfileImagePath ?? "/img/default-user.svg",
+                Message = $"{changerName} har bytt status på projektet {dto.ProjectName} till {dto.Status}",
+                Timestamp = DateTime.UtcNow,
+                NotificationId = Guid.NewGuid().ToString(),
+                NotificationType = "StatusChanged"
+            };
+
+            var admins = await _memberService.GetAllAdminsAsync();
+            foreach (var admin in admins)
+                await _notificationService.SendNotificationAsync(admin.Email, notification);
+
+
+            return Json(new { success = true });
+        }
         return StatusCode(500, new { message = "Failed to update project." });
     }
 
