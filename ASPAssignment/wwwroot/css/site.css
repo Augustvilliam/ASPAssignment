@@ -145,6 +145,7 @@ a {
     text-decoration-line: none;
 }
 
+
 p, input, button {
     color: var(--clr-body-light);
 }
@@ -187,13 +188,7 @@ label{
     margin:0 auto;
 }
 /*Misc*/
-#dynamic-content {
-    opacity: 0;
-    transition: opacity 0.6s ease-in;
-}
-#dynamic-content.fade.fade-in-body {
-    opacity: 1;
-}
+
 
 .WIP{
     width:400px;
@@ -505,7 +500,6 @@ button {
 
 #main-hero {
     transition: ease-in .8s;
-    opacity: 0;
 }
 .topbar {
     text-align: start;
@@ -930,6 +924,7 @@ h2 {
 }
 
 /*BUTTONS*/
+
 
 .btn-logout{
     background-color:transparent;
