@@ -58,8 +58,7 @@
             </div>
         </div>
     }
-
-    <p class="p-description">@Model.Description</p>
+    <p class="p-description">@Html.Raw(Model.Description)</p>
 
     <div class="temp-deadline-container d-flex align-items-center gap-2 mt-2">
         <img src="~/img/Clock.svg" alt="Clock">

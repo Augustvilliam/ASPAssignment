@@ -8,7 +8,7 @@
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ExistingProfileImagePath" />
 
-    <button type="button" id="settingsUploadBtn">
+    <button class="upload-btn" type="button" id="settingsUploadBtn">
         <img id="settingsPreviewImage"
              src="@(!string.IsNullOrEmpty(Model.ExistingProfileImagePath)
                ? Model.ExistingProfileImagePath

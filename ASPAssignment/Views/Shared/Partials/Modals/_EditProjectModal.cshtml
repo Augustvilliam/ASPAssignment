@@ -27,9 +27,28 @@
                     <input asp-for="ClientName" name="ClientName" class="form-input" />
                     <span asp-validation-for="ClientName" class="text-danger"></span>
 
-                    <label asp-for="Description"></label>
-                    <textarea asp-for="Description" name="Description" class="form-input" placeholder="Project Description"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
+                    <div class="description-wrapper">
+                        <input type="hidden" asp-for="Description" id="edit-description-input" />
+                        <div id="edit-description-editor" class="ql-container ql-snow custom-editor"></div>
+                        <div id="edit-toolbar" class="ql-toolbar ql-snow custom-toolbar">
+                            <span class="ql-formats">
+                                <button class="ql-bold" aria-label="Bold"></button>
+                                <button class="ql-italic" aria-label="Italic"></button>
+                                <button class="ql-underline" aria-label="Underline"></button>
+                            </span>
+                            <span class="ql-formats ql-splitter">
+                                <button class="ql-align" value="" aria-label="Align left"></button>
+                                <button class="ql-align" value="center" aria-label="Align center"></button>
+                                <button class="ql-align" value="right" aria-label="Align right"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-list" value="bullet" aria-label="Bullet list"></button>
+                                <button class="ql-list" value="ordered" aria-label="Numbered list"></button>
+                                <button class="ql-link" aria-label="Link"></button>
+
+                            </span>
+                        </div>
+                    </div>
 
                     <div class="date-pick">
                         <label asp-for="StartDate"></label>

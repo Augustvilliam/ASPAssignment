@@ -7,6 +7,13 @@
 * {
     font-family: "Nunito", sans-serif;
 }
+body{
+    opacity:0;
+    transition: 0.3s ease-in;
+}
+body.fade-in-body {
+        opacity: 1;
+    }
 
 .logofont {
     font-family: "Comfortaa", sans-serif;
@@ -92,12 +99,13 @@
     --opac-purple: rgba(130, 106, 249, 0.1);
     --clr-danger-red: #fff0f0;
     --clr-shadow-dark: #040F15;
+    --font-main: "Nunito", sans-serif;
 }
 
     :root[data-theme="dark"] {
         --clr-heading: #FFFFFF;
-        --clr-body-light: #637085;
-        --clr-body-dark: #28263B;
+        --clr-body-light: #E8E8E8;
+        --clr-body-dark: #E8E8E8;
         --clr-grey100: #313133;
         --clr-grey200: #232324;
         --clr-grey300: #E8EAED;
@@ -127,6 +135,7 @@
         --opac-purple: rgba(130, 106, 249, 0.1);
         --clr-danger-red: #fff0f0;
         --clr-shadow-dark: rgba(4, 15, 21, .15);
+        --font-main: "Nunito", sans-serif;
     }
 
 a {
@@ -178,6 +187,13 @@ label{
     margin:0 auto;
 }
 /*Misc*/
+#dynamic-content {
+    opacity: 0;
+    transition: opacity 0.6s ease-in;
+}
+#dynamic-content.fade.fade-in-body {
+    opacity: 1;
+}
 
 .WIP{
     width:400px;
@@ -460,7 +476,7 @@ button {
 
 .hero {
     border-top: 2px solid var(--clr-border200);
-    transition: ease-in 2s;
+
     .header
 
 {
@@ -483,7 +499,14 @@ button {
 }
 
 }
+    #main-hero.fade-in{
+        opacity:1;
+    }
 
+#main-hero {
+    transition: ease-in .8s;
+    opacity: 0;
+}
 .topbar {
     text-align: start;
     display: grid;
@@ -572,13 +595,13 @@ button {
     background-color: var(--clr-surface);
     box-shadow: 0px 6px 20px var(--opac-accent);
     .current-users
-
 {
     grid-row: 3;
     grid-column: 3;
     img{
            max-height:30px;
            max-width:30px;
+           border-radius:50%;
        }
 }
 
@@ -601,6 +624,7 @@ button {
 span {
     margin-left: .5rem;
     grid-column: 2;
+    color:var(--clr-heading)
 }
 .text-danger{
     margin-left: .5rem;
@@ -669,6 +693,7 @@ h3 {
     width: 40px;
     height: 40px;
     z-index:1;
+    background-color:transparent;
 }
 
 }
@@ -729,7 +754,7 @@ p{
     font-weight:bold
 }
 i, button, span{
-    color: var(--clr-body-dark);
+    color: var(--clr-heading);
 }
     button
 {
@@ -1032,7 +1057,7 @@ h2 {
         font-size: 16px;
         font-weight: 600;
         margin: 0;
-        color:var(--clr-surface)
+        color:white;
     }
 }
 
@@ -1707,7 +1732,7 @@ h1 {
     border: 2px solid var(--clr-border300);
     border-radius: .8rem;
     box-shadow: -9px 22px 31px -18px rgba(0,0,0,0.75);
-    background-color: white;
+    background-color: var(--clr-surface);
     height: 600px;
     width: 1400px;
     display: grid;
@@ -1802,7 +1827,7 @@ span {
     word-wrap: break-word;
     word-break: break-word;
     white-space: pre-wrap;
-    background-color: var(--clr-grey300);
+    background-color: var(--clr-grey100);
     p
 
 {
@@ -1818,7 +1843,7 @@ span {
 }
 
 .chat-input-container {
-    border-top: 1px solid var(--clr-border200);
+    border-top: 1px solid var(--clr-border300);
     grid-column: 2;
     grid-row: 3;
     display: flex;
@@ -1837,7 +1862,7 @@ span {
     input
 
 {
-    border: 1px solid var(--clr-border200);
+    border: 1px solid var(--clr-border300);
     border-radius: .8rem;
     width: 70%;
     padding: .2rem;
@@ -1858,7 +1883,7 @@ button {
 }
 
 .chat-exit {
-    border-bottom: 1px solid var(--clr-border200);
+    border-bottom: 1px solid var(--clr-border300);
     margin: 0;
     grid-column: 2;
     grid-row: 1;
@@ -2151,4 +2176,43 @@ p {
     text-align: center;
     padding: 1rem;
     font-size: 16px;
+}
+.description-wrapper {
+    margin: 1rem;
+    border: 1px solid var(--clr-border200);
+    border-radius: .8rem;
+    overflow:hidden;
+    font:
+}
+.ql-container {
+    min-height: 170px;
+    border: none !important;
+    font-size: 16px!important;
+    color:var(--clr-body-light) !important;
+}
+.custom-editor{
+    font-family:var(--font-main)!important;
+    font-size:16px;
+}
+
+.custom-toolbar button:hover {
+    background: var(--clr-accent);
+}
+#create-toolbar{
+    border:none;
+    border-top:1px solid var(--clr-border200)
+}
+#edit-toolbar {
+    border: none;
+    border-top: 1px solid var(--clr-border200)
+}
+.ql-toolbar.ql-snow {
+    border: none;
+    border-top: 1px solid var(--clr-border200)
+}
+.ql-splitter {
+    border-left: 1px solid var(--clr-border100);
+    border-right: 1px solid var(--clr-border100);
+    padding-left:.5rem;
+    padding-right: .5rem;
 }
