@@ -1,0 +1,41 @@
+﻿@using ASPAssignment.ViewModels
+@model MemberIndex
+
+@{
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div id="MemberView">
+    <div class="header">
+        <h1>Team Members</h1>
+        <button class="project-btn" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">
+            + Add Team Member
+        </button>
+    </div>
+
+    @if (Model.Items == null || !Model.Items.Any())
+    {
+        <p>No Members found or failed to load.</p>
+    }
+    else
+    {
+        <div class="project-view">
+            @foreach (var member in Model.Items)
+            {
+                <partial name="Partials/Home/_MemberCard" model="member" />
+            }
+        </div>
+    }
+
+    <nav>
+        <ul class="pagination">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a href="#" class="member-page" data-page="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+
+</div>

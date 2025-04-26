@@ -10,6 +10,7 @@ namespace ASPAssignment.Controllers;
 public class MemberController(IMemberService memberService) : Controller
 {
     private readonly IMemberService _memberService = memberService;
+    private const int PageSize = 10;
 
     [Authorize]
     [HttpGet("GetMember/{id}")]
@@ -94,6 +95,7 @@ public class MemberController(IMemberService memberService) : Controller
 
         return Json(result);
     }
+
 
 
 }

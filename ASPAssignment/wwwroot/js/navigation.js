@@ -1,13 +1,16 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+﻿
+document.addEventListener("DOMContentLoaded", function () {
     const projectsBtn = document.getElementById("load-projects");
     const teamBtn = document.getElementById("load-team-members");
-    const container = document.querySelector(".hero");
+    const container = document.getElementById("dynamic-content"); // Uppdaterad container
 
     if (projectsBtn)
-        projectsBtn.addEventListener("click", () => loadPartialView("/Navigation/LoadProjects"));
+        projectsBtn.addEventListener("click", () =>
+            loadPartialView("/Navigation/LoadProjects"));
 
     if (teamBtn)
-        teamBtn.addEventListener("click", () => loadPartialView("/Navigation/LoadTeamMembers"));
+        teamBtn.addEventListener("click", () =>
+            loadPartialView("/Navigation/LoadMembers"));
 
     function loadPartialView(url) {
         if (!container) return;
@@ -20,62 +23,61 @@
             .then(response => response.text())
             .then(html => {
                 container.innerHTML = html;
-                requestAnimationFrame(() => container.classList.add("visible"));
+                requestAnimationFrame(() =>
+                    container.classList.add("visible")
+                );
 
-                if (typeof resetInitFlags === "function") {
-                    resetInitFlags();
-                }
+                resetInitFlags?.();
+                initAll?.();
+                initStatusFilter?.();
 
-                if (typeof initAll === "function") {
-                    initAll();
-                }
-
-                if (typeof initStatusFilter === "function") {
-                    initStatusFilter();
-                }
+                bindProjectPagination?.();
+                bindMemberPagination?.();
             })
             .catch(error => {
                 container.innerHTML = "<div class='text-danger'>Kunde inte ladda innehållet.</div>";
                 console.error("Error loading view:", error);
             });
     }
+
     function initStatusFilter() {
         document.querySelectorAll(".status-bar .navbar-link").forEach(link => {
             link.addEventListener("click", function (e) {
                 e.preventDefault();
-                const status = this.getAttribute("data-status") || "";
+                const status = this.dataset.status || "";
 
-                document.querySelectorAll(".status-bar .navbar-link").forEach(l => l.classList.remove("active"));
+                document.querySelectorAll(".status-bar .navbar-link")
+                    .forEach(l => l.classList.remove("active"));
                 this.classList.add("active");
 
-                loadPartialView(`/Navigation/LoadProjects${status ? `?status=${status}` : ""}`);
+                loadPartialView(`/Navigation/LoadProjects?status=${status}`);
             });
         });
     }
 
-    function initMoreMenu() {
-        document.querySelectorAll(".more-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
+    function bindProjectPagination() {
+        document.querySelectorAll('.project-page').forEach(link => {
+            link.addEventListener('click', e => {
                 e.preventDefault();
-                const container = btn.closest(".more-container");
-                const menu = container?.querySelector(".more-menu");
-
-                if (!menu) return;
-
-                document.querySelectorAll(".more-menu").forEach(m => {
-                    if (m !== menu) m.classList.add("d-none");
-                });
-
-                menu.classList.toggle("d-none");
+                const page = link.dataset.page;
+                const status = link.dataset.status || '';
+                loadPartialView(`/Navigation/LoadProjects?status=${status}&page=${page}`);
             });
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest(".more-container")) {
-                document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
-            }
         });
     }
 
+    function bindMemberPagination() {
+        document.querySelectorAll('.member-page').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const page = link.dataset.page;
+                loadPartialView(`/Navigation/LoadMembers?page=${page}`);
+            });
+        });
+    }
+
+    // Initial bindings
     initStatusFilter();
+    bindProjectPagination();
+    bindMemberPagination();
 });

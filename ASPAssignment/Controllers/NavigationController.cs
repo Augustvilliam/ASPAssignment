@@ -1,38 +1,57 @@
-﻿using Business.Interface;
+﻿using ASPAssignment.ViewModels;
+using Business.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ASPAssignment.Controllers;
-
-public class NavigationController : Controller
+namespace ASPAssignment.Controllers
 {
-    private readonly IMemberService _memberService;
-    private readonly IProjectService _projectService;
-
-    public NavigationController(IMemberService memberService, IProjectService projectService)
-    {
-        _memberService = memberService;
-        _projectService = projectService;
-    }
     [Authorize]
-    public async Task<IActionResult> LoadProjects(string? status)
+    [Route("Navigation")]
+    public class NavigationController : Controller
     {
-        var allProjects = await _projectService.GetAllProjectsAsync();
+        private readonly IMemberService _memberService;
+        private readonly IProjectService _projectService;
+        private const int PageSize = 10;
 
-        if (!string.IsNullOrEmpty(status) && (status == "Ongoing" || status == "Completed"))
-            allProjects = allProjects.Where(p => p.Status == status);
+        public NavigationController(IMemberService memberService, IProjectService projectService)
+        {
+            _memberService = memberService;
+            _projectService = projectService;
+        }
 
-        if (!allProjects.Any())
-            return Content("No projects found.");
+        [HttpGet("LoadProjects")]
+        public async Task<IActionResult> LoadProjects(string? status, int page = 1)
+        {
+            var total = await _projectService.CountAsync(status);
+            var items = await _projectService.GetPagedAsync(status, (page - 1) * PageSize, PageSize);
 
-        return PartialView("~/Views/Shared/Partials/_ProjectView.cshtml", allProjects);
-    }
+            var vm = new ProjectIndex
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = PageSize,
+                TotalItems = total,
+                Status = status
+            };
 
-    [Authorize]
+            return PartialView("~/Views/Shared/Partials/Home/_ProjectView.cshtml", vm);
+        }
 
-    public async Task<IActionResult> LoadTeamMembers()
-    {
-        var members = await _memberService.GetAllMembersAsync();
-        return PartialView("~/Views/Shared/Partials/_TeamMembers.cshtml", members);
+        [HttpGet("LoadMembers")]
+        public async Task<IActionResult> LoadMembers(int page = 1)
+        {
+            var total = await _memberService.CountAsync();
+            var items = await _memberService.GetPagedAsync((page - 1) * PageSize, PageSize);
+
+            var vm = new MemberIndex
+            {
+                Items = items,
+                PageNumber = page,
+                PageSize = PageSize,
+                TotalItems = total
+            };
+
+            return PartialView("~/Views/Shared/Partials/Home/_MemberView.cshtml", vm);
+        }
     }
 }

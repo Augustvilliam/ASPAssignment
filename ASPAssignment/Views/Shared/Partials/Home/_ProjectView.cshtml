@@ -1,0 +1,38 @@
+﻿@using ASPAssignment.ViewModels
+@model ProjectIndex
+
+<div class="header">
+    <h1>Projects</h1>
+    <button class="project-btn" data-bs-toggle="modal" data-bs-target="#createprojectModal">
+        + Add projects
+    </button>
+</div>
+
+<partial name="Partials/ProjectView/_StatusBar" model="Model" />
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No projects found.</div>
+}
+else
+{
+    <div class="project-view">
+        @foreach (var project in Model.Items)
+        {
+            <partial name="Partials/Home/_ProjectCard" model="project" />
+        }
+    </div>
+}
+
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i==Model.PageNumber ? "active":"")">
+                <a href="#" class="project-page"
+                   data-page="@i"
+                   data-status="@Model.Status">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

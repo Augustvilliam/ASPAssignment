@@ -1,0 +1,30 @@
+﻿@model Business.Dtos.MemberDto
+
+@{
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="team-card">
+    <div class="top-space">
+        @if (isAdmin)
+        {
+            <button data-member-id="@Model.Id"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editTeamMemberModal"
+                    class="more-btn">
+                <img src="~/img/More 2.svg" alt="More Options" />
+            </button>
+        }
+    </div>
+
+    <img class="profile-img"
+         src="@(string.IsNullOrWhiteSpace(Model.ProfileImagePath) ? "/img/Employee.svg" : Model.ProfileImagePath)"
+         alt="Profile Image" />
+
+    <h1>@Model.FirstName @Model.LastName</h1>
+    <h3 class="jobtitle">@Model.JobTitle</h3>
+    <h2 class="contact-format">@Model.Email</h2>
+    <h2 class="contact-format">@Model.Phone</h2>
+
+    <button class="message-btn">Message</button>
+</div>

@@ -1,14 +1,21 @@
-﻿@model IEnumerable<ProjectEntity>
+﻿@model ASPAssignment.ViewModels.ProjectIndex
 
 @{
-    var totalCount = Model.Count();
-    var ongoingCount = Model.Count(p => p.Status == "Ongoing");
-    var compleateCount = Model.Count(p => p.Status == "Compleated");
-
+    var totalCount = Model.TotalItems;
+    var ongoingCount = Model.Items.Count(p => p.Status == "Ongoing");
+    var completedCount = Model.Items.Count(p => p.Status == "Completed");
 }
-
 <div class="status-bar">
-    <a class="navbar-link" href="#" data-status="">ALL[@totalCount]</a>
-    <a class="navbar-link" href="#" data-status="Ongoing">STARTED[@ongoingCount]</a>
-    <a class="navbar-link" href="#" data-status="Completed">COMPLETED[@compleateCount]</a>
+    <a class="navbar-link @(string.IsNullOrEmpty(Model.Status) ? "active" : "")"
+       href="#" data-status="">
+        ALL [@totalCount]
+    </a>
+    <a class="navbar-link @(Model.Status=="Ongoing" ? "active" : "")"
+       href="#" data-status="Ongoing">
+        STARTED [@ongoingCount]
+    </a>
+    <a class="navbar-link @(Model.Status=="Completed" ? "active" : "")"
+       href="#" data-status="Completed">
+        COMPLETED [@completedCount]
+    </a>
 </div>

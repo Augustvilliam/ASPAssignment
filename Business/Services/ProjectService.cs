@@ -1,9 +1,14 @@
-﻿using Business.Dtos;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Business.Dtos;
 using Business.Factories;
 using Business.Interface;
 using Data.Entities;
 using Data.Interface;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace Business.Services;
 
@@ -135,5 +140,30 @@ public class ProjectService : IProjectService
             await _projectRepo.RollbackTransactionsAync();
             throw;
         }
+    }
+
+    public async Task<int> CountAsync(string? status)
+    {
+        var query = _projectRepo.Context.Projects.AsQueryable();
+        if (!string.IsNullOrEmpty(status))
+            query = query.Where(p => p.Status == status);
+        return await query.CountAsync();
+    }
+
+    public async Task<IEnumerable<ProjectDto>> GetPagedAsync(string? status, int skip, int take)
+    {
+        var query = _projectRepo.Context.Projects
+            .Include(p => p.Members)
+            .AsQueryable();
+        if (!string.IsNullOrEmpty(status))
+            query = query.Where(p => p.Status == status);
+
+        var list = await query
+            .OrderByDescending(p => p.StartDate)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+
+        return list.Select(ProjectFactory.FromEntity);
     }
 }

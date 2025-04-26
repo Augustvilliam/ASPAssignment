@@ -16,7 +16,6 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
         return list.Select(MemberFactory.FromEntity);
     }
-
     public async Task<MemberDto?> GetMemberByIdAsync(string id)
     {
         var user = await _userManager.Users
@@ -65,7 +64,6 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
         return user == null ? null : MemberFactory.FromEntity(user);
     }
-
     public async Task<bool> UpdateMemberAsync(MemberDto dto, string? imagePath)
     {
         var user = await _userManager.Users
@@ -92,7 +90,6 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
         var result = await _userManager.UpdateAsync(user);
         return result.Succeeded;
     }
-
     public async Task<bool> DeleteMemberAsync(string id)
     {
         var user = await _userManager.Users
@@ -104,5 +101,20 @@ public class MemberService(UserManager<MemberEntity> userManager) : IMemberServi
 
         var result = await _userManager.DeleteAsync(user);
         return result.Succeeded;
+    }
+    public async Task<int> CountAsync()
+    {
+        return await _userManager.Users.CountAsync();
+    }
+    public async Task<IEnumerable<MemberDto>> GetPagedAsync(int skip, int take)
+    {
+        var list = await _userManager.Users
+            .Include(u => u.Profile)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+
+        return list.Select(MemberFactory.FromEntity);
+
     }
 }

@@ -35,7 +35,11 @@ public static class ProjectFactory
             Budget = entity.Budget,
             ProjectImagePath = entity.ProjectImagePath,
             MemberIds = entity.Members.Select(m => m.Id).ToList(),
-            Status = entity.Status
+            Status = entity.Status,
+            Members = entity.Members?
+                        .Select(MemberFactory.FromEntity)
+                        .ToList()
+                    ?? new List<MemberDto>()
         };
     }
     public static void UpdateEntity(ProjectEntity entity, ProjectDto dto, IEnumerable<MemberEntity> members)
