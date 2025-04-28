@@ -1,4 +1,5 @@
 ﻿using ASPAssignment.ViewModels;
+using Business.Dtos;
 using Business.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,47 +12,93 @@ namespace ASPAssignment.Controllers
     {
         private readonly IMemberService _memberService;
         private readonly IProjectService _projectService;
-        private const int PageSize = 10;
+        private readonly ITagService _tagService;
+        private const int PageSize = 9;
 
-        public NavigationController(IMemberService memberService, IProjectService projectService)
+        public NavigationController(IMemberService memberService,
+            IProjectService projectService,
+            ITagService tagService)
         {
             _memberService = memberService;
             _projectService = projectService;
+            _tagService = tagService;
         }
 
+
         [HttpGet("LoadProjects")]
-        public async Task<IActionResult> LoadProjects(string? status, int page = 1)
+        public async Task<IActionResult> LoadProjects(
+            string? status,
+            string? term,
+            int page = 1)
         {
-            var total = await _projectService.CountAsync(status);
-            var items = await _projectService.GetPagedAsync(status, (page - 1) * PageSize, PageSize);
+            IEnumerable<ProjectDto> dtos;
+            int total;
+
+            if (!string.IsNullOrWhiteSpace(term))
+            {
+                // 1) Sök med TagService
+                dtos = await _tagService.SearchProjectsAsync(term);
+                total = dtos.Count();
+                page = 1;
+            }
+            else
+            {
+                // 2) Vanlig paginering + status‐filter
+                total = await _projectService.CountAsync(status);
+                dtos = await _projectService.GetPagedAsync(
+                            status,
+                            (page - 1) * PageSize,
+                            PageSize);
+            }
 
             var vm = new ProjectIndex
             {
-                Items = items,
+                Items = dtos,
                 PageNumber = page,
                 PageSize = PageSize,
                 TotalItems = total,
                 Status = status
             };
 
-            return PartialView("~/Views/Shared/Partials/Home/_ProjectView.cshtml", vm);
+            return PartialView(
+              "~/Views/Shared/Partials/Home/_ProjectView.cshtml",
+              vm
+            );
         }
 
         [HttpGet("LoadMembers")]
-        public async Task<IActionResult> LoadMembers(int page = 1)
+        public async Task<IActionResult> LoadMembers(
+          string? term,
+          int page = 1)
         {
-            var total = await _memberService.CountAsync();
-            var items = await _memberService.GetPagedAsync((page - 1) * PageSize, PageSize);
+            IEnumerable<MemberDto> dtos;
+            int total;
+
+            if (!string.IsNullOrWhiteSpace(term))
+            {
+                dtos = await _tagService.SearchMembersAsync(term);
+                total = dtos.Count();
+                page = 1;
+            }
+            else
+            {
+                total = await _memberService.CountAsync();
+                dtos = await _memberService.GetPagedAsync(
+                          (page - 1) * PageSize,
+                          PageSize);
+            }
 
             var vm = new MemberIndex
             {
-                Items = items,
+                Items = dtos,
                 PageNumber = page,
                 PageSize = PageSize,
                 TotalItems = total
             };
-
-            return PartialView("~/Views/Shared/Partials/Home/_MemberView.cshtml", vm);
+            return PartialView(
+              "~/Views/Shared/Partials/Home/_MemberView.cshtml",
+              vm
+            );
         }
     }
 }

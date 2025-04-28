@@ -60,15 +60,28 @@
                         <span asp-validation-for="EndDate" class="text-danger enddateerror"></span>
                     </div>
 
-                    <label for="member-search">Members</label>
+                    <label for="edit-member-search-input">Members</label>
                     <div class="member-picker">
-                        <div class="member-picker-header" id="edit-accordion-toggle">
-                            <div class="selected-members" id="edit-selected-members"></div>
-                            <button type="button" id="edit-toggle-member-list" class="search-btn">🔍</button>
+                        <div id="edit-selected-members" class="selected-members"></div>
+
+                        <button type="button"
+                                id="edit-toggle-member-list"
+                                class="search-btn"
+                                aria-label="Search members">
+                            <i class="fa fa-magnifying-glass"></i>
+                        </button>
+
+                        <div id="edit-member-dropdown" class="search-dropdown d-none">
+                            <input type="text"
+                                   id="edit-member-search-input"
+                                   class="form-control"
+                                   placeholder="Sök medlemmar…"
+                                   autocomplete="off" />
+                            <ul id="edit-member-suggestions" class="suggestions-list"></ul>
                         </div>
-                        <ul id="edit-member-suggestions" class="suggestions-list" style="display: none;"></ul>
+
+                        <div id="edit-selected-member-ids"></div>
                     </div>
-                    <div id="edit-selected-member-ids"></div>
 
 
                     <label asp-for="Budget"></label>

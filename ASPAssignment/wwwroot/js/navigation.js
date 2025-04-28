@@ -66,6 +66,26 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function initGlobalSearch() {
+        const input = document.getElementById("globalSearch");
+        if (!input) return;
+        let timeout;
+        input.addEventListener("input", () => {
+            clearTimeout(timeout);
+            const term = input.value.trim();
+            timeout = setTimeout(() => {
+                // Avgör om vi är i Members-vyn genom att leta efter #MemberView
+                const isMemberView = !!document.getElementById("MemberView");
+                if (isMemberView) {
+                    // Ladda om med term i Members
+                    loadPartialView(`/Navigation/LoadMembers?term=${encodeURIComponent(term)}`);
+                } else {
+                    // Ladda om med term i Projects
+                    loadPartialView(`/Navigation/LoadProjects?term=${encodeURIComponent(term)}`);
+                }
+            }, 300);
+        });
+    }
     function bindMemberPagination() {
         document.querySelectorAll('.member-page').forEach(link => {
             link.addEventListener('click', e => {
@@ -80,4 +100,5 @@ document.addEventListener("DOMContentLoaded", function () {
     initStatusFilter();
     bindProjectPagination();
     bindMemberPagination();
+    initGlobalSearch();
 });

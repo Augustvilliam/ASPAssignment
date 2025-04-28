@@ -188,11 +188,14 @@ label{
     margin:0 auto;
 }
 /*Misc*/
+.alert alert-info{
+    margin:1rem;
+    padding:1rem;
+}
 
-
-.WIP{
-    width:400px;
-    height:400px;
+.WIP {
+    width: 400px;
+    height: 400px;
 }
 .d-none {
     display: none !important;
@@ -239,6 +242,12 @@ label{
     overflow:hidden;
 }
 /* WRAPPERS AND CONTAINERS */
+#MemberView{
+    p{
+         padding:1rem;
+     }
+}
+
 .delete-container {
     margin: 0 auto;
     padding: 2.5rem;
@@ -514,8 +523,11 @@ button {
     grid-column: 2;
 }
 
+
 .searchbar {
     background-color: transparent;
+    width: 100%;
+    border-radius: .5rem;
 }
 
 }
@@ -533,12 +545,26 @@ button {
 }
 
 }
-
+#searchResults {
+    border: none;
+    margin: 0;
+    max-height: 50%;
+    overflow-y: auto;
+    width: 970px;
+    top: 55px;
+    border-radius: 0 0 .8rem .8rem;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+}
+.result-item{
+    max-width:100%;
+    padding:1rem;
+    margin:1rem;
+}
 /* Components */
-.satus-select{
-    background-color:transparent;
-    border:1px solid var(--clr-grey300);
-    color:var(--clr-body-light);
+.satus-select {
+    background-color: transparent;
+    border: 1px solid var(--clr-grey300);
+    color: var(--clr-body-light);
 }
 .usersummary {
     padding-left: .5rem;
@@ -1593,79 +1619,109 @@ h1 {
 }
 
    /*Member-picker*/
-.member-picker {
-    position: relative;
-    border: 1px solid var(--clr-border300);
-    border-radius: .8rem;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin: 1rem;
-    margin-top:0;
-    padding: 1rem;
-}
 
-.member-picker-header {
-    display: flex;
+
+.member-picker {
+    display: grid;
+    grid-template-columns:1fr auto;
     align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
+    justify-content:space-between;
+    position: relative;
+    border:1px solid var(--clr-border300);
+    width:88%;
+    margin:1rem;
+    padding:1rem;
+    border-radius:.8rem;
 }
 
 .search-btn {
     background: none;
     border: none;
-    font-size: 1.2em;
+    font-size: 1.2rem;
     cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.selected-members {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+.search-dropdown {
+    position: absolute;
+    top: 72%;
+    right: -1px;
+    width: 516px;
+    background: #fff;
+    border: 1px solid var(--clr-border300);
+    border-top:none;
+    border-radius:0 0 .8rem .8rem;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-.selected-member {
-    background: #e0e0e0;
-    border-radius: 20px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-}
-
-    .selected-member img {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        margin-right: 4px;
+    .search-dropdown input {
+        width: 90%;
+        padding: .5rem;
+        border:1px solid var(--clr-border100);
+        height:20px;
     }
 
 .suggestions-list {
     list-style: none;
-    margin-top:2rem;
-    border: 1px solid var(--clr-border300);
-    border-radius: .8rem;
+    margin: 0;
+    padding: 0;
     max-height: 200px;
     overflow-y: auto;
-    background: #fff;
-    position: absolute;
-    width: 100%;
-    z-index: 10;
-    padding-left:0;
 }
 
     .suggestions-list li {
-        cursor: pointer;
         display: flex;
         align-items: center;
+        padding: 1rem;
+        margin-left:.5rem;
+        margin-right:.5rem;
+        border-radius:.25rem;
+        cursor: pointer;
+        img{
+               height:24px;
+               width:24px;
+               margin-right:1rem;
+               
+           }
     }
 
-        .suggestions-list li img {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 8px;
+        .suggestions-list li:hover {
+            background: #f5f5f5;
         }
+
+.selected-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.selected-member {
+    display: inline-flex;
+    align-items: center;
+    background: #e9ecef;
+    border-radius: .25rem;
+    padding: .25rem .5rem;
+}
+
+    .selected-member img {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: .5rem;
+    }
+
+    .selected-member .btn-close {
+        font-size: .75rem;
+        margin-left: .5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
 
 
         /*ChatDelar*/
@@ -2211,3 +2267,5 @@ p {
     padding-left:.5rem;
     padding-right: .5rem;
 }
+
+

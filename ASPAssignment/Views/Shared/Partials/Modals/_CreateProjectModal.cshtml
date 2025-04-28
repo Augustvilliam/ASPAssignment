@@ -65,18 +65,28 @@
                         <span asp-validation-for="EndDate" class="text-danger enddateerror"></span>
                     </div>
 
-                    <label for="member-search">Members</label>
-                    <div class="member-picker">
-                        <div class="member-picker-header" id="accordion-toggle">
-                            <div class="selected-members" id="selected-members"></div>
-                            <button type="button" id="toggle-member-list" class="search-btn">
-                                🔍
-                            </button>
-                        </div>
-                        <ul id="member-suggestions" class="suggestions-list" style="display: none;"></ul>
-                    </div>
-                    <div id="selected-member-ids"></div>
+                    <label for="memberSearchInput_create">Members</label>
+                    <div class="member-picker" data-picker-id="create">
+                        <div id="selectedMembers_create" class="selected-members"></div>
 
+                        <button type="button"
+                                id="toggleMemberSearch_create"
+                                class="search-btn"
+                                aria-label="Search members">
+                            <i class="fa fa-magnifying-glass"></i>
+                        </button>
+
+                        <div id="memberSearchDropdown_create" class="search-dropdown d-none">
+                            <input type="text"
+                                   id="memberSearchInput_create"
+                                   class="form-control"
+                                   placeholder="Sök medlemmar…"
+                                   autocomplete="off" />
+                            <ul id="memberSuggestions_create" class="suggestions-list"></ul>
+                        </div>
+
+                        <div id="selectedMemberIds_create"></div>
+                    </div>
 
                     <label for="budget">Budget</label>
                     <input asp-for="Budget" id="budget" name="Budget" placeholder="Budget i kr" class="form-input @(ViewData.ModelState["Budget"]?.Errors.Any() == true ? "input-validation-error" : "")" />

@@ -12,5 +12,12 @@
                 <i class="fa-solid fa-briefcase btn-img"></i>
                 Team Members
             </button>
+            @if (User.IsInRole("Admin"))
+            {
+            <button id="Create-Roles" class="sidebar-btn">
+            <i class=" fa-solid fa-screwdriver btn-img"></i> 
+                <a asp-controller="Admin" asp-action="Index">Admin Tools</a>
+            </button>
+            }
         </div>
 
