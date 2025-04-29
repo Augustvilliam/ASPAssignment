@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject UserManager<MemberEntity> UserManager
+﻿@inject UserManager<MemberEntity> UserManager
 
 @{
     var user = await UserManager.GetUserAsync(User);

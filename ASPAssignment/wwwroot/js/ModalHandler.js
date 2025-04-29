@@ -102,7 +102,6 @@ function initMemberPickerGeneric(modal, opts) {
         });
     }
 }
-
 // CREATE project modal
 function initCreateProjectModal() {
     const modal = document.getElementById("createprojectModal");
@@ -136,7 +135,6 @@ function initCreateProjectModal() {
     });
     form.dataset.submitBound = 'true';
 }
-
 // EDIT project modal
 function initEditProjectModal() {
     const modal = document.getElementById("editprojectModal");
@@ -208,22 +206,19 @@ function initEditProjectModal() {
     });
     form.dataset.editSubmitBound = 'true';
 }
-
-
 function initEditTeamMemberModal() {
     const modal = document.getElementById("editTeamMemberModal");
-    if (!modal) return;
-
-    if (modal.dataset.teamModalBound) return;
+    if (!modal || modal.dataset.teamModalBound) return;
     modal.dataset.teamModalBound = 'true';
 
-    console.log("🔁 initEditTeamMemberModal körs");
+    console.log("🔁 initEditTeamMemberModal körs med roles");
 
     const form = modal.querySelector("form");
     const fileInput = document.getElementById("profilepic");
     const previewImg = document.getElementById("previewImage");
     const uploadBtn = document.getElementById("uploadPreviewBtn");
     const errorContainer = document.getElementById("edit-member-errors");
+    const roleSelect = form.querySelector('[name="RoleId"]');
 
     initImagePreview(fileInput, previewImg, uploadBtn);
 
@@ -232,16 +227,35 @@ function initEditTeamMemberModal() {
         const memberId = button?.getAttribute("data-member-id");
         if (!memberId) return;
 
-        const response = await fetch(`/Member/GetMember/${memberId}`);
-        const member = await response.json();
+        try {
+            const response = await fetch(`/Member/GetMember/${memberId}`);
+            const data = await response.json();
+            const member = data.member;
+            const roles = data.roles || [];
 
-        form.querySelector('[name="Id"]').value = member.id;
-        form.querySelector('[name="FirstName"]').value = member.firstName;
-        form.querySelector('[name="LastName"]').value = member.lastName;
-        form.querySelector('[name="Email"]').value = member.email;
-        form.querySelector('[name="Phone"]').value = member.phone || "";
-        form.querySelector('[name="JobTitle"]').value = member.jobTitle || "";
-        previewImg.src = member.profileImagePath ?? "/img/upload.svg";
+            // Fyll i formulärfälten
+            form.querySelector('[name="Id"]').value = member.id;
+            form.querySelector('[name="FirstName"]').value = member.firstName;
+            form.querySelector('[name="LastName"]').value = member.lastName;
+            form.querySelector('[name="Email"]').value = member.email;
+            form.querySelector('[name="Phone"]').value = member.phone || "";
+            previewImg.src = member.profileImagePath ?? "/img/upload.svg";
+
+            // Ladda dropdown med roller
+            if (roleSelect) {
+                roleSelect.innerHTML = '';
+                roles.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.text = r.name;
+                    roleSelect.appendChild(opt);
+                });
+                // Sätta valt värde
+                roleSelect.value = member.roleId || '';
+            }
+        } catch (err) {
+            console.error("❌ Kunde inte hämta memberdata eller roller:", err);
+        }
     });
 
     form.addEventListener("submit", async (e) => {
@@ -256,7 +270,6 @@ function initEditTeamMemberModal() {
                 method: "POST",
                 body: data
             });
-
             await handleFormResponse(response, modal, "/Navigation/LoadMembers", errorContainer);
         } catch (err) {
             console.error("Update member error:", err);

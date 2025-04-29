@@ -8,5 +8,9 @@ public class MemberEntity : IdentityUser
 
     public virtual MemberProfileEntity? Profile { get; set; }
 
-    public ICollection<ProjectEntity> Projects { get; set; } = [];
+    public ICollection<ProjectEntity> Projects { get; set; } = new List<ProjectEntity>();
+
+    // Convenience-egenskap för att få ut JobTitle från profilen
+    [NotMapped]
+    public string? JobTitle => Profile?.Role?.Name;
 }

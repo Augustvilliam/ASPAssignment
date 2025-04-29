@@ -39,9 +39,9 @@
                         <input asp-for="Phone" id="Phone" name="Phone" class="form-input" />
                         <span asp-validation-for="Phone" class="text-danger"></span>
 
-                        <label asp-for="JobTitle"></label>
-                        <input asp-for="JobTitle" id="JobTitle" name="JobTitle" class="form-input" />
-                        <span asp-validation-for="JobTitle" class="text-danger"></span>
+                        <label asp-for="RoleId"></label>
+                        <select asp-for="RoleId" asp-items="Model.Roles" class="form-input"></select>
+                        <span asp-validation-for="RoleId" class="text-danger"></span>
 
                         <label asp-for="StreetAddress"></label>
                         <input asp-for="StreetAddress" class="form-input" />

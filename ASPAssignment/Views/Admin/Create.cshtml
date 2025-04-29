@@ -5,15 +5,21 @@
 
 <h2>Skapa ny roll</h2>
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
+<form class="role-form" asp-action="Create" method="post">
+
+    <div class="role-form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <div class="form-group form-check">
+
+    <div class="role-form-group-admin">
         <input asp-for="IsAdmin" class="form-check-input" />
         <label asp-for="IsAdmin" class="form-check-label"></label>
     </div>
-    <button type="submit" class="btn btn-success">Skapa</button>
+
+    <div>
+        <button type="submit" class="btn-role-create">Skapa</button>
+        <button class="btn-role-return">Return</button>
+    </div>
 </form>

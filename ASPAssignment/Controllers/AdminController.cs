@@ -99,5 +99,50 @@ namespace ASPAssignment.Controllers
             await _roleManager.DeleteAsync(role);
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null) return NotFound();
+
+            var vm = new EditRole
+            {
+                Id = role.Id,
+                Name = role.Name,
+                IsAdmin = role.IsAdmin
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditRole model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var role = await _roleManager.FindByIdAsync(model.Id);
+            if (role == null) return NotFound();
+
+            // (Valfritt) hindra att standardroller byter namn
+            if ((role.Name == "User" || role.Name == "Admin") && role.Name != model.Name)
+            {
+                ModelState.AddModelError("", "Du kan inte byta namn på standardrollerna.");
+                return View(model);
+            }
+
+            role.Name = model.Name;
+            role.IsAdmin = model.IsAdmin;
+
+            var result = await _roleManager.UpdateAsync(role);
+            if (result.Succeeded)
+                return RedirectToAction(nameof(Index));
+
+            foreach (var e in result.Errors)
+                ModelState.AddModelError("", e.Description);
+
+            return View(model);
+        }
     }
 }
+

@@ -1,4 +1,20 @@
-﻿<div class="settings-topbar">
+﻿
+@inject UserManager<MemberEntity> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var profile = user?.Profile;
+    var fullName = profile != null
+        ? $"{profile.FirstName} {profile.LastName}".Trim()
+        : user?.Email ?? "User";
+    var profileImagePath = user?.ProfileImagePath ?? "/img/Employee.svg";
+    var roles = await UserManager.GetRolesAsync(user);
+    ViewBag.Role = roles.FirstOrDefault() ?? "N/A";
+    ViewBag.Email = user?.Email ?? "";
+    ViewBag.ProfileImage = profileImagePath;
+}
+
+<div class="settings-topbar">
     <h1>Settings</h1>
     <div class="user-info">
         <p>Role: @ViewBag.Role</p>

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using ASPAssignment.Services;
 using Data.Entities;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,12 @@ builder.Services.AddIdentity<MemberEntity, ApplicationRole>(options =>
     options.Password.RequireLowercase = true;
 })
     .AddEntityFrameworkStores<DataContext>();
+builder.Services.AddScoped<IClaimsTransformation, AdminClaimsTransformer>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAppAdmin", policy =>
+        policy.RequireClaim("IsAppAdmin", "true"));
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
