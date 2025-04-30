@@ -1,31 +1,34 @@
+using System;
+using System.Security.Claims;
 using ASPAssignment.Hubs;
+using ASPAssignment.Services;
 using Business.Interface;
 using Business.Services;
 using Data.Contexts;
+using Data.Entities;
 using Data.Helpers;
 using Data.Interface;
 using Data.Repository;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
-using ASPAssignment.Services;
-using Data.Entities;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Databas & DI
-builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
+// ===== Databas & DI =====
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AlphaDb")));
+
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// MVC + Identity
+// ===== MVC + Identity =====
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddIdentity<MemberEntity, ApplicationRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -34,60 +37,116 @@ builder.Services.AddIdentity<MemberEntity, ApplicationRole>(options =>
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
 })
-    .AddEntityFrameworkStores<DataContext>();
+.AddEntityFrameworkStores<DataContext>();
+
+// Claims-transformering för IsAppAdmin
 builder.Services.AddScoped<IClaimsTransformation, AdminClaimsTransformer>();
+
+// Policyn som kräver admin-claim
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAppAdmin", policy =>
         policy.RequireClaim("IsAppAdmin", "true"));
 });
 
+// Konfigurera Identity-cookien EN GÅNG
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    // Standardlogin för vanliga användare
     options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
     options.SlidingExpiration = true;
     options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.Name = "MyAppAuth";
+
+    // Särskilj inloggningsväg för /Admin
+    options.Events.OnRedirectToLogin = ctx =>
+    {
+        // Skapa samma typ för båda vägarna
+        var returnUrl = ctx.Request.Path + ctx.Request.QueryString;
+        PathString targetLogin = ctx.Request.Path.StartsWithSegments("/Admin")
+            ? new PathString("/Admin/Login")
+            : options.LoginPath;
+
+        // Bygg redirect-URL som string
+        var redirectUri = targetLogin.Value
+                          + "?returnUrl="
+                          + Uri.EscapeDataString(returnUrl);
+
+        ctx.Response.Redirect(redirectUri);
+        return Task.CompletedTask;
+    };
 });
 
-// External auth
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-})
-    .AddCookie()
-    .AddGoogle(options =>
+// ===== Externa inloggningsleverantörer =====
+builder.Services.AddAuthentication()
+    .AddGoogle(opts =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+        opts.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        opts.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+        opts.Events.OnRemoteFailure = ctx =>
+        {
+            ctx.HandleResponse();
+            var returnUrl = ctx.Properties.RedirectUri ?? "/";
+            var redirect = $"/External/ExternalSignIn?returnUrl={Uri.EscapeDataString(returnUrl)}" +
+                           $"&error={Uri.EscapeDataString(ctx.Failure?.Message ?? "External login failed")}";
+            ctx.Response.Redirect(redirect);
+            return Task.CompletedTask;
+        };
+
     })
-    .AddFacebook(options =>
+    .AddFacebook(opts =>
     {
-        options.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
-        options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+        opts.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
+        opts.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+        opts.Events.OnRemoteFailure = ctx =>
+        {
+            ctx.HandleResponse();
+            var returnUrl = ctx.Properties.RedirectUri ?? "/";
+            var redirect = $"/External/ExternalSignIn?returnUrl={Uri.EscapeDataString(returnUrl)}" +
+                           $"&error={Uri.EscapeDataString(ctx.Failure?.Message ?? "External login failed")}";
+            ctx.Response.Redirect(redirect);
+            return Task.CompletedTask;
+        };
     })
-    .AddGitHub(options =>
+    .AddGitHub(opts =>
     {
-        options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"]!;
-        options.Scope.Add("user:email");
+        opts.ClientId = builder.Configuration["Authentication:GitHub:ClientId"]!;
+        opts.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"]!;
+        opts.Events.OnRemoteFailure = ctx =>
+        {
+            ctx.HandleResponse();
+            var returnUrl = ctx.Properties.RedirectUri ?? "/";
+            var redirect = $"/External/ExternalSignIn?returnUrl={Uri.EscapeDataString(returnUrl)}" +
+                           $"&error={Uri.EscapeDataString(ctx.Failure?.Message ?? "External login failed")}";
+            ctx.Response.Redirect(redirect);
+            return Task.CompletedTask;
+        };
+        opts.Scope.Add("user:email");
     })
-    .AddMicrosoftAccount(options =>
+    .AddMicrosoftAccount(opts =>
     {
-        options.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
+        opts.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
+        opts.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
+        opts.Events.OnRemoteFailure = ctx =>
+        {
+            ctx.HandleResponse();
+            var returnUrl = ctx.Properties.RedirectUri ?? "/";
+            var redirect = $"/External/ExternalSignIn?returnUrl={Uri.EscapeDataString(returnUrl)}" +
+                           $"&error={Uri.EscapeDataString(ctx.Failure?.Message ?? "External login failed")}";
+            ctx.Response.Redirect(redirect);
+            return Task.CompletedTask;
+        };
     });
 
-// SignalR
+// ===== SignalR & Notifieringar =====
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
 
 var app = builder.Build();
 
-// Mappa hubs
-app.MapHub<Chathub>("/chathub");
-app.MapHub<NotificationHub>("/notificationHub");
-
+// ===== Middleware =====
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -97,18 +156,32 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Seed roller vid start
 using (var scope = app.Services.CreateScope())
 {
     await IdentitySeeder.SeedRoles(scope.ServiceProvider);
 }
 
+// ===== Routing =====
+// Admin-route (måste deklareras före default)
 app.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Account}/{action=Login}/{id?}");
+    name: "admin",
+    pattern: "Admin/{action=Login}/{id?}",
+    defaults: new { controller = "Admin" }
+);
+
+// Default-route (Account/Login som startsida)
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Account}/{action=Login}/{id?}"
+);
+
+// SignalR-hubbar
+app.MapHub<Chathub>("/chathub");
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
-
-

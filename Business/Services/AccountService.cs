@@ -1,25 +1,41 @@
-﻿
-using Business.Dtos;
+﻿using Business.Dtos;
 using Business.Interface;
 using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Business.Services
 {
-    public class AccountService(SignInManager<MemberEntity> signInManager, UserManager<MemberEntity> userManager) : IAccountService
+    public class AccountService : IAccountService
     {
-        private readonly SignInManager<MemberEntity> _signInManager = signInManager;
-        private readonly UserManager<MemberEntity> _userManager = userManager;
+        private readonly SignInManager<MemberEntity> _signInManager;
+        private readonly UserManager<MemberEntity> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
+        public AccountService(
+            SignInManager<MemberEntity> signInManager,
+            UserManager<MemberEntity> userManager,
+            RoleManager<ApplicationRole> roleManager)
+        {
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
 
         public async Task<bool> LoginAsync(LoginDto loginDto)
         {
-            var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
+            var result = await _signInManager
+                .PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
             return result.Succeeded;
         }
 
         public async Task<IdentityResult> RegisterAsync(RegisterDto registerDto)
         {
+            //Hämta den standard-rollen "User"
+            var userRole = await _roleManager.FindByNameAsync("User");
+            if (userRole == null)
+                throw new InvalidOperationException("Standard-rollen 'User' är inte konfigurerad!");
+
+            //Bygg MemberEntity med Profile.RoleId redan ifyllt
             var memberEntity = new MemberEntity
             {
                 UserName = registerDto.Email,
@@ -27,15 +43,22 @@ namespace Business.Services
                 Profile = new MemberProfileEntity
                 {
                     FirstName = registerDto.FirstName,
-                    LastName = registerDto.LastName
+                    LastName = registerDto.LastName,
+                    RoleId = userRole.Id
                 }
             };
 
-            var result = await _userManager.CreateAsync(memberEntity, registerDto.Password ?? "ExternalLogin123!");
+            //Skapa användaren
+            var result = await _userManager.CreateAsync(
+                memberEntity,
+                registerDto.Password ?? "ExternalLogin123!"
+            );
             if (!result.Succeeded)
                 return result;
 
-            await _userManager.AddToRoleAsync(memberEntity, "User");
+            //Lägg till användaren i AspNetUserRoles
+            await _userManager.AddToRoleAsync(memberEntity, userRole.Name!);
+
             return result;
         }
 
@@ -48,10 +71,7 @@ namespace Business.Services
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
-            {
                 await _userManager.AddLoginAsync(user, loginInfo);
-            }
         }
-
     }
 }

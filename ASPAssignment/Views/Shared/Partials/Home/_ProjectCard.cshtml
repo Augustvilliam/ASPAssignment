@@ -5,7 +5,7 @@
     var end = Model.EndDate;
     string deadlineText;
     bool isOverdue = end < now;
-    var isAdmin = User.IsInRole("Admin");
+    var isAdmin = User.IsAppAdmin();
     var isUser = User.IsInRole("User");
 
     if (isOverdue)

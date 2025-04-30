@@ -1,10 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ASPAssignment.ViewModels;
+﻿namespace ASPAssignment.ViewModels;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 public class SettingsFormViewModel
 {
     public string Id { get; set; } = null!;
+
+    public string RoleId { get; set; } = null!;
+
+    [Display(Name = "Date of Birth")]
+    [DataType(DataType.Date)]
+    public DateTime? DateOfBirth { get; set; }
 
     [Display(Name = "Profile Picture")]
     public IFormFile? ProfileImage { get; set; }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿
 using ASPAssignment.ViewModels;
 using Business.Dtos;
 using Business.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ASPAssignment.Services;
-using ASPAssignment.Hubs;
 
 namespace ASPAssignment.Controllers
 {
@@ -37,39 +35,42 @@ namespace ASPAssignment.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginForm form, string returnUrl = "/Home/Index")
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var dto = new LoginDto
-                {
-                    Email = form.Email,
-                    Password = form.Password
-                };
-
-                var result = await _accountService.LoginAsync(dto);
-                if (result)
-                {
-                    // Skicka profilpåminnelse om profil ej är komplett
-                    var user = await _memberService.GetMemberByEmailAsync(form.Email);
-                    if (user != null && !user.HasCompleteProfile)
-                    {
-                        var notification = new NotificationDto
-                        {
-                            ImageUrl = user.ProfileImageUrl ?? "/img/default-user.svg",
-                            Message = "Komplettera din profil med bild, telefon och adress.",
-                            Timestamp = DateTime.UtcNow,
-                            NotificationId = Guid.NewGuid().ToString(),
-                            NotificationType = "ProfileReminder"
-                        };
-                        await _notificationService.SendNotificationAsync(user.Email, notification);
-                    }
-
-                    return LocalRedirect(returnUrl);
-                }
-
-                ViewBag.ErrorMessage = "Invalid login attempt.";
+                ViewBag.ErrorMessage = string.Empty;
+                return View(form);
             }
 
-            return View(form);
+            var dto = new LoginDto
+            {
+                Email = form.Email,
+                Password = form.Password
+            };
+
+            if (!await _accountService.LoginAsync(dto))
+            {
+                var err = "Invalid login attempt.";
+                ModelState.AddModelError(string.Empty, err);
+                ViewBag.ErrorMessage = err;
+                return View(form);
+            }
+
+            // Skicka profilpåminnelse om profil ej är komplett:
+            var user = await _memberService.GetMemberByEmailAsync(form.Email);
+            if (user != null && !user.HasCompleteProfile)
+            {
+                var reminder = new NotificationDto
+                {
+                    ImageUrl = user.ProfileImageUrl ?? "/img/default-user.svg",
+                    Message = "Komplettera din profil med bild, telefon och adress.",
+                    Timestamp = DateTime.UtcNow,
+                    NotificationId = Guid.NewGuid().ToString(),
+                    NotificationType = "ProfileReminder"
+                };
+                await _notificationService.SendNotificationAsync(user.Email, reminder);
+            }
+
+            return LocalRedirect(returnUrl);
         }
 
         [HttpGet]
@@ -83,10 +84,7 @@ namespace ASPAssignment.Controllers
         public async Task<IActionResult> Register(RegisterForm form)
         {
             if (!ModelState.IsValid)
-            {
-                ViewBag.ErrorMessage = "One or more fields are invalid.";
                 return View(form);
-            }
 
             var dto = new RegisterDto
             {
@@ -97,31 +95,36 @@ namespace ASPAssignment.Controllers
             };
 
             var result = await _accountService.RegisterAsync(dto);
-
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                var name = !string.IsNullOrEmpty(form.FirstName) && !string.IsNullOrEmpty(form.LastName)
-                    ? $"{form.FirstName} {form.LastName}"
-                    : form.Email;
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+                return View(form);
+            }
 
-                var notification = new NotificationDto
-                {
-                    ImageUrl = "/img/default-user.svg",
-                    Message = $"{name} har registrerat sig! Hälsa hen välkomna i chatten!",
-                    Timestamp = DateTime.UtcNow,
-                    NotificationId = Guid.NewGuid().ToString(),
-                    NotificationType = "UserJoined"
-                };
-                await _notificationService.BroadcastNotificationAsync(notification);
-                return RedirectToAction("Login", "Account");
-            }
-            // Om registreringen misslyckas, lägg till felmeddelanden i ModelState
-            ViewBag.ErrorMessage = "Registration failed. Please try again.";
-            foreach (var error in result.Errors)
+            // Lyckad registrering – skicka global notis
+            var displayName =
+                !string.IsNullOrWhiteSpace(form.FirstName) && !string.IsNullOrWhiteSpace(form.LastName)
+                ? $"{form.FirstName} {form.LastName}"
+                : form.Email;
+
+            var joinedNotification = new NotificationDto
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ImageUrl = "/img/default-user.svg",
+                Message = $"{displayName} Has joined, Say hi!",
+                Timestamp = DateTime.UtcNow,
+                NotificationType = "UserJoined"
+                // NotificationId fylls av SendNotificationAsync per användare
+            };
+
+            // Hämta alla medlemmar och skicka notis var för sig:
+            var allMembers = await _memberService.GetAllMembersAsync();
+            foreach (var member in allMembers)
+            {
+                await _notificationService.SendNotificationAsync(member.Email, joinedNotification);
             }
-            return View(form);
+
+            return LocalRedirect("~/Account/Login");
         }
         [Authorize]
         public async Task<IActionResult> LogoutAsync()

@@ -50,9 +50,53 @@ public class NotificationService : INotificationService
             await _db.SaveChangesAsync();
         }
     }
-    public Task BroadcastNotificationAsync(NotificationDto notification)
+    public async Task BroadcastNotificationAsync(NotificationDto notification)
     {
-        return _hub.Clients.All.SendAsync("ReceiveNotification", notification);
+        // 1) Hämta alla userIds från Identity-tabellen
+        var userIds = await _db.Users
+                               .Select(u => u.Id)
+                               .ToListAsync();
+
+        // 2) Bygg upp NotificationEntity-objekt och motsvarande DTO per user
+        var entities = new List<NotificationEntity>(userIds.Count);
+        var userNotifications = new Dictionary<string, NotificationDto>(userIds.Count);
+
+        foreach (var uid in userIds)
+        {
+            var id = Guid.NewGuid();
+            // Spara entity för just den användaren
+            entities.Add(new NotificationEntity
+            {
+                Id = id,
+                UserId = uid,
+                Message = notification.Message,
+                ImageUrl = notification.ImageUrl,
+                Timestamp = notification.Timestamp,
+                NotificationType = notification.NotificationType
+            });
+
+            // Klona DTO med rätt NotificationId
+            userNotifications[uid] = new NotificationDto
+            {
+                NotificationId = id.ToString(),
+                Message = notification.Message,
+                ImageUrl = notification.ImageUrl,
+                Timestamp = notification.Timestamp,
+                NotificationType = notification.NotificationType
+            };
+        }
+
+        // 3) Spara alla notiser i ett svep
+        await _db.Notifications.AddRangeAsync(entities);
+        await _db.SaveChangesAsync();
+
+        // 4) Skicka en SignalR-händelse till var och en
+        foreach (var uid in userIds)
+        {
+            var dto = userNotifications[uid];
+            await _hub.Clients.User(uid)
+                      .SendAsync("ReceiveNotification", dto);
+        }
     }
     public async Task<IEnumerable<NotificationDto>> GetNotificationsForUserAsync(string userId)
     {

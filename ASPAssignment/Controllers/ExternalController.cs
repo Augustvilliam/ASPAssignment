@@ -1,89 +1,114 @@
 ﻿using System.Security.Claims;
 using Business.Dtos;
 using Business.Interface;
-using Business.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers;
 
-public class ExternalController(IAccountService accountService, SignInManager<MemberEntity> signInManager) : Controller 
+public class ExternalController : Controller
 {
-    private readonly IAccountService _accountService = accountService;
-    private readonly SignInManager<MemberEntity> _signInManager = signInManager;
+    private readonly IAccountService _accountService;
+    private readonly SignInManager<MemberEntity> _signInManager;
 
-
-    [HttpGet]
-    public IActionResult ExternalSignIn()
+    public ExternalController(
+        IAccountService accountService,
+        SignInManager<MemberEntity> signInManager)
     {
+        _accountService = accountService;
+        _signInManager = signInManager;
+    }
+
+    // GET: /External/ExternalSignIn?returnUrl=/Home/Index
+    [HttpGet]
+    public IActionResult ExternalSignIn(string returnUrl = null!)
+    {
+        ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Home");
         return View();
     }
 
-
+    // POST: /External/ExternalSignIn
     [HttpPost]
     public IActionResult ExternalSignIn(string provider, string returnUrl = null!)
     {
         if (string.IsNullOrEmpty(provider))
         {
-            ModelState.AddModelError("", "Invalid Provider");
+            ModelState.AddModelError("", "Invalid provider");
+            ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Home");
             return View();
         }
 
-        var redirectUrl = Url.Action("ExternalSignInCallback", "External", new { returnUrl })!;
-        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-        return Challenge(properties, provider);
+        // Säkerställ att returnUrl skickas vidare till callback
+        var redirectUrl = Url.Action(
+            nameof(ExternalSignInCallback),
+            "External",
+            new { returnUrl = returnUrl ?? Url.Action("Index", "Home") }
+        )!;
+        var props = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(props, provider);
     }
 
-    public async Task <IActionResult> ExternalSignInCallback(string returnUrl = null!, string remoteError = null!)
+    // GET or POST från externa leverantören
+    public async Task<IActionResult> ExternalSignInCallback(
+        string returnUrl = null!,
+        string remoteError = null!)
     {
-        returnUrl ??= Url.Content("~/");
+        // Standard-redirect om ingen specifik returnUrl är angiven
+        returnUrl ??= Url.Action("Index", "Home");
 
         if (!string.IsNullOrEmpty(remoteError))
         {
             ModelState.AddModelError("", $"Error from external provider: {remoteError}");
+            ViewBag.ReturnUrl = returnUrl;
             return View("ExternalSignIn");
         }
 
-        var externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
-        if (externalLoginInfo == null)
-        {
-            return RedirectToAction("ExternalSignIn");
-        }
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
+            return RedirectToAction(nameof(ExternalSignIn), new { returnUrl });
 
-        var signInResult = await _signInManager.ExternalLoginSignInAsync(externalLoginInfo.LoginProvider, externalLoginInfo.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-        if (signInResult.Succeeded)
-        {
+        // 1) Försök logga in med redan kopplad extern-login
+        var signInRes = await _signInManager.ExternalLoginSignInAsync(
+            info.LoginProvider,
+            info.ProviderKey,
+            isPersistent: false,
+            bypassTwoFactor: true
+        );
+        if (signInRes.Succeeded)
             return LocalRedirect(returnUrl);
-        }
-        else
+
+        // 2) Annars: hämta e-post och antingen länka eller skapa konto
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+        if (email != null)
         {
-            string email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email)!;
-            string username = $"ext_{externalLoginInfo.LoginProvider.ToLower()}_{email}";
-
-            var dto = new RegisterDto
+            var existing = await _signInManager.UserManager.FindByEmailAsync(email);
+            if (existing != null)
             {
-                Email = email,
-            };
-
-            var result = await _accountService.RegisterAsync(dto);
-            if (result.Succeeded)
+                // Länka nya provider till samma konto
+                await _accountService.AddLoginAsync(email, info);
+                await _signInManager.SignInAsync(existing, isPersistent: false);
+                return LocalRedirect(returnUrl);
+            }
+            else
             {
-                await _accountService.AddLoginAsync(dto.Email, externalLoginInfo);
-                
-                var user = await _signInManager.UserManager.FindByEmailAsync(dto.Email);
-                if ( user != null)
+                // Skapa nytt konto med automagic-lösen
+                var dto = new RegisterDto { Email = email };
+                var regResult = await _accountService.RegisterAsync(dto);
+                if (regResult.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _accountService.AddLoginAsync(email, info);
+                    var user = await _signInManager.UserManager.FindByEmailAsync(email);
+                    await _signInManager.SignInAsync(user!, isPersistent: false);
                     return LocalRedirect(returnUrl);
                 }
-
+                // Visa eventuella fel från registreringen
+                foreach (var e in regResult.Errors)
+                    ModelState.AddModelError("", e.Description);
             }
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-            return View("ExternalSignIn");
         }
 
+        // Om vi hamnar här: något gick fel, visa login-sidan igen
+        ViewBag.ReturnUrl = returnUrl;
+        return View("ExternalSignIn");
     }
 }

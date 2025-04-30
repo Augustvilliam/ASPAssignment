@@ -21,31 +21,31 @@ public class SettingsController(
     [Authorize]
     public async Task<IActionResult> Settings()
     {
-        var userId = _userManager.GetUserId(User);
         var user = await _userManager.Users
             .Include(u => u.Profile)
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
 
-        var profile = user?.Profile;
+        if (user == null) return NotFound();
 
+        var profile = user.Profile!;
         var model = new SettingsFormViewModel
         {
-            Id = user?.Id,
-            FirstName = profile?.FirstName ?? "",
-            LastName = profile?.LastName ?? "",
-            Phone = user?.PhoneNumber ?? "",
-            Email = user?.Email ?? "",
-            StreetAddress = profile?.StreetAddress ?? "",
-            PostalCode = profile?.PostalCode ?? "",
-            City = profile?.City ?? "",
-            ExistingProfileImagePath = user?.ProfileImagePath
+            Id = user.Id,
+            RoleId = profile.RoleId,
+            DateOfBirth = profile.BirthDate,
+            FirstName = profile.FirstName ?? "",
+            LastName = profile.LastName ?? "",
+            Phone = user.PhoneNumber,
+            Email = user.Email,
+            StreetAddress = profile.StreetAddress,
+            PostalCode = profile.PostalCode,
+            City = profile.City,
+            ExistingProfileImagePath = user.ProfileImagePath
         };
-        ViewBag.ProfileImage = user?.ProfileImagePath ?? "/img/Employee.svg";
-        ViewBag.Email = user?.Email ?? "";
-        ViewBag.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "User";
-        ViewBag.FullName = profile != null
-            ? $"{profile.FirstName} {profile.LastName}".Trim()
-            : "User";
+
+        ViewBag.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "N/A";
+        ViewBag.ProfileImage = user.ProfileImagePath ?? "/img/Employee.svg";
+        ViewBag.Email = user.Email;
 
         return View(model);
     }
@@ -107,7 +107,6 @@ public class SettingsController(
         }
 
         string? imagePath = null;
-
         if (model.ProfileImage != null && model.ProfileImage.Length > 0)
         {
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ProfileImage.FileName)}";
@@ -123,6 +122,8 @@ public class SettingsController(
         var dto = new MemberDto
         {
             Id = model.Id,
+            RoleId = model.RoleId,
+            BirthDate = model.DateOfBirth,
             FirstName = model.FirstName,
             LastName = model.LastName,
             Email = model.Email,

@@ -93,6 +93,7 @@ public class MemberService: IMemberService
 
     public async Task<bool> UpdateMemberAsync(MemberDto dto, string? imagePath)
     {
+        // 1) Hämta användare inkl. profil
         var user = await _userManager.Users
             .Include(u => u.Profile)
             .FirstOrDefaultAsync(x => x.Id == dto.Id);
@@ -100,29 +101,48 @@ public class MemberService: IMemberService
         if (user == null)
             return false;
 
-        // Ensure profile exists
+        // 2) Se till att en profil alltid finns
         if (user.Profile == null)
         {
             user.Profile = new MemberProfileEntity { MemberId = user.Id };
+            _context.MemberProfile.Add(user.Profile);
         }
 
-        // Update Identity roles
+        // 3) Uppdatera roller **ENDAST om** RoleId skiljer sig
         var currentRoles = await _userManager.GetRolesAsync(user);
-        if (currentRoles.Any())
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        var newRoleEntity = await _roleManager.FindByIdAsync(dto.RoleId);
+        if (newRoleEntity != null)
+        {
+            var newRoleName = newRoleEntity.Name!;
+            if (!currentRoles.Contains(newRoleName))
+            {
+                // Ta bort gamla roller
+                if (currentRoles.Any())
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
 
-        var newRole = await _roleManager.FindByIdAsync(dto.RoleId);
-        if (newRole != null)
-            await _userManager.AddToRoleAsync(user, newRole.Name);
+                // Tilldela ny
+                await _userManager.AddToRoleAsync(user, newRoleName);
+            }
+        }
 
-        // Update profile entity fields including RoleId
+        // 4) Använd din factory för att uppdatera profilfält
         MemberFactory.UpdateEntity(user, dto);
-        user.ProfileImagePath = imagePath ?? user.ProfileImagePath;
 
-        // Persist changes
-        var result = await _userManager.UpdateAsync(user);
-        return result.Succeeded;
+        // 5) Bild och telefonnummer (factory uppdaterar ProfileImagePath och PhoneNumber)
+        if (!string.IsNullOrEmpty(imagePath))
+            user.ProfileImagePath = imagePath;
+
+        // 6) Spara user (inbegriper AspNetUsers-tabellen och UserRoles)
+        var userUpdateResult = await _userManager.UpdateAsync(user);
+        if (!userUpdateResult.Succeeded)
+            return false;
+
+        // 7) Spara MemberProfile-ändringar (BirthDate, Address, RoleId etc.)
+        await _context.SaveChangesAsync();
+
+        return true;
     }
+
 
     public async Task<bool> DeleteMemberAsync(string id)
     {

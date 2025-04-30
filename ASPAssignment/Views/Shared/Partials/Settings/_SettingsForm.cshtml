@@ -7,7 +7,7 @@
 <form asp-controller="Settings" asp-action="Update" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="ExistingProfileImagePath" />
-
+    <input type="hidden" asp-for="RoleId" />
     <button class="upload-btn" type="button" id="settingsUploadBtn">
         <img id="settingsPreviewImage"
              src="@(!string.IsNullOrEmpty(Model.ExistingProfileImagePath)
@@ -44,6 +44,12 @@
         <label asp-for="Phone"></label>
         <input asp-for="Phone" class="settings-input" />
         <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+
+    <div class="input-group">
+        <label asp-for="DateOfBirth"></label>
+        <input asp-for="DateOfBirth" type="date" class="settings-input" />
+        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
     </div>
 
     <div class="input-group">

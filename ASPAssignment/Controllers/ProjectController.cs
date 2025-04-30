@@ -97,7 +97,7 @@ public class ProjectController(IProjectService projectService,
     }
 
     [HttpPost("Update")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "RequireAppAdmin")]
     public async Task<IActionResult> Update(ProjectEditForm form)
     {
         if (!ModelState.IsValid)
@@ -163,7 +163,6 @@ public class ProjectController(IProjectService projectService,
             foreach (var admin in admins)
                 await _notificationService.SendNotificationAsync(admin.Email, notification);
 
-
             return Json(new { success = true });
         }
         return StatusCode(500, new { message = "Failed to update project." });
@@ -208,7 +207,7 @@ public class ProjectController(IProjectService projectService,
 
 
     [HttpDelete("Delete/{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "RequireAppAdmin")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _projectService.DeleteProjectAsync( id);

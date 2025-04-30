@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers
 {
+    [Authorize(Policy = "RequireAppAdmin")]
     public class AdminController : Controller
     {
         private readonly SignInManager<MemberEntity> _signInManager;
@@ -46,7 +47,6 @@ namespace ASPAssignment.Controllers
             return View(form);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Index()
         {
@@ -54,11 +54,9 @@ namespace ASPAssignment.Controllers
             return View(roles);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create() => View(new CreateRole());
 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateRole model)
         {
@@ -85,7 +83,6 @@ namespace ASPAssignment.Controllers
                 ModelState.AddModelError("", error.Description);
             return View(model);
         }
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {

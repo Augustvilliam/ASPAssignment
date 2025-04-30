@@ -561,6 +561,32 @@ button {
     margin:1rem;
 }
 /* Components */
+.pagination{
+    display:flex;
+    flex-direction:row;
+    list-style:none;
+}
+.page-item {
+    text-align:center;
+    padding:.5rem;
+    background: var(--opac-accent);
+    color: var(--clr-body-light);
+    border-radius: .25rem;
+    margin-left:1rem;
+    height:20px;
+    width:20px;
+    a
+{
+    color: var(--clr-body-light);
+}
+}
+.page-item:hover{
+    background:var(--clr-accent);
+    transition:1s;
+    a{
+         color:#fff;
+     }
+}
 .list-group {
     margin: 2rem;
     padding: 1rem;
@@ -570,8 +596,8 @@ button {
     justify-content: center;
     gap: 1rem;
     max-height: 1000px;
-    overflow-x:auto;
-    border:1px solid var(--clr-border300);
+    overflow-x: auto;
+    border: 1px solid var(--clr-border300);
     border-radius: .8rem;
     .role-display
 {
