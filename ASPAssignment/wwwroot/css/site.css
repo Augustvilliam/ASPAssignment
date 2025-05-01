@@ -596,8 +596,6 @@ button {
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    max-height: 1000px;
-    overflow-x: auto;
     border: 1px solid var(--clr-border300);
     border-radius: .8rem;
     .role-display

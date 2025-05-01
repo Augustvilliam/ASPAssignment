@@ -62,7 +62,7 @@ public class ProjectController(IProjectService projectService,
             Budget = form.Budget,
             ProjectImagePath = imagePath,
             MemberIds = form.SelectedMemberId,
-            Status = form.Status // ✅ Lägger till status från form
+            Status = form.Status
         };
 
         await _projectService.CreateProjectAsync(dto);
@@ -140,7 +140,7 @@ public class ProjectController(IProjectService projectService,
             Budget = form.Budget,
             ProjectImagePath = imagePath,
             MemberIds = form.SelectedMemberId,
-            Status = form.Status // ✅ Uppdaterad status
+            Status = form.Status
         };
 
         var result = await _projectService.UpdateProjectAsync(dto);

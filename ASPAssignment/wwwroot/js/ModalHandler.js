@@ -23,6 +23,10 @@ function initCreateProjectModal() {
         if (errorContainer) errorContainer.innerHTML = "";
         previewImg.src = "/img/upload.svg";       // återställ preview
         delete modal.dataset.memberPickerInited;  // låt pickern initieras om
+        //Rensa quill.
+        if (window.quillCreate) {
+            window.quillCreate.root.innerHTML = '';
+        }
     });
 
     // ─── Bind bara ett submit ───
@@ -36,6 +40,9 @@ function initCreateProjectModal() {
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault(); clearValidation(form);
+        if (window.quillCreate) {
+            document.getElementById('create-description-input').value = quillCreate.root.innerHTML;
+        }
         const data = new FormData(form);
         if (errorContainer) errorContainer.innerHTML = "";
         try {
@@ -54,52 +61,78 @@ function initEditProjectModal() {
     const form = modal.querySelector("form");
     if (form.dataset.editSubmitBound) return;
     form.dataset.editSubmitBound = 'true';
+
     const fileInput = document.getElementById("editProjectImageInput");
     const previewImg = document.getElementById("editProjectPreviewImage");
     const uploadBtn = document.getElementById("editProjectUploadBtn");
     const errorContainer = document.getElementById("edit-project-errors");
     initImagePreview(fileInput, previewImg, uploadBtn);
 
-
-
-    // Vid varje öppning: hämta project, fyll form och återfylla pickern
     modal.addEventListener("show.bs.modal", async (event) => {
+        modal.dataset.keepMembers = "true";
+
         const button = event.relatedTarget;
         const projectId = button?.getAttribute("data-project-id");
         if (!projectId) return;
 
+        // ── 1) Töm pickern ─────────────────────────
+        const selBox = document.getElementById('edit-selected-members');
+        const hiddenEl = document.getElementById('edit-selected-member-ids');
+        selBox.innerHTML = '';
+        hiddenEl.innerHTML = '';
+
         try {
+            // ── 2) Hämta projektdata ─────────────────
             const resp = await fetch(`/Project/GetProject/${projectId}`);
             const project = await resp.json();
 
-            // Fyll i formulärfälten
+
+            // ── 3) Fyll i formuläret ───────────────────
             form.querySelector('[name="Id"]').value = project.id;
             form.querySelector('[name="ProjectName"]').value = project.projectName;
             form.querySelector('[name="ClientName"]').value = project.clientName;
-            form.querySelector('[name="Description"]').value = project.description || '';
-            form.querySelector('[name="StartDate"]').value = project.startDate.substring(0, 10);
-            form.querySelector('[name="EndDate"]').value = project.endDate.substring(0, 10);
+            form.querySelector('[name="StartDate"]').value = project.startDate.slice(0, 10);
+            form.querySelector('[name="EndDate"]').value = project.endDate.slice(0, 10);
             form.querySelector('[name="Budget"]').value = project.budget;
             form.querySelector('[name="Status"]').value = project.status;
+            // beskrivning via Quill
+            form.querySelector('[name="Description"]').value = project.description || '';
+            window.quillEdit.root.innerHTML = project.description || '';
             previewImg.src = project.projectImagePath || "/img/upload.svg";
 
-        } catch (err) {
+            // ── 4) Populera pickern med redan valda medlemmar ──
+            // (använder ditt memberPickerAPI)
+            const members = project.members || [];
+            members.forEach(m => {
+                window.memberPickerAPI.addMemberToPicker({
+                    id: m.id,
+                    fullName: m.fullName,
+                    avatarUrl: m.avatarUrl
+                }, selBox, hiddenEl);
+            });
+        }
+        catch (err) {
             console.error("❌ Kunde inte hämta projektdata:", err);
         }
     });
-
     form.addEventListener("submit", async (e) => {
-        e.preventDefault(); clearValidation(form);
-
+        e.preventDefault();
+        clearValidation(form);
+        // ── 5) Flytta Quill-beskrivningen in i den dolda inputen ──
+        if (window.quillEdit) {
+            document.getElementById('edit-description-input').value = quillEdit.root.innerHTML;
+        }
         const data = new FormData(form);
-        console.log("⚙️ Hidden SelectedMemberId inputs:",
-            Array.from(data.getAll("SelectedMemberId"))
-        );
         if (errorContainer) errorContainer.innerHTML = '';
         try {
             const resp = await fetch("/Project/Update", { method: "POST", body: data });
             await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
-        } catch (err) { console.error("Update project error:", err); }
+        } catch (err) {
+            console.error("Update project error:", err);
+        }
+    });
+    modal.addEventListener("hidden.bs.modal", () => {
+        delete modal.dataset.keepMembers;
     });
 }
 function initEditTeamMemberModal() {
@@ -252,7 +285,6 @@ function initMoreMenu() {
         }
     });
 }
-
 function initImagePreview(fileInput, previewImg, uploadBtn) {
     if (!fileInput || !previewImg) return;
 

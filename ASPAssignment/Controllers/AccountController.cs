@@ -25,7 +25,8 @@ namespace ASPAssignment.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = "~/")
+        [AllowAnonymous]
+        public IActionResult Login(string returnUrl = "/Home/Index")
         {
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.ErrorMessage = string.Empty;
@@ -33,8 +34,18 @@ namespace ASPAssignment.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginForm form, string returnUrl = "/Home/Index")
         {
+            // Se till att returnUrl alltid finns med i vyn vid redisplay
+            ViewBag.ReturnUrl = returnUrl;
+
+            // Om användaren redan är inloggad, skicka direkt vidare
+            if (User.Identity?.IsAuthenticated == true)
+                return LocalRedirect(returnUrl);
+
+            // Validera client‐side‐errors
             if (!ModelState.IsValid)
             {
                 ViewBag.ErrorMessage = string.Empty;
@@ -44,9 +55,11 @@ namespace ASPAssignment.Controllers
             var dto = new LoginDto
             {
                 Email = form.Email,
-                Password = form.Password
+                Password = form.Password,
+                RememberMe = form.RememberMe
             };
 
+            // Försök logga in
             if (!await _accountService.LoginAsync(dto))
             {
                 var err = "Invalid login attempt.";
@@ -55,25 +68,12 @@ namespace ASPAssignment.Controllers
                 return View(form);
             }
 
-            // Skicka profilpåminnelse om profil ej är komplett:
-            var user = await _memberService.GetMemberByEmailAsync(form.Email);
-            if (user != null && !user.HasCompleteProfile)
-            {
-                var reminder = new NotificationDto
-                {
-                    ImageUrl = user.ProfileImageUrl ?? "/img/default-user.svg",
-                    Message = "Komplettera din profil med bild, telefon och adress.",
-                    Timestamp = DateTime.UtcNow,
-                    NotificationId = Guid.NewGuid().ToString(),
-                    NotificationType = "ProfileReminder"
-                };
-                await _notificationService.SendNotificationAsync(user.Email, reminder);
-            }
-
+            // Lyckad inloggning → redirecta till returnUrl
             return LocalRedirect(returnUrl);
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register()
         {
             ViewBag.ErrorMessage = string.Empty;
@@ -81,6 +81,7 @@ namespace ASPAssignment.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterForm form)
         {
             if (!ModelState.IsValid)

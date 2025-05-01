@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ASPAssignment.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -29,7 +30,7 @@ namespace ASPAssignment.Controllers
             _userManager = userManager;
         }
 
-        [Authorize]
+        
         public async Task<IActionResult> Index(string? status, int page = 1)
         {
             // 1) Profil-info till layout
@@ -75,7 +76,7 @@ namespace ASPAssignment.Controllers
             return View(vm);
         }
 
-        [Authorize]
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
             => View(new ErrorViewModel

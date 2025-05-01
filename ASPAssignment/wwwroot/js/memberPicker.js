@@ -1,5 +1,5 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
-    // Initiera pickern för Create‐modal
+    // Create‐modal
     initMemberSearchPicker({
         toggleBtnSel: '#toggleMemberSearch_create',
         dropdownSel: '#memberSearchDropdown_create',
@@ -9,6 +9,8 @@
         hiddenSel: '#selectedMemberIds_create',
         apiUrl: '/api/tags/members'
     });
+
+    // Edit‐modal
     initMemberSearchPicker({
         toggleBtnSel: '#edit-toggle-member-list',
         dropdownSel: '#edit-member-dropdown',
@@ -31,18 +33,36 @@ function initMemberSearchPicker(opts) {
 
     let allMembers = [];
     let loaded = false;
-    let lastList = [];
 
-    // 1) Klick på förstoringsglas: visa dropdown & ladda medlemmar om första gången
+    function resetPicker() {
+        selBox.innerHTML = '';
+        hiddenEl.innerHTML = '';
+        input.value = '';
+        dropdown.classList.add('d-none');
+    }
+
+    // Hitta närliggande .modal och bind villkorlig reset
+    const modal = toggleBtn.closest('.modal');
+    if (modal) {
+        // Vid öppning: bara reset om vi INTE redan pre‐populerat medlemmar
+        modal.addEventListener('show.bs.modal', () => {
+            if (!modal.dataset.keepMembers) {
+                resetPicker();
+            }
+        });
+        // När vi stänger: ta bort flaggan så nästa gång använder vi riktiga data igen
+        modal.addEventListener('hidden.bs.modal', () => {
+            delete modal.dataset.keepMembers;
+        });
+    }
+
+    // Klick på förstoringsglaset
     toggleBtn.addEventListener('click', async () => {
         dropdown.classList.toggle('d-none');
         if (!loaded) {
             try {
-                console.log('Hämtar alla medlemmar från', opts.apiUrl);
                 const res = await fetch(`${opts.apiUrl}?term=`);
-                console.log('Svar från API:', res.status, await res.clone().text());
                 allMembers = res.ok ? await res.json() : [];
-                console.log('allMembers:', allMembers);
                 renderList(allMembers);
             } catch (e) {
                 console.error('Could not load members', e);
@@ -52,32 +72,35 @@ function initMemberSearchPicker(opts) {
         input.focus();
     });
 
-
-
-    // 2) Filtrera medan du skriver
+    // Sök medan du skriver
     let timer;
     input.addEventListener('input', () => {
         clearTimeout(timer);
         timer = setTimeout(() => {
             const term = input.value.trim().toLowerCase();
-            lastList = term
+            const filtered = term
                 ? allMembers.filter(m => {
                     const name = `${m.firstName} ${m.lastName}`.toLowerCase();
-                    return name.includes(term) || m.email.toLowerCase().includes(term);
+                    return name.includes(term)
+                        || m.email.toLowerCase().includes(term);
                 })
                 : allMembers;
-            renderList(lastList);
+            renderList(filtered);
         }, 200);
     });
 
-    // 3) Render-funktion för dropdown‐listan
     function renderList(list) {
-        if (!list.length) {
+        const selectedIds = new Set(
+            Array.from(hiddenEl.querySelectorAll('input[name="SelectedMemberId"]'))
+                .map(i => i.value)
+        );
+        const filtered = list.filter(m => !selectedIds.has(m.id));
+        if (!filtered.length) {
             suggBox.innerHTML = '<li class="text-muted p-2">Inga träffar</li>';
             return;
         }
-        suggBox.innerHTML = list.map(m => {
-            const name = (m.firstName || m.lastName)
+        suggBox.innerHTML = filtered.map(m => {
+            const name = m.firstName || m.lastName
                 ? `${m.firstName} ${m.lastName}`.trim()
                 : m.email;
             const avatar = m.profileImagePath || '/img/default-user.svg';
@@ -89,29 +112,27 @@ function initMemberSearchPicker(opts) {
         }).join('');
     }
 
-    // 4) Klick på ett list‐item → skapa tag + hidden input
+    // Klick på suggestion → tag + hidden input
     suggBox.addEventListener('click', e => {
         const li = e.target.closest('li[data-id]');
         if (!li) return;
         const id = li.dataset.id;
-        const member = loaded
-            ? allMembers.find(m => m.id === id)
-            : null;
+        const member = loaded ? allMembers.find(m => m.id === id) : null;
         if (!member) return;
 
-        // Undvik dubletter
+        // dubletter?
         if (hiddenEl.querySelector(`input[value="${id}"]`)) {
             input.value = '';
             dropdown.classList.add('d-none');
             return;
         }
 
-        const name = (member.firstName || member.lastName)
+        const name = member.firstName || member.lastName
             ? `${member.firstName} ${member.lastName}`.trim()
             : member.email;
         const avatar = member.profileImagePath || '/img/default-user.svg';
 
-        // Bygg tag
+        // gör tag
         const tag = document.createElement('div');
         tag.className = 'selected-member';
         tag.innerHTML = `
@@ -122,25 +143,52 @@ function initMemberSearchPicker(opts) {
         tag.querySelector('button').addEventListener('click', () => {
             tag.remove();
             hiddenEl.querySelector(`input[value="${id}"]`)?.remove();
+            renderList(allMembers);
         });
         selBox.appendChild(tag);
 
-        // Hidden input
+        // gör hidden-input
         const inp = document.createElement('input');
         inp.type = 'hidden';
         inp.name = 'SelectedMemberId';
         inp.value = id;
         hiddenEl.appendChild(inp);
 
-        // Rensa fältet & stäng dropdown
         input.value = '';
         dropdown.classList.add('d-none');
     });
 
-    // 5) Klick utanför pickern stänger dropdown
+    // Klick utanför pickern stänger dropdown
     document.addEventListener('click', e => {
         if (!e.target.closest('.member-picker')) {
             dropdown.classList.add('d-none');
         }
     });
 }
+
+// API‐hjälp för att populera redan sparade medlemmar
+window.memberPickerAPI = {
+    addMemberToPicker(member, selBox, hiddenEl) {
+        const id = member.id;
+        if (hiddenEl.querySelector(`input[value="${id}"]`)) return;
+
+        const tag = document.createElement('div');
+        tag.className = 'selected-member';
+        tag.innerHTML = `
+      <img src="${member.avatarUrl || member.profileImagePath || '/img/default-user.svg'}" alt="">
+      <span>${member.fullName || `${member.firstName} ${member.lastName}`.trim()}</span>
+      <button type="button" class="btn-close" aria-label="Remove">X</button>
+    `;
+        tag.querySelector('button').addEventListener('click', () => {
+            tag.remove();
+            hiddenEl.querySelector(`input[value="${id}"]`)?.remove();
+        });
+        selBox.appendChild(tag);
+
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'SelectedMemberId';
+        inp.value = id;
+        hiddenEl.appendChild(inp);
+    }
+};

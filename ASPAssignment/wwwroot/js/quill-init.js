@@ -1,6 +1,6 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
     // Create-modal
-    var quillCreate = new Quill('#create-description-editor', {
+    window.quillCreate = new Quill('#create-description-editor', {
         theme: 'snow',
         placeholder: 'Skriv projektbeskrivning här…',
         modules: {
@@ -8,22 +8,24 @@
         }
     });
 
-    // Edit-modal
-    var quillEdit = new Quill('#edit-description-editor', {
+    // Edit-modal – gör tillgänglig globalt
+    window.quillEdit = new Quill('#edit-description-editor', {
         theme: 'snow',
         modules: {
             toolbar: { container: '#edit-toolbar' }
         }
     });
+
     // Ladda in befintlig HTML i editorn
-    var existing = document.getElementById('edit-description-input').value;
+    const existing = document.getElementById('edit-description-input')?.value || '';
     quillEdit.root.innerHTML = existing;
 
     // På submit: flytta HTML till den dolda inputen
-    document.getElementById('create-project-form').addEventListener('submit', function () {
+    document.getElementById('create-project-form')?.addEventListener('submit', function () {
         document.getElementById('create-description-input').value = quillCreate.root.innerHTML;
     });
-    document.getElementById('edit-project-form').addEventListener('submit', function () {
+
+    document.getElementById('edit-project-form')?.addEventListener('submit', function () {
         document.getElementById('edit-description-input').value = quillEdit.root.innerHTML;
     });
 });

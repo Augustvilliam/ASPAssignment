@@ -87,18 +87,13 @@
                     <label asp-for="Budget"></label>
                     <input asp-for="Budget" name="Budget" class="form-input" />
                     <span asp-for="SelectedMemberId" asp-validation-for="Budget" class="text-danger"></span>
-                    <select name="Status" id="Status" class="form-control satus-select">
-                        @if (Model.Status == "Ongoing")
-                        {
+
+                    <label asp-for="Status">Status</label>
+                    <select asp-for="Status" id="Status" class="form-control satus-select">
                             <option value="Ongoing" selected>Ongoing</option>
                             <option value="Completed">Completed</option>
-                        }
-                        else
-                        {
-                            <option value="Ongoing">Ongoing</option>
-                            <option value="Completed" selected>Completed</option>
-                        }
                     </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
 
                     <button type="submit" class="project-form-btn">Update</button>
                 </form>

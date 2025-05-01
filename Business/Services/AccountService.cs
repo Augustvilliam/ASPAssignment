@@ -24,7 +24,7 @@ namespace Business.Services
         public async Task<bool> LoginAsync(LoginDto loginDto)
         {
             var result = await _signInManager
-                .PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
+                .PasswordSignInAsync(loginDto.Email, loginDto.Password, loginDto.RememberMe, false);
             return result.Succeeded;
         }
 

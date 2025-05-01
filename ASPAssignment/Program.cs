@@ -1,5 +1,4 @@
-using System;
-using System.Security.Claims;
+
 using ASPAssignment.Hubs;
 using ASPAssignment.Services;
 using Business.Interface;
@@ -10,7 +9,6 @@ using Data.Helpers;
 using Data.Interface;
 using Data.Repository;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,6 +53,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     // Standardlogin för vanliga användare
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
     options.Cookie.SameSite = SameSiteMode.None;
     options.Cookie.Name = "MyAppAuth";
@@ -177,9 +176,8 @@ app.MapControllerRoute(
 // Default-route (Account/Login som startsida)
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}"
+    pattern: "{controller=Home}/{action=Index}/{id?}"
 );
-
 // SignalR-hubbar
 app.MapHub<Chathub>("/chathub");
 app.MapHub<NotificationHub>("/notificationHub");
