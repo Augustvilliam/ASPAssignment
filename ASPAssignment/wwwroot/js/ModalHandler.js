@@ -1,139 +1,50 @@
-﻿let isMemberPickerInitialized = false;
-let isEditMemberPickerInitialized = false;
-let isCreateProjectModalInitialized = false;
-
-let editSelectedMembers = [];
-
-// Kör alla initieringar och nollställ flags
-function initAll() {
+﻿function initAll() {
+    resetInitFlags();
     initCreateProjectModal();
     initEditProjectModal();
     initEditTeamMemberModal();
     initMoreMenu();
     initDeleteModal();
-    resetInitFlags();
 }
-
 document.addEventListener("DOMContentLoaded", initAll);
 
-// Generisk member-picker
-function initMemberPickerGeneric(modal, opts) {
-    if (modal.dataset.memberPickerInited) return;
-    modal.dataset.memberPickerInited = 'true';
-
-    const btnSel = modal.querySelector(opts.toggleBtnSelector);
-    const ulSel = modal.querySelector(opts.suggestionListSelector);
-    const contSel = modal.querySelector(opts.selectedContainerSel);
-    const idsSel = modal.querySelector(opts.selectedIdsInputSel);
-    if (!btnSel || !ulSel || !contSel || !idsSel) {
-        console.warn("⚠️ Member picker-element saknas i DOM");
-        return;
-    }
-
-    let selectedMembers = Array.isArray(opts.existingMembers)
-        ? opts.existingMembers.slice()
-        : [];
-    let allMembers = [];
-
-    modal.addEventListener('show.bs.modal', () => {
-        selectedMembers = [];
-        contSel.innerHTML = '';
-        idsSel.innerHTML = '';
-        ulSel.innerHTML = '';
-        ulSel.style.display = 'none';
-
-        if (Array.isArray(opts.existingMembers) && opts.existingMembers.length) {
-            selectedMembers = opts.existingMembers.map(m => ({ id: m.id, fullName: m.fullName, avatarUrl: m.avatarUrl }));
-            renderSelected();
-            updateHidden();
-        }
-    });
-
-    btnSel.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const isVisible = ulSel.style.display === 'block';
-        ulSel.style.display = isVisible ? 'none' : 'block';
-        if (!isVisible && allMembers.length === 0) {
-            try { allMembers = await fetch('/Member/Search').then(r => r.json()); }
-            catch (err) { console.error("🚨 Fel vid hämtning av medlemmar:", err); }
-        }
-        renderSuggestions(allMembers);
-    });
-
-    function renderSuggestions(list) {
-        ulSel.innerHTML = '';
-        list.forEach(m => {
-            if (selectedMembers.some(x => x.id === m.id)) return;
-            const li = document.createElement('li');
-            li.innerHTML = `<img src="${m.avatarUrl}" alt=""> ${m.fullName}`;
-            li.addEventListener('click', () => { selectedMembers.push(m); renderSelected(); updateHidden(); ulSel.style.display = 'none'; });
-            ulSel.appendChild(li);
-        });
-    }
-
-    function renderSelected() {
-        contSel.innerHTML = '';
-        selectedMembers.forEach(m => {
-            const div = document.createElement('div');
-            div.classList.add('selected-member');
-            div.innerHTML = `
-                <img src="${m.avatarUrl}" alt="">
-                ${m.fullName}
-                <button type="button" class="remove-btn" data-id="${m.id}">&times;</button>
-            `;
-            contSel.appendChild(div);
-        });
-        contSel.querySelectorAll('.remove-btn').forEach(btn => btn.addEventListener('click', () => {
-            selectedMembers = selectedMembers.filter(x => x.id !== btn.dataset.id);
-            renderSelected();
-            updateHidden();
-            renderSuggestions(allMembers);
-        }));
-    }
-
-    function updateHidden() {
-        idsSel.innerHTML = '';
-        selectedMembers.forEach(m => {
-            const inp = document.createElement('input');
-            inp.type = 'hidden';
-            inp.name = 'SelectedMemberId';
-            inp.value = m.id;
-            idsSel.appendChild(inp);
-        });
-    }
-}
 // CREATE project modal
 function initCreateProjectModal() {
     const modal = document.getElementById("createprojectModal");
-    if (!modal || isCreateProjectModalInitialized) return;
-    isCreateProjectModalInitialized = true;
+    if (!modal) return;
 
     const form = modal.querySelector("form");
-    const fileInput = document.getElementById("projectImageInput");
     const previewImg = document.getElementById("projectPreviewImage");
-    const uploadBtn = document.getElementById("projectUploadBtn");
     const errorContainer = document.getElementById("create-project-errors");
+
+    // ─── Rensa formuläret vid varje öppning ───
+    modal.addEventListener("show.bs.modal", () => {
+        form.reset();                             // töm alla inputs
+        if (errorContainer) errorContainer.innerHTML = "";
+        previewImg.src = "/img/upload.svg";       // återställ preview
+        delete modal.dataset.memberPickerInited;  // låt pickern initieras om
+    });
+
+    // ─── Bind bara ett submit ───
+    if (form.dataset.submitBound) return;
+    form.dataset.submitBound = "true";
+
+    const fileInput = document.getElementById("projectImageInput");
+    const uploadBtn = document.getElementById("projectUploadBtn");
     initImagePreview(fileInput, previewImg, uploadBtn);
 
-    // Initiera pickern med tom existingMembers
-    initMemberPickerGeneric(modal, {
-        toggleBtnSelector: '#toggle-member-list',
-        suggestionListSelector: '#member-suggestions',
-        selectedContainerSel: '#selected-members',
-        selectedIdsInputSel: '#selected-member-ids',
-        existingMembers: []
-    });
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault(); clearValidation(form);
         const data = new FormData(form);
-        if (errorContainer) errorContainer.innerHTML = '';
+        if (errorContainer) errorContainer.innerHTML = "";
         try {
             const resp = await fetch("/Project/Create", { method: "POST", body: data });
             await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
-        } catch (err) { console.error("Create project error:", err); }
+        } catch (err) {
+            console.error("Create project error:", err);
+        }
     });
-    form.dataset.submitBound = 'true';
 }
 // EDIT project modal
 function initEditProjectModal() {
@@ -141,20 +52,15 @@ function initEditProjectModal() {
     if (!modal) return;
 
     const form = modal.querySelector("form");
+    if (form.dataset.editSubmitBound) return;
+    form.dataset.editSubmitBound = 'true';
     const fileInput = document.getElementById("editProjectImageInput");
     const previewImg = document.getElementById("editProjectPreviewImage");
     const uploadBtn = document.getElementById("editProjectUploadBtn");
     const errorContainer = document.getElementById("edit-project-errors");
     initImagePreview(fileInput, previewImg, uploadBtn);
 
-    // Initiera pickern EN gång med tom befintlig lista
-    initMemberPickerGeneric(modal, {
-        toggleBtnSelector: '#edit-toggle-member-list',
-        suggestionListSelector: '#edit-member-suggestions',
-        selectedContainerSel: '#edit-selected-members',
-        selectedIdsInputSel: '#edit-selected-member-ids',
-        existingMembers: []
-    });
+
 
     // Vid varje öppning: hämta project, fyll form och återfylla pickern
     modal.addEventListener("show.bs.modal", async (event) => {
@@ -177,15 +83,6 @@ function initEditProjectModal() {
             form.querySelector('[name="Status"]').value = project.status;
             previewImg.src = project.projectImagePath || "/img/upload.svg";
 
-            // Återställ pickerns state så den kan fyllas på med nya medlemmar
-            delete modal.dataset.memberPickerInited;
-            initMemberPickerGeneric(modal, {
-                toggleBtnSelector: '#edit-toggle-member-list',
-                suggestionListSelector: '#edit-member-suggestions',
-                selectedContainerSel: '#edit-selected-members',
-                selectedIdsInputSel: '#edit-selected-member-ids',
-                existingMembers: project.members
-            });
         } catch (err) {
             console.error("❌ Kunde inte hämta projektdata:", err);
         }
@@ -204,7 +101,6 @@ function initEditProjectModal() {
             await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
         } catch (err) { console.error("Update project error:", err); }
     });
-    form.dataset.editSubmitBound = 'true';
 }
 function initEditTeamMemberModal() {
     const modal = document.getElementById("editTeamMemberModal");
@@ -277,97 +173,86 @@ function initEditTeamMemberModal() {
     });
 }
 function initMoreMenu() {
-    const buttons = document.querySelectorAll(".more-btn");
-    if (!buttons.length) return; // ✔️ finns inget att initiera
+    // Förhindra dubbelbindning
+    if (initMoreMenu.bound) return;
+    initMoreMenu.bound = true;
 
-    buttons.forEach(btn => {
-        btn.addEventListener("click", (e) => {
+    document.body.addEventListener("click", function (e) {
+        // 1) Klick på själva "..."-knappen (.more-btn)
+        const moreBtn = e.target.closest(".more-btn");
+        if (moreBtn) {
             e.preventDefault();
-            const container = btn.closest(".more-container");
+            const container = moreBtn.closest(".more-container");
             const menu = container?.querySelector(".more-menu");
-
             if (!menu) return;
 
-            document.querySelectorAll(".more-menu").forEach(m => {
-                if (m !== menu) m.classList.add("d-none");
-            });
+            // Dölj alla andra
+            document.querySelectorAll(".more-menu")
+                .forEach(m => { if (m !== menu) m.classList.add("d-none"); });
 
+            // Växla den här
             menu.classList.toggle("d-none");
-        });
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest(".more-container")) {
-            document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
+            return;
         }
-    });
 
-    // 🛠 Edit-knapp
-    document.querySelectorAll(".edit-btn").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-            document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
+        // 2) Klick på edit-knappen
+        const editBtn = e.target.closest(".edit-btn");
+        if (editBtn) {
+            // Stäng alla mer-menyer
+            document.querySelectorAll(".more-menu")
+                .forEach(m => m.classList.add("d-none"));
 
-            const container = btn.closest(".more-container");
-            const projectId = container?.querySelector(".more-btn")?.getAttribute("data-project-id");
+            // Hämta projectId och populera edit-modalen
+            const container = editBtn.closest(".more-container");
+            const projectId = container?.querySelector(".more-btn")?.dataset.projectId;
             if (!projectId) return;
 
             const modal = document.getElementById("editprojectModal");
-            const form = modal?.querySelector("form");
+            const form = modal.querySelector("form");
+            fetch(`/Project/GetProject/${projectId}`)
+                .then(r => r.json())
+                .then(project => {
+                    form.Id.value = project.id;
+                    form.ProjectName.value = project.projectName;
+                    form.ClientName.value = project.clientName;
+                    form.Description.value = project.description || "";
+                    form.StartDate.value = project.startDate.slice(0, 10);
+                    form.EndDate.value = project.endDate.slice(0, 10);
+                    form.Budget.value = project.budget;
+                    document.getElementById("editProjectPreviewImage")
+                        .src = project.projectImagePath || "/img/upload.svg";
+                    // Select för members sparas via din picker
+                    bootstrap.Modal.getOrCreateInstance(modal).show();
+                })
+                .catch(err => console.error("❌ Kunde inte hämta projektdata:", err));
+            return;
+        }
 
-            try {
-                const response = await fetch(`/Project/GetProject/${projectId}`);
-                const project = await response.json();
+        // 3) Klick på delete-knappen
+        const delBtn = e.target.closest(".delete-btn");
+        if (delBtn) {
+            document.querySelectorAll(".more-menu")
+                .forEach(m => m.classList.add("d-none"));
 
-                form.querySelector('[name="Id"]').value = project.id;
-                form.querySelector('[name="ProjectName"]').value = project.projectName;
-                form.querySelector('[name="ClientName"]').value = project.clientName;
-                form.querySelector('[name="Description"]').value = project.description ?? "";
-                form.querySelector('[name="StartDate"]').value = project.startDate.substring(0, 10);
-                form.querySelector('[name="EndDate"]').value = project.endDate.substring(0, 10);
-                form.querySelector('[name="Budget"]').value = project.budget;
-                document.getElementById("editProjectPreviewImage").src = project.projectImagePath ?? "/img/upload.svg";
-
-                const select = form.querySelector('[name="SelectedMemberId"]');
-                if (select) {
-                    Array.from(select.options).forEach(option => {
-                        option.selected = project.memberIds.includes(option.value);
-                    });
-                }
-
-                bootstrap.Modal.getOrCreateInstance(modal).show();
-            } catch (error) {
-                console.error("❌ Kunde inte hämta projektdata:", error);
-            }
-        });
-    });
-
-    // 🗑 Delete-knapp
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            document.querySelectorAll(".more-menu").forEach(menu => menu.classList.add("d-none"));
-
-            const container = btn.closest(".more-container");
-            const projectId = container?.querySelector(".more-btn")?.getAttribute("data-project-id");
+            const container = delBtn.closest(".more-container");
+            const projectId = container?.querySelector(".more-btn")?.dataset.projectId;
             if (!projectId) return;
 
-            const deleteIdInput = document.getElementById("deleteProjectId");
-            const confirmationInput = document.getElementById("deleteConfirmationInput");
-            const errorDiv = document.getElementById("deleteError");
+            document.getElementById("deleteProjectId").value = projectId;
+            document.getElementById("deleteConfirmationInput").value = "";
+            document.getElementById("deleteError").classList.add("d-none");
+            new bootstrap.Modal(document.getElementById("deleteProjectModal")).show();
+            return;
+        }
 
-            if (!deleteIdInput || !confirmationInput || !errorDiv) {
-                console.warn("⚠️ Delete-modalens element saknas – hoppar över delete-init.");
-                return;
-            }
-
-            deleteIdInput.value = projectId;
-            confirmationInput.value = "";
-            errorDiv.classList.add("d-none");
-
-            const modal = new bootstrap.Modal(document.getElementById("deleteProjectModal"));
-            modal.show();
-        });
+        // 4) Klick utanför .more-container stänger alla menyer
+        if (!e.target.closest(".more-container")) {
+            document.querySelectorAll(".more-menu")
+                .forEach(m => m.classList.add("d-none"));
+        }
     });
 }
+
 function initImagePreview(fileInput, previewImg, uploadBtn) {
     if (!fileInput || !previewImg) return;
 
@@ -383,32 +268,14 @@ function initImagePreview(fileInput, previewImg, uploadBtn) {
     });
 }
 function resetInitFlags() {
-    isCreateProjectModalInitialized = false;
-    isMemberPickerInitialized = false;
-    isEditMemberPickerInitialized = false;
-    editSelectedMembers = [];
-
-    // Ta bort alla dataset‑flaggor på dina modals och formulär
     const clearDataSet = (el, keys) => {
         if (!el) return;
         keys.forEach(k => delete el.dataset[k]);
     };
 
-    // CREATE
-    const createModal = document.getElementById("createprojectModal");
-    clearDataSet(createModal, ["memberPickerInited"]);
-    const createForm = createModal?.querySelector("form");
-    clearDataSet(createForm, ["submitBound"]);
-
-    // EDIT PROJECT
-    const editProjModal = document.getElementById("editprojectModal");
-    clearDataSet(editProjModal, ["memberPickerInited", "editModalBound"]);
-    const editProjForm = editProjModal?.querySelector("form");
-    clearDataSet(editProjForm, ["editSubmitBound"]);
-
-    // EDIT TEAM MEMBER
-    const teamModal = document.getElementById("editTeamMemberModal");
-    clearDataSet(teamModal, ["teamModalBound"]);
+    clearDataSet(document.getElementById("createprojectModal"), ["memberPickerInited"]);
+    clearDataSet(document.getElementById("editprojectModal"), ["memberPickerInited"]);
+    clearDataSet(document.getElementById("editTeamMemberModal"), ["memberPickerInited"]);
 }
 function initDeleteModal() {
     const form = document.getElementById("confirmDeleteForm");

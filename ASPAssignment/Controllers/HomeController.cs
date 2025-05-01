@@ -1,4 +1,4 @@
-using System.Diagnostics;
+ using System.Diagnostics;
 using ASPAssignment.Models;
 using ASPAssignment.ViewModels;
 using Business.Interface;
@@ -45,11 +45,14 @@ namespace ASPAssignment.Controllers
             ViewBag.Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "User";
             ViewBag.Email = user.Email ?? "-";
 
-            // 2) Members för picker i navbar (om du behöver den)
-            var members = await _memberService.GetAllMembersAsync();
-            ViewBag.Members = new MultiSelectList(members, "Id", "FullName");
 
-            // 3) Paginering av projekt
+
+            //Paginering av projekt
+            var allCount = await _projectService.CountAsync(null);
+            var ongoingCount = await _projectService.CountAsync("Ongoing");
+            var completedCount = await _projectService.CountAsync("Completed");
+
+            // Hämta paginering
             var total = await _projectService.CountAsync(status);
             var items = await _projectService.GetPagedAsync(
                 status,
@@ -57,13 +60,16 @@ namespace ASPAssignment.Controllers
                 PageSize
             );
 
-            var vm = new ProjectIndex
+            var vm = new ProjectIndex //bygger viewmodel
             {
                 Items = items,
                 PageNumber = page,
                 PageSize = PageSize,
                 TotalItems = total,
-                Status = status
+                Status = status,
+                AllCount = allCount,
+                OngoingCountAll = ongoingCount,
+                CompletedCountAll = completedCount
             };
 
             return View(vm);

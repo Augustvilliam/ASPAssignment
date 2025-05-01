@@ -26,30 +26,27 @@ namespace ASPAssignment.Controllers
 
 
         [HttpGet("LoadProjects")]
-        public async Task<IActionResult> LoadProjects(
-            string? status,
-            string? term,
-            int page = 1)
+        public async Task<IActionResult> LoadProjects(string? status, string? term, int page = 1)
         {
             IEnumerable<ProjectDto> dtos;
             int total;
 
             if (!string.IsNullOrWhiteSpace(term))
             {
-                // 1) Sök med TagService
                 dtos = await _tagService.SearchProjectsAsync(term);
                 total = dtos.Count();
                 page = 1;
             }
             else
             {
-                // 2) Vanlig paginering + status‐filter
                 total = await _projectService.CountAsync(status);
-                dtos = await _projectService.GetPagedAsync(
-                            status,
-                            (page - 1) * PageSize,
-                            PageSize);
+                dtos = await _projectService.GetPagedAsync(status, (page - 1) * PageSize, PageSize);
             }
+
+            // ─── Hämta fasta totalsiffror ───
+            var allCount = await _projectService.CountAsync(null);
+            var ongoingCount = await _projectService.CountAsync("Ongoing");
+            var completedCount = await _projectService.CountAsync("Completed");
 
             var vm = new ProjectIndex
             {
@@ -57,12 +54,14 @@ namespace ASPAssignment.Controllers
                 PageNumber = page,
                 PageSize = PageSize,
                 TotalItems = total,
-                Status = status
+                Status = status,
+                AllCount = allCount,
+                OngoingCountAll = ongoingCount,
+                CompletedCountAll = completedCount
             };
 
             return PartialView(
-              "~/Views/Shared/Partials/Home/_ProjectView.cshtml",
-              vm
+                "~/Views/Shared/Partials/Home/_ProjectView.cshtml", vm
             );
         }
 

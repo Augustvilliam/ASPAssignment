@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using ASPAssignment.ViewModels;
+﻿using ASPAssignment.ViewModels;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -29,22 +28,48 @@ namespace ASPAssignment.Controllers
         }
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Login(AdminLoginForm form)
+        public async Task<IActionResult> Login(AdminLoginForm form, string returnUrl = null)
         {
             if (!ModelState.IsValid)
-                return View(form);
-            var user = await _userManager.FindByEmailAsync(form.Email);
-            if (user == null || !await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                ViewBag.ErrorMessage = "Invadlid Login Attempt, or not an admin";
+                ViewBag.ErrorMessage = "Obligatoriska fält saknas.";
                 return View(form);
             }
-            var reuslt = await _signInManager.PasswordSignInAsync(user, form.Password, form.RememberMe, false);
-            if (reuslt.Succeeded)
-                return RedirectToAction("Index", "Home");
 
-            ViewBag.ErrorMessage = "Somethign went wrong, please try again";
-            return View(form);
+            //Först: Prova vanlig inloggning
+            var signInResult = await _signInManager
+                .PasswordSignInAsync(form.Email, form.Password, form.RememberMe, lockoutOnFailure: false);
+
+            if (!signInResult.Succeeded)
+            {
+                ViewBag.ErrorMessage = "Fel e-post eller lösenord.";
+                return View(form);
+            }
+
+            //Hämta användaren och kontrollera IsAdmin-flaggan på varje roll
+            var user = await _userManager.FindByEmailAsync(form.Email);
+            var roles = await _userManager.GetRolesAsync(user!);
+            var isAdmin = false;
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role?.IsAdmin == true)
+                {
+                    isAdmin = true;
+                    break;
+                }
+            }
+
+            if (!isAdmin)
+            {
+                // Logga ut direkt om det inte är en admin
+                await _signInManager.SignOutAsync();
+                ViewBag.ErrorMessage = "Invalid Authorization, please use the Member-portal.";
+                return View(form);
+            }
+
+            //Inloggad som admin – skicka vidare
+            return LocalRedirect(returnUrl ?? Url.Action("Index", "Home")!);
         }
 
         [HttpGet]

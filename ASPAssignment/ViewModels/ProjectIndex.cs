@@ -11,4 +11,7 @@ public class ProjectIndex
     public int TotalItems { get; set; }
     public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
     public string? Status { get; set; }
+    public int AllCount { get; set; }
+    public int OngoingCountAll { get; set; }
+    public int CompletedCountAll { get; set; }
 }
