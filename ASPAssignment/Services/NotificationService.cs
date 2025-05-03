@@ -40,7 +40,6 @@ public class NotificationService : INotificationService
         await _hub.Clients.User(userId)
                  .SendAsync("ReceiveNotification", dto);
     }
-
     public async Task DismissAsync(Guid notificationId, string userId)
     {
         var entity = await _db.Notifications.FindAsync(notificationId);
@@ -50,7 +49,6 @@ public class NotificationService : INotificationService
             await _db.SaveChangesAsync();
         }
     }
-
     public async Task ClearAllForUserAsync(string userId)
     {
         var notes = _db.Notifications.Where(n => n.UserId == userId);

@@ -111,8 +111,17 @@ public class AccountController : Controller
         var result = await _accountService.RegisterAsync(dto);
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            // fel om e-post redan finns
+            if (result.Errors.Any(e => e.Code == "DuplicateEmail"))
+            {
+                ViewBag.ErrorMessage = "This Email is already in use";
+            }
+            else
+            {
+                // Visa övriga valideringsfel normalt
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+            }
             return View(form);
         }
 
@@ -131,12 +140,22 @@ public class AccountController : Controller
             // NotificationId fylls av SendNotificationAsync per användare
         };
 
-        // Hämta alla medlemmar och skicka notis var för sig:
+        //Hämta alla medlemmar och skicka notis var för sig:
         var allMembers = await _memberService.GetAllMembersAsync();
         foreach (var member in allMembers)
         {
             await _notificationService.SendNotificationAsync(member.Email, joinedNotification);
         }
+
+        //Påminnelse-notis ENDAST till den nya användaren:
+        var reminderNotification = new NotificationDto
+        {
+            ImageUrl = "/img/profile-reminder.svg",
+            Message = "Hi, and welcome, Please go to 'Settings' and finish up your profile!.",
+            Timestamp = DateTime.UtcNow,
+            NotificationType = "ProfileReminder"
+        };
+        await _notificationService.SendNotificationAsync(form.Email, reminderNotification);
 
         return LocalRedirect("~/Account/Login");
     }

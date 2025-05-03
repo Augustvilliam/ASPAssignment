@@ -44,8 +44,8 @@
                 : `för ${diffMins} minuter sedan`;
 
         el.innerHTML = `
-            <img src="${notification.imageUrl}"
-                 onerror="this.src='/img/proimg.svg'" alt="">
+       <img src="${notification.imageUrl}"
+            onerror="this.onerror=null; this.src='/img/proimg.svg';" alt="">
             <div class="notis-content">
               <span>${notification.message}</span>
               <p>${timeText}</p>

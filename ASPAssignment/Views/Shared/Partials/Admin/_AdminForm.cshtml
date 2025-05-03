@@ -17,10 +17,12 @@
         <input asp-for="Password" class="form-input" placeholder="Your Password" />
         <span asp-validation-for="Password" class="text-danger"></span>
 
-        <div class="forgot-password">
-            <input asp-for="RememberMe" type="checkbox" id="rememberMe" />
-            <label for="rememberMe">Remember Me</label>
-            <a href="#">Forgot Password?</a>
+        <div id="checkbox-div" class="Spacebetween">
+            <div class="form-check">
+                <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe" />
+                <label asp-for="RememberMe" class="form-check-label" for="rememberMe">Remember Me</label>
+            </div>
+            <a href="#" class="forgot-pw-link">Forgot Password?</a>
         </div>
 
         <button class="login-btn" type="submit">Login</button>
@@ -29,7 +31,28 @@
     <p>Not an admin? <a asp-controller="Account" asp-action="Login">Return!</a></p>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const forgotLink = document.querySelector('.forgot-pw-link');
+        if (!forgotLink) return;
 
+        const handler = e => {
+            e.preventDefault();
+            if (document.querySelector('.forgot-pw-msg')) return;
+
+            const msg = document.createElement('span');
+            msg.textContent = 'Sorry not implemented :(';
+            msg.classList.add('text-danger', 'forgot-pw-msg');
+            forgotLink.parentNode.appendChild(msg);
+
+            forgotLink.removeEventListener('click', handler);
+            forgotLink.style.pointerEvents = 'none';
+
+        };
+
+        forgotLink.addEventListener('click', handler);
+    });
+</script>
 
 
 

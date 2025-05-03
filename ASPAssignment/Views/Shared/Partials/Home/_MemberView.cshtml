@@ -7,8 +7,8 @@
 <div id="MemberView">
     <div class="header">
         <h1>Team Members</h1>
-        <button class="project-btn" data-bs-toggle="modal" data-bs-target="#addTeamMemberModal">
-            + Add Team Member
+        <button class="project-btn" data-bs-toggle="modal" data-bs-target="#createprojectModal">
+            + Add projects
         </button>
     </div>
 
@@ -38,3 +38,18 @@
     </nav>
 
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const cards = document.querySelectorAll('.team-card');
+          cards.forEach((card, i) => {
+            // 0.2s internt mellan korten
+            setTimeout(() => {
+              card.style.opacity = '1';
+              card.style.animation = 'dropIn 0.5s ease-out forwards';
+            }, i * 200);
+          });
+        });
+    </script>
+}

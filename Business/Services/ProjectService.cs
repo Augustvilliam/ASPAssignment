@@ -163,4 +163,39 @@ public class ProjectService : IProjectService
 
         return list.Select(ProjectFactory.FromEntity);
     }
+    public async Task<bool> AddMembersToProjectAsync(Guid projectId, List<string> memberIds)
+    {
+        var context = _projectRepo.Context;
+        // Hämta projekt med redan inkl. medlemmar
+        var project = await context.Projects
+            .Include(p => p.Members)
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+
+        if (project == null)
+            return false;
+
+        // Hämta MemberEntity för varje ID
+        var membersToAdd = new List<MemberEntity>();
+        foreach (var mid in memberIds)
+        {
+            var member = await _memberRepo.GetByIdAsync(mid);
+            if (member != null && !project.Members.Any(m => m.Id == mid))
+                membersToAdd.Add(member);
+        }
+
+        // Lägg till nya medlemmar
+        foreach (var m in membersToAdd)
+            project.Members.Add(m);
+
+        // Spara
+        try
+        {
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

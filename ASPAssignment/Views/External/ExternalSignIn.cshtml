@@ -7,6 +7,10 @@
 
 <div class="reg-form-container">
     <h1>Login</h1>
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div id="error-center" class="text-danger mb-2">@ViewBag.ErrorMessage</div>
+    }
     <form asp-controller="External" asp-action="ExternalSignIn" method="post" novalidate>
         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 

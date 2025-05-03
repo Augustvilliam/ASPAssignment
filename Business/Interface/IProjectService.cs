@@ -5,6 +5,7 @@ namespace Business.Interface
 {
     public interface IProjectService
     {
+        Task<bool> AddMembersToProjectAsync(Guid projectId, List<string> memberIds);
         Task<int> CountAsync(string? status);
         Task CreateProjectAsync(ProjectDto dto);
         Task<bool> DeleteProjectAsync(Guid id);

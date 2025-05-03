@@ -5,6 +5,7 @@
     initEditTeamMemberModal();
     initMoreMenu();
     initDeleteModal();
+    initAddMemberModal();
 }
 document.addEventListener("DOMContentLoaded", initAll);
 
@@ -125,7 +126,7 @@ function initEditProjectModal() {
         const data = new FormData(form);
         if (errorContainer) errorContainer.innerHTML = '';
         try {
-            const resp = await fetch("/Project/Update", { method: "POST", body: data });
+            const resp = await fetch("/Project/Update", { method: "POST", body: data, credentials: 'same-origin'});
             await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
         } catch (err) {
             console.error("Update project error:", err);
@@ -293,26 +294,78 @@ function initDeleteModal() {
         const confirmationInput = document.getElementById("deleteConfirmationInput");
         const projectId = document.getElementById("deleteProjectId");
         const errorDiv = document.getElementById("deleteError");
+        const submitBtn = form.querySelector('button[type="submit"]');  // <— hämta knappen
 
         if (confirmationInput.value !== "DELETE") {
             errorDiv.classList.remove("d-none");
+
+            if (submitBtn) {
+                submitBtn.classList.add("shake");
+                submitBtn.addEventListener("animationend", () => {
+                    submitBtn.classList.remove("shake");
+                }, { once: true });
+            }
             return;
         }
 
         fetch(`/Project/Delete/${projectId.value}`, {
             method: "DELETE"
-        }).then(response => {
-            handleDeleteResponse(
-                response,
-                document.getElementById("deleteProjectModal"),
-                "/Navigation/LoadProjects"
-            );
-        }).catch(err => {
-            console.error("🚨 Fetch error vid delete:", err);
-        });
+        })
+            .then(response => {
+                handleDeleteResponse(
+                    response,
+                    document.getElementById("deleteProjectModal"),
+                    "/Navigation/LoadProjects"
+                );
+            })
+            .catch(err => {
+                console.error("🚨 Fetch error vid delete:", err);
+            });
     });
 
-    form.dataset.submitBound = "true"; // 🔒 Förhindrar multipla bindningar
+    form.dataset.submitBound = "true";
+}
+function initAddMemberModal() {
+    const modalEl = document.getElementById('addMemberModal');
+    if (!modalEl) return;
+
+    modalEl.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+        const projectId = button.getAttribute('data-project-id');
+        modalEl.querySelector('#addMemberProjectId').value = projectId;
+
+        // Rensa eventuell tidigare state i member-picker …
+        const sel = modalEl.querySelector('#selectedMembers_add');
+        const ids = modalEl.querySelector('#selectedMemberIds_add');
+        sel.innerHTML = '';
+        ids.innerHTML = '';
+        // … och initiera din memberPickerAPI för denna modal …
+        window.memberPickerAPI.initPicker(
+            modalEl,
+            'add'
+        );
+    });
+
+    // Submit‐knapp
+    const submitBtn = document.getElementById('addMembersSubmit');
+    submitBtn.addEventListener('click', async () => {
+        const form = document.getElementById('add-member-form');
+        const data = new FormData(form);
+        try {
+            const resp = await fetch('/Project/AddMembers', {
+                method: 'POST',
+                body: data
+            });
+            if (resp.ok) {
+                bootstrap.Modal.getInstance(modalEl).hide();
+                // ev. uppdatera UI (t.ex. reload projects-listan)
+            } else {
+                // valideringsfel …
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    });
 }
 function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));
@@ -350,19 +403,30 @@ async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
     }
 }
 async function handleDeleteResponse(response, modal, reloadUrl) {
-    if (response.ok) {
-        bootstrap.Modal.getInstance(modal)?.hide();
-        const dynamicContent = document.getElementById("dynamic-content");
-        const viewResponse = await fetch(reloadUrl);
-        const html = await viewResponse.text();
-        dynamicContent.innerHTML = html;
+    const submitBtn = modal.querySelector('button[type="submit"]');
 
-        resetInitFlags();
-        initAll();
+    if (!response.ok) {
+        // Lägg på shake-animationen
+        if (submitBtn) {
+            submitBtn.classList.add('shake');
+            submitBtn.addEventListener('animationend', () => {
+                submitBtn.classList.remove('shake');
+            }, { once: true });
+        }
 
-    } else {
         console.error("❌ Delete misslyckades, status:", response.status);
+        return;
     }
+
+    // Om vi kommer hit är det OK
+    bootstrap.Modal.getInstance(modal)?.hide();
+    const dynamicContent = document.getElementById("dynamic-content");
+    const viewResponse = await fetch(reloadUrl);
+    const html = await viewResponse.text();
+    dynamicContent.innerHTML = html;
+
+    resetInitFlags();
+    initAll();
 }
 
 

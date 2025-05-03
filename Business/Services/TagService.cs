@@ -32,17 +32,23 @@ public class TagService : ITagService
     public async Task<IEnumerable<ProjectDto>> SearchProjectsAsync(string term)
     {
         var entities = await _projectService.GetAllProjectsAsync();
-        var allDtos = entities.Select(ProjectFactory.FromEntity);
+        var allDtos = entities.Select(ProjectFactory.FromEntity).ToList();
 
         if (string.IsNullOrWhiteSpace(term))
             return allDtos;
 
-        term = term.Trim().ToLowerInvariant();
+        var t = term.Trim().ToLowerInvariant();
         return allDtos.Where(p =>
-            (!string.IsNullOrEmpty(p.ProjectName) && p.ProjectName.ToLowerInvariant().Contains(term)) ||
-            (!string.IsNullOrEmpty(p.ClientName) && p.ClientName.ToLowerInvariant().Contains(term)) ||
-            (!string.IsNullOrEmpty(p.Description) && p.Description.ToLowerInvariant().Contains(term)) ||
-            (!string.IsNullOrEmpty(p.Status) && p.Status.ToLowerInvariant().Contains(term))
+            // Sök på projektnamn, klient, beskrivning, status
+            (!string.IsNullOrEmpty(p.ProjectName) && p.ProjectName.ToLowerInvariant().Contains(t)) ||
+            (!string.IsNullOrEmpty(p.ClientName) && p.ClientName.ToLowerInvariant().Contains(t)) ||
+            (!string.IsNullOrEmpty(p.Description) && p.Description.ToLowerInvariant().Contains(t)) ||
+            (!string.IsNullOrEmpty(p.Status) && p.Status.ToLowerInvariant().Contains(t)) ||
+            // Sök på medlemmar kopplade till projektet
+            (p.Members != null && p.Members.Any(m =>
+                (!string.IsNullOrEmpty(m.FullName) && m.FullName.ToLowerInvariant().Contains(t)) ||
+                (!string.IsNullOrEmpty(m.Email) && m.Email.ToLowerInvariant().Contains(t))
+            ))
         );
     }
 }

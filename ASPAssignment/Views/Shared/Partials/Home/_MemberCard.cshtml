@@ -8,13 +8,17 @@
     <div class="top-space">
         @if (isAdmin)
         {
+            <div class="more-container">
             <button data-member-id="@Model.Id"
                     data-role-id="@Model.RoleId"
                     data-bs-toggle="modal"
                     data-bs-target="#editTeamMemberModal"
                     class="more-btn">
-                <img src="~/img/More 2.svg" alt="More Options" />
+                <i class="fa-solid fa-circle more-circle"></i>
+                <i class="fa-solid fa-circle more-circle"></i>
             </button>
+
+            </div>
         }
     </div>
 

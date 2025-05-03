@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using ASPAssignment.Services;
 using Business.Dtos;
 using Business.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -10,16 +11,21 @@ public class ExternalController : Controller
 {
     private readonly IAccountService _accountService;
     private readonly SignInManager<MemberEntity> _signInManager;
+    private readonly IMemberService _memberService;
+    private readonly INotificationService _notificationService;
 
     public ExternalController(
         IAccountService accountService,
-        SignInManager<MemberEntity> signInManager)
+        SignInManager<MemberEntity> signInManager,
+        IMemberService memberService,
+        INotificationService notificationService)
     {
         _accountService = accountService;
         _signInManager = signInManager;
+        _memberService = memberService;
+        _notificationService = notificationService;
     }
 
-    // GET: /External/ExternalSignIn?returnUrl=/Home/Index
     [HttpGet]
     public IActionResult ExternalSignIn(string returnUrl = null!)
     {
@@ -27,7 +33,6 @@ public class ExternalController : Controller
         return View();
     }
 
-    // POST: /External/ExternalSignIn
     [HttpPost]
     public IActionResult ExternalSignIn(string provider, string returnUrl = null!)
     {
@@ -48,7 +53,7 @@ public class ExternalController : Controller
         return Challenge(props, provider);
     }
 
-    // GET or POST från externa leverantören
+    // GET eller POST från externa leverantören
     public async Task<IActionResult> ExternalSignInCallback(
         string returnUrl = null!,
         string remoteError = null!)
@@ -58,6 +63,7 @@ public class ExternalController : Controller
 
         if (!string.IsNullOrEmpty(remoteError))
         {
+            ViewBag.ErrorMessage = "Something went wrong";
             ModelState.AddModelError("", $"Error from external provider: {remoteError}");
             ViewBag.ReturnUrl = returnUrl;
             return View("ExternalSignIn");
@@ -65,9 +71,13 @@ public class ExternalController : Controller
 
         var info = await _signInManager.GetExternalLoginInfoAsync();
         if (info == null)
-            return RedirectToAction(nameof(ExternalSignIn), new { returnUrl });
+        {
+            ViewBag.ErrorMessage = "Something went wrong";
+            ViewBag.ReturnUrl = returnUrl;
+            return View("ExternalSignIn");
+        }
 
-        // 1) Försök logga in med redan kopplad extern-login
+        //Försök logga in med redan kopplad extern-login
         var signInRes = await _signInManager.ExternalLoginSignInAsync(
             info.LoginProvider,
             info.ProviderKey,
@@ -96,9 +106,35 @@ public class ExternalController : Controller
                 var regResult = await _accountService.RegisterAsync(dto);
                 if (regResult.Succeeded)
                 {
+                    // Länka login och logga in
                     await _accountService.AddLoginAsync(email, info);
                     var user = await _signInManager.UserManager.FindByEmailAsync(email);
                     await _signInManager.SignInAsync(user!, isPersistent: false);
+
+                    // Bygg displayName från Claims (om tillgängligt)
+                    var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                    var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
+                    var displayName =
+                        !string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName)
+                        ? $"{firstName} {lastName}"
+                        : email;
+
+                    var joinedNotification = new NotificationDto
+                    {
+                        ImageUrl = "/img/default-user.svg",
+                        Message = $"{displayName} has joined, say hi!",
+                        Timestamp = DateTime.UtcNow,
+                        NotificationType = "UserJoined"
+                        // NotificationId fylls per användare i SendNotificationAsync
+                    };
+
+                    var allMembers = await _memberService.GetAllMembersAsync();
+                    foreach (var member in allMembers)
+                    {
+                        await _notificationService
+                            .SendNotificationAsync(member.Email, joinedNotification);
+                    }
+
                     return LocalRedirect(returnUrl);
                 }
                 // Visa eventuella fel från registreringen

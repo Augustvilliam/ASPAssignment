@@ -96,7 +96,7 @@ public class ProjectController(IProjectService projectService,
     }
 
     [HttpPost("Update")]
-    [Authorize(Policy = "RequireProjectLeadOrAdmin")]
+    [Authorize(Policy = "RequireProjectLeadOrAppAdmin")]
     public async Task<IActionResult> Update(ProjectEditForm form)
     {
         if (!ModelState.IsValid)
@@ -214,6 +214,8 @@ public class ProjectController(IProjectService projectService,
         return Ok(new { sucess = true });
     }
 
+    [HttpPost]
+    [Authorize(Policy = "RequireProjectLeadOrAppAdmin")]
     private async Task LoadMembersToViewBag()
     {
         var members = await _memberService.GetAllMembersAsync();

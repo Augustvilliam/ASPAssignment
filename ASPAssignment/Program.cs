@@ -43,15 +43,18 @@ builder.Services.AddScoped<IClaimsTransformation, AdminClaimsTransformer>();
 // Policyn som kräver admin-claim
 builder.Services.AddAuthorization(options =>
 {
+    // Endast de med IsAppAdmin-claim får denna
     options.AddPolicy("RequireAppAdmin", policy =>
         policy.RequireClaim("IsAppAdmin", "true"));
+
+    // Antingen Projektledarroll ELLER vilken roll som helst med IsAppAdmin-claim
+    options.AddPolicy("RequireProjectLeadOrAppAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("ProjectLead")
+         || context.User.HasClaim(c => c.Type == "IsAppAdmin" && c.Value == "true")
+        ));
 });
-//policy för Admins och projectlead
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("RequireProjectLeadOrAdmin", policy =>
-        policy.RequireRole("ProjectLead", "Admin"));
-});
+
 
 // Konfigurera Identity-cookien EN GÅNG
 builder.Services.ConfigureApplicationCookie(options =>
@@ -64,7 +67,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SameSite = SameSiteMode.None;
     options.Cookie.Name = "MyAppAuth";
 
-    // Särskilj inloggningsväg för /Admin
+    // Särskilj inloggningsväg för /Admin helt genererad av chatgpt-mini-hight
     options.Events.OnRedirectToLogin = ctx =>
     {
         // Skapa samma typ för båda vägarna

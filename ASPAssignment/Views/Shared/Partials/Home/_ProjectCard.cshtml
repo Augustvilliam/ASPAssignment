@@ -31,20 +31,38 @@
     {
         <div class="more-container">
             <button class="more-btn" data-project-id="@Model.Id">
-                <img src="~/img/More 2.svg" alt="More">
+                <i class="fa-solid fa-circle more-circle"></i>
+                <i class="fa-solid fa-circle more-circle"></i>
             </button>
 
             <div class="more-menu d-none">
+                    @if (isAdmin)
+                    {
+                    <button class="dropdown-item text-start edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal" data-project-id="@Model.Id">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Project
+                    </button>
 
+                    <button class="dropdown-item text-start addmember-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editprojectModal" 
+                  data-project-id="@Model.Id">
+                        <i class="fa-solid fa-user"></i> Add Member
+                    </button>
+
+                    <button class="dropdown-item text-start delete-btn" data-project-id="@Model.Id">
+                        <i class="fa-solid fa-trash-can"></i> Delete Project
+                    </button>
+
+                    }
+                    @if(isProjectLead)
+                    {
                     <button class="dropdown-item text-start w-100 edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal" data-project-id="@Model.Id">
                         <i class="fa-solid fa-pen-to-square"></i> Edit Project
                     </button>
                     <button class="dropdown-item text-start w-100 addmember-btn" data-project-id="@Model.Id">
                         <i class="fa-solid fa-user"></i> Add Member
                     </button>
-                    <button class="dropdown-item text-start w-100 delete-btn" data-project-id="@Model.Id">
-                        <i class="fa-solid fa-trash-can"></i> Delete Project
-                    </button>
+                    }
                 
             </div>
         </div>
