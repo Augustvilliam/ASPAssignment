@@ -242,6 +242,32 @@ label{
     overflow:hidden;
 }
 /* WRAPPERS AND CONTAINERS */
+.Terms-container {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 1px solid var(--clr-border300);
+    border-right: 1px solid var(--clr-border300)
+}
+.terms-head {
+    color: var(--clr-accent);
+    margin-top: 3rem;
+    font-size: 36px;
+    padding: 2rem;
+    border-bottom: 1px solid var(--clr-border300);
+}
+.terms-text {
+    display: flex;
+    padding: 2rem;
+    flex-direction: column;
+    p{
+    color: var(--clr-heading);
+    font-size: 2rem;
+
+}
+}
+}
 #MemberView{
     p{
          padding:1rem;
@@ -608,6 +634,11 @@ button {
     width: 100%;
     border-bottom:1px solid var(--clr-border300);
     padding:.5rem;
+    span{
+                   margin:.5rem;
+                   color:var(--clr-heading);
+                   
+               }
 }
 
 }
@@ -1384,6 +1415,32 @@ input:checked + .slider:before {
     }
 
 /*Helpers Typ bara copy-past från boostrap och chatgpt*/
+#checkbox-div {
+    display: grid;
+    justify-content: center;
+    margin-bottom: 1rem;
+    grid-template-columns: 1fr auto;
+    .forgot-pw-msg{
+                      margin-top:1rem;
+                                  grid-column:1/3;
+                                  text-align:center;
+                                  
+                              }
+}
+alert alert-info {
+    padding-left: 1rem;
+    font-size: 2rem;
+}
+.unread-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
 .profile-modal {
     display: none; /* Bootstrap hanterar visningen */
     position: fixed;

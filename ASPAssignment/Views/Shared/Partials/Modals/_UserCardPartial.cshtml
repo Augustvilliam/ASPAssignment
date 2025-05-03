@@ -3,13 +3,13 @@
 @{
     var user = await UserManager.GetUserAsync(User);
     var profile = user?.Profile;
-
-    var fullName = profile != null
+    var fullName = (profile != null
         ? $"{profile.FirstName} {profile.LastName}".Trim()
-        : "User";
+        : null)
+        ?? user?.Email
+        ?? "User";
     var profileImagePath = user?.ProfileImagePath ?? "/img/Employee.svg";
 }
-
 
 <div id="userModal" class="user-card profile-modal modal fade" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog">

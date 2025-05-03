@@ -1,4 +1,14 @@
-﻿
+﻿@inject UserManager<MemberEntity> UserManager
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var profile = user?.Profile;
+    var fullName = profile != null
+        ? $"{profile.FirstName} {profile.LastName}".Trim()
+        : user?.Email ?? "User";
+    var profileImagePath = user?.ProfileImagePath ?? "/img/Employee.svg";
+    ViewBag.ProfileImage = profileImagePath;
+}
+
     <div class="topbar">
 		<input id="globalSearch" class="searchbar" placeholder="Search anything" autocomplete="off" />
         
@@ -13,6 +23,5 @@
             <img class="profile-thumb" src="@ViewBag.ProfileImage" alt="Profile Image" />
         </button>
         <partial name="Partials/Modals/_UserCardPartial" />
-
     </div>
 

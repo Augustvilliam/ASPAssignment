@@ -5,33 +5,70 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPAssignment.Controllers;
 
-public class ChatController(DataContext context) : Controller
+[ApiController]
+[Route("[controller]")]
+public class ChatController : Controller
 {
-    private readonly DataContext _context = context;
+    private readonly DataContext _context;
+    public ChatController(DataContext context) => _context = context;
 
-    [HttpGet]
-    public async Task<IActionResult> History (string otherUserId)
+    [HttpGet("History")]
+    public async Task<IActionResult> History(string otherUserId)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(currentUserId) || string.IsNullOrEmpty(otherUserId))
-            return BadRequest("");
+            return BadRequest();
 
-        var history = await _context.ChatMessages
-            .Where(m =>
-            (m.SenderId == currentUserId && m.RecipientId == otherUserId) ||
-            (m.SenderId == otherUserId && m.RecipientId == currentUserId)
-            )
-            .OrderBy(m => m.Timestamp)
-            .Select(m => new
+        var history = await (
+            from m in _context.ChatMessages
+            where (m.SenderId == currentUserId && m.RecipientId == otherUserId)
+               || (m.SenderId == otherUserId && m.RecipientId == currentUserId)
+            join u in _context.Users.Include(u => u.Profile) on m.SenderId equals u.Id
+            orderby m.Timestamp
+            select new
             {
-                senderID = m.SenderId,
+                senderId = m.SenderId,
+                senderName = u.Profile != null
+                               ? $"{u.Profile.FirstName} {u.Profile.LastName}"
+                               : u.UserName,
                 text = m.Text,
                 timestamp = m.Timestamp
+            }
+        ).ToListAsync();
+
+        var toMarkRead = await _context.ChatMessages
+            .Where(m =>
+                m.RecipientId == currentUserId &&
+                m.SenderId == otherUserId &&
+                !m.IsRead)
+            .ToListAsync();
+
+        if (toMarkRead.Any())
+        {
+            toMarkRead.ForEach(m => m.IsRead = true);
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(history);
+    }
+
+    [HttpGet("UnreadCounts")]
+    public async Task<IActionResult> UnreadCounts()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var counts = await _context.ChatMessages
+            .Where(m => m.RecipientId == userId && !m.IsRead)
+            .GroupBy(m => m.SenderId)
+            .Select(g => new
+            {
+                otherUserId = g.Key,
+                unreadCount = g.Count()
             })
             .ToListAsync();
 
-        return Json(history);
+        return Ok(counts);
     }
-
-
 }

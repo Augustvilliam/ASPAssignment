@@ -6,7 +6,7 @@
     string deadlineText;
     bool isOverdue = end < now;
     var isAdmin = User.IsAppAdmin();
-    var isUser = User.IsInRole("User");
+    bool isProjectLead = User.IsInRole("ProjectLead");
 
     if (isOverdue)
     {
@@ -27,7 +27,7 @@
         <h3>@Model.ClientName</h3>
     </div>
 
-    @if (isAdmin || isUser)
+    @if (isAdmin || isProjectLead)
     {
         <div class="more-container">
             <button class="more-btn" data-project-id="@Model.Id">
@@ -35,9 +35,8 @@
             </button>
 
             <div class="more-menu d-none">
-                @if (isAdmin)
-                {
-                    <button class="dropdown-item text-start w-100 edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal">
+
+                    <button class="dropdown-item text-start w-100 edit-btn" data-bs-toggle="modal" data-bs-target="#editprojectModal" data-project-id="@Model.Id">
                         <i class="fa-solid fa-pen-to-square"></i> Edit Project
                     </button>
                     <button class="dropdown-item text-start w-100 addmember-btn" data-project-id="@Model.Id">
@@ -46,15 +45,7 @@
                     <button class="dropdown-item text-start w-100 delete-btn" data-project-id="@Model.Id">
                         <i class="fa-solid fa-trash-can"></i> Delete Project
                     </button>
-                }
-                else if (isUser)
-                {
-                    <button class="dropdown-item text-start w-100 mark-complete-btn"
-                            data-project-id="@Model.Id"
-                            data-status="Completed">
-                        <i class="fa-solid fa-check"></i> Mark as Complete
-                    </button>
-                }
+                
             </div>
         </div>
     }
@@ -77,29 +68,3 @@
         }
     </div>
 </div>
-<script>
-    async function preloadProjectData(projectId) {
-        const response = await fetch(`/Project/GetProject/${projectId}`);
-        const data = await response.json();
-
-        if (data.members) {
-            selectedMembers = data.members;
-            renderSelectedMembers();
-            updateSelectedIds();
-        }
-
-        document.querySelector('[name="ProjectName"]').value = data.projectName;
-        document.querySelector('[name="ClientName"]').value = data.clientName;
-        document.querySelector('[name="Description"]').value = data.description || '';
-        document.querySelector('[name="StartDate"]').value = data.startDate.slice(0, 10);
-        document.querySelector('[name="EndDate"]').value = data.endDate.slice(0, 10);
-        document.querySelector('[name="Budget"]').value = data.budget;
-        document.querySelector('[name="Status"]').value = data.status;
-
-        if (data.projectImagePath) {
-            document.getElementById("editProjectPreviewImage").src = data.projectImagePath;
-        }
-
-        document.querySelector('[name="Id"]').value = data.id;
-    }
-</script>

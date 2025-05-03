@@ -96,7 +96,7 @@ public class ProjectController(IProjectService projectService,
     }
 
     [HttpPost("Update")]
-    [Authorize(Policy = "RequireAppAdmin")]
+    [Authorize(Policy = "RequireProjectLeadOrAdmin")]
     public async Task<IActionResult> Update(ProjectEditForm form)
     {
         if (!ModelState.IsValid)

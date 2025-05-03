@@ -32,7 +32,7 @@ namespace ASPAssignment.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.ErrorMessage = "Obligatoriska fält saknas.";
+                ViewBag.ErrorMessage = "Please enter valid information.";
                 return View(form);
             }
 
@@ -42,7 +42,7 @@ namespace ASPAssignment.Controllers
 
             if (!signInResult.Succeeded)
             {
-                ViewBag.ErrorMessage = "Fel e-post eller lösenord.";
+                ViewBag.ErrorMessage = "Invalid Email Or password.";
                 return View(form);
             }
 

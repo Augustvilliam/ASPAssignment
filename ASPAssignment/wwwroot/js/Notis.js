@@ -7,6 +7,7 @@
     const notifMark = document.querySelector('.bell-group .notificaton-mark');
     const counterElem = document.querySelector('.notis-counter span');
 
+
     // ----- Helpers -----
     function updateMark() {
         const count = parseInt(counterElem.textContent, 10) || 0;
@@ -53,9 +54,10 @@
         `;
 
         // Dismiss‐knapp
-        el.querySelector('.close-btn').addEventListener('click', () => {
-            el.remove();
-            updateCounter(-1);
+         el.querySelector('.close-btn').addEventListener('click', e => {
+                e.stopPropagation();            
+                el.remove();
+                updateCounter(-1);
 
             // Persist dismiss
             const id = el.dataset.id;
@@ -106,6 +108,25 @@
                 .then(() => console.log('Ansluten till NotificationHub'))
                 .catch(err => console.error('SignalR-error:', err.toString()));
         });
+    const clearAllBtn = document.querySelector('#clear-all-btn');
+
+    clearAllBtn.addEventListener('click', e => {
+        e.stopPropagation();   // förhindra att panelen stängs
+
+        fetch('/api/notifications/clear-all', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': getAntiForgeryToken() }
+        })
+            .then(res => {
+                // ta bort alla notiselement
+                bodyEl.querySelectorAll('.notis').forEach(n => n.remove());
+                // nollställ räknare och tomt-läge
+                counterElem.textContent = '0';
+                updateMark();
+                updateEmptyState();
+            })
+            .catch(err => console.error('Kunde inte rensa notiser:', err));
+    });
 
     // ----- Initera state -----
     updateMark();

@@ -24,9 +24,19 @@ namespace ASPAssignment.Controllers
         }
 
         [HttpPost("dismiss/{id:guid}")]
+        [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> Dismiss(Guid id)
         {
             await _notisSvc.DismissAsync(id, User.Identity.Name!);
+            return Ok();
+        }
+
+        [HttpPost("clear-all")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClearAll()
+        {
+            await _notisSvc.ClearAllForUserAsync(User.Identity.Name!);
             return Ok();
         }
     }

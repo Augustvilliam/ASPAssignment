@@ -29,21 +29,31 @@
     });
 
     // 2) Privata meddelanden
-    connection.on("ReceivePrivateMessage", (senderName, message, senderId) => {
-        console.log("📥 ReceivePrivateMessage fired:", senderName, message, senderId);
-        const msgDiv = document.createElement("div");
+    connection.on("ReceivePrivateMessage",
+        (senderName, message, senderId, recipientId) => {
 
-        // Klass baserat på om vi själva är avsändaren
-        if (senderId === window.currentUserId) {
-            msgDiv.classList.add("chat-message");
-        } else {
-            msgDiv.classList.add("chat-message-response");
-        }
+            // 1) Ignorera meddelanden som inte tillhör den öppna chatten
+            if (window.selectedRecipientId !== senderId
+                && window.selectedRecipientId !== recipientId) {
+                return;
+            }
 
-        msgDiv.innerHTML = `<span>${message}</span><p>${senderName}</p>`;
-        chatView.appendChild(msgDiv);
-        chatView.scrollTop = chatView.scrollHeight;
-    });
+            // 2) Avgör om det är mitt eller inkommande
+            const isMe = senderId === window.currentUserId;
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add(isMe
+                ? "chat-message"
+                : "chat-message-response"
+            );
+
+            msgDiv.innerHTML = `
+      <span>${message}</span>
+      <p>${senderName}</p>
+    `;
+
+            chatView.appendChild(msgDiv);
+            chatView.scrollTop = chatView.scrollHeight;
+        });
 
     // 3) Skicka privatmeddelande
     form.addEventListener("submit", async (e) => {

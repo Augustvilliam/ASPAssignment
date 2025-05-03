@@ -46,6 +46,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireAppAdmin", policy =>
         policy.RequireClaim("IsAppAdmin", "true"));
 });
+//policy för Admins och projectlead
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireProjectLeadOrAdmin", policy =>
+        policy.RequireRole("ProjectLead", "Admin"));
+});
 
 // Konfigurera Identity-cookien EN GÅNG
 builder.Services.ConfigureApplicationCookie(options =>

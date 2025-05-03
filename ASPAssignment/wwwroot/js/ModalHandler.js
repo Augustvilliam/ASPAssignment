@@ -168,6 +168,13 @@ function initEditTeamMemberModal() {
             form.querySelector('[name="LastName"]').value = member.lastName;
             form.querySelector('[name="Email"]').value = member.email;
             form.querySelector('[name="Phone"]').value = member.phone || "";
+            form.querySelector('[name="StreetAddress"]').value = member.streetAddress || "";
+            form.querySelector('[name="City"]').value = member.city || "";
+            form.querySelector('[name="PostalCode"]').value = member.postalCode || "";
+            form.querySelector('[name="BirthDate"]').value = member.birthDate
+                ? member.birthDate.slice(0, 10)
+                : "";
+
             previewImg.src = member.profileImagePath ?? "/img/upload.svg";
 
             // Ladda dropdown med roller
@@ -179,7 +186,6 @@ function initEditTeamMemberModal() {
                     opt.text = r.name;
                     roleSelect.appendChild(opt);
                 });
-                // Sätta valt värde
                 roleSelect.value = member.roleId || '';
             }
         } catch (err) {
@@ -228,38 +234,6 @@ function initMoreMenu() {
             return;
         }
 
-        // 2) Klick på edit-knappen
-        const editBtn = e.target.closest(".edit-btn");
-        if (editBtn) {
-            // Stäng alla mer-menyer
-            document.querySelectorAll(".more-menu")
-                .forEach(m => m.classList.add("d-none"));
-
-            // Hämta projectId och populera edit-modalen
-            const container = editBtn.closest(".more-container");
-            const projectId = container?.querySelector(".more-btn")?.dataset.projectId;
-            if (!projectId) return;
-
-            const modal = document.getElementById("editprojectModal");
-            const form = modal.querySelector("form");
-            fetch(`/Project/GetProject/${projectId}`)
-                .then(r => r.json())
-                .then(project => {
-                    form.Id.value = project.id;
-                    form.ProjectName.value = project.projectName;
-                    form.ClientName.value = project.clientName;
-                    form.Description.value = project.description || "";
-                    form.StartDate.value = project.startDate.slice(0, 10);
-                    form.EndDate.value = project.endDate.slice(0, 10);
-                    form.Budget.value = project.budget;
-                    document.getElementById("editProjectPreviewImage")
-                        .src = project.projectImagePath || "/img/upload.svg";
-                    // Select för members sparas via din picker
-                    bootstrap.Modal.getOrCreateInstance(modal).show();
-                })
-                .catch(err => console.error("❌ Kunde inte hämta projektdata:", err));
-            return;
-        }
 
         // 3) Klick på delete-knappen
         const delBtn = e.target.closest(".delete-btn");

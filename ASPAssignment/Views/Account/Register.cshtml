@@ -12,6 +12,7 @@
     <img class="splitter" src="~/img/splitter.svg" alt="Splitter" />
 
     <form class="reg-form" asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" novalidate>
+        @Html.AntiForgeryToken()
         @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
         {
             <div id="error-center" class="text-danger mb-2">@ViewBag.ErrorMessage</div>
@@ -37,13 +38,14 @@
         <input asp-for="ConfirmPassword" class="form-input-login @(ViewData.ModelState["ConfirmPassword"]?.Errors.Any() == true ? "input-error" : "")" />
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
 
-        <div class="form-check mb-3">
-            <input asp-for="Terms" class="form-check-input @(ViewData.ModelState["Terms"]?.Errors.Any() == true ? "input-error" : "")" type="checkbox" id="termsCheck" />
-            <label asp-for="Terms" class="form-check-label">
-                I accept <a href="#">Terms and Conditions</a>
+        <div class="form-check">
+            <input asp-for="Terms" class="form-check-input" type="checkbox" id="termsCheck" />
+            <label for="termsCheck" class="form-check-label">
+                I accept 
+                <a target="_blank" asp-controller="Account" asp-action="Terms">Terms and Conditions</a>
             </label>
-            <span asp-validation-for="Terms" class="text-danger"></span>
         </div>
+            <span asp-validation-for="Terms" class="text-danger"></span>
 
         <button type="submit" class="login-btn">Create Account</button>
     </form>

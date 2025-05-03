@@ -1,6 +1,5 @@
 ﻿
 @inject UserManager<MemberEntity> UserManager
-
 @{
     var user = await UserManager.GetUserAsync(User);
     var profile = user?.Profile;

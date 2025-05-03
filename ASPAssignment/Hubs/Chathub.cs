@@ -74,13 +74,16 @@ namespace ASPAssignment.Hubs
             if (_userConnections.TryGetValue(recipientId, out var recConn))
             {
                 await Clients.Client(recConn)
-                             .SendAsync("ReceivePrivateMessage", senderName, message, senderId);
+                             .SendAsync("ReceivePrivateMessage",
+                                        senderName, message, senderId, recipientId);
             }
 
+            // Skicka tillbaka till avsändaren
             if (_userConnections.TryGetValue(senderId, out var sndConn))
             {
                 await Clients.Client(sndConn)
-                             .SendAsync("ReceivePrivateMessage", senderName, message, senderId);
+                             .SendAsync("ReceivePrivateMessage",
+                                        senderName, message, senderId, recipientId);
             }
         }
     }

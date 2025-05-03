@@ -50,6 +50,14 @@ public class NotificationService : INotificationService
             await _db.SaveChangesAsync();
         }
     }
+
+    public async Task ClearAllForUserAsync(string userId)
+    {
+        var notes = _db.Notifications.Where(n => n.UserId == userId);
+        _db.Notifications.RemoveRange(notes);
+        _db.SaveChanges();
+        await _db.SaveChangesAsync();
+    }
     public async Task BroadcastNotificationAsync(NotificationDto notification)
     {
         // 1) Hämta alla userIds från Identity-tabellen
