@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Data.Contexts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,13 +8,14 @@ namespace ASPAssignment.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize]
 public class ChatController : Controller
 {
     private readonly DataContext _context;
     public ChatController(DataContext context) => _context = context;
 
     [HttpGet("History")]
-    public async Task<IActionResult> History(string otherUserId)
+    public async Task<IActionResult> History(string otherUserId) //laddar in historik till en användare
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(currentUserId) || string.IsNullOrEmpty(otherUserId))
@@ -53,7 +55,7 @@ public class ChatController : Controller
     }
 
     [HttpGet("UnreadCounts")]
-    public async Task<IActionResult> UnreadCounts()
+    public async Task<IActionResult> UnreadCounts() //räknar olästa meddelande för den lilla röda pricken på varje användare i chatten om det finns. 
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))

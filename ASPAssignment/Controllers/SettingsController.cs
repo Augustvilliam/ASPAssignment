@@ -1,6 +1,7 @@
 ﻿using ASPAssignment.ViewModels;
 using Business.Dtos;
 using Business.Interface;
+using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,17 +9,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 
 namespace ASPAssignment.Controllers;
-
+[Authorize]
 public class SettingsController(
     UserManager<MemberEntity> userManager,
     SignInManager<MemberEntity> signInManager,
-    IMemberService memberService) : Controller
+    IMemberService memberService, RoleManager<ApplicationRole> roleManager) : Controller
 {
     private readonly UserManager<MemberEntity> _userManager = userManager;
     private readonly SignInManager<MemberEntity> _signInManager = signInManager;
     private readonly IMemberService _memberService = memberService;
+    private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
 
-    [Authorize]
+
     public async Task<IActionResult> Settings()
     {
         var user = await _userManager.Users
@@ -26,6 +28,16 @@ public class SettingsController(
             .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
 
         if (user == null) return NotFound();
+
+        if (user.Profile == null)
+        {
+            user.Profile = new MemberProfileEntity
+            {
+                MemberId = user.Id,
+                RoleId = (await _roleManager.FindByNameAsync("User"))?.Id ?? ""
+            };
+            // (du behöver inte spara permanent här, bara för viewmodellen)
+        }
 
         var profile = user.Profile!;
         var model = new SettingsFormViewModel
@@ -84,8 +96,8 @@ public class SettingsController(
     }
 
     [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> DeleteAccount()
+    [HttpPost] 
+    public async Task<IActionResult> DeleteAccount() //just nu kan bara användare ta bort sina egna konton. admins kan inte ta bort någon annan. 
     {
         var user = await _userManager.GetUserAsync(User);
         if (user != null)

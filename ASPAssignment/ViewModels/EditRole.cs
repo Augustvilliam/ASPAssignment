@@ -2,7 +2,7 @@
 
 namespace ASPAssignment.ViewModels;
 
-public class EditRole
+public class EditRole //för att editera en roll i adminview ändast för folk med IsAdmin=true.
 {
     [Required]
     public string Id { get; set; }

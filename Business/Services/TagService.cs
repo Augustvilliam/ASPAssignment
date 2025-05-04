@@ -17,7 +17,7 @@ public class TagService : ITagService
         _projectService = projectService;
     }
 
-    public async Task<IEnumerable<MemberDto>> SearchMembersAsync(string term)
+    public async Task<IEnumerable<MemberDto>> SearchMembersAsync(string term) //söker bland members när de är laddade i dynamicview
     {
         var all = await _membersService.GetAllMembersAsync();
         if (string.IsNullOrEmpty(term))
@@ -29,7 +29,7 @@ public class TagService : ITagService
         m.Email?.ToLowerInvariant().Contains(term) == true
         );
     }
-    public async Task<IEnumerable<ProjectDto>> SearchProjectsAsync(string term)
+    public async Task<IEnumerable<ProjectDto>> SearchProjectsAsync(string term) //söker bland projects när de är laddade i dynamicview
     {
         var entities = await _projectService.GetAllProjectsAsync();
         var allDtos = entities.Select(ProjectFactory.FromEntity).ToList();
@@ -44,7 +44,7 @@ public class TagService : ITagService
             (!string.IsNullOrEmpty(p.ClientName) && p.ClientName.ToLowerInvariant().Contains(t)) ||
             (!string.IsNullOrEmpty(p.Description) && p.Description.ToLowerInvariant().Contains(t)) ||
             (!string.IsNullOrEmpty(p.Status) && p.Status.ToLowerInvariant().Contains(t)) ||
-            // Sök på medlemmar kopplade till projektet
+            // Sök på medlemmar kopplade till projektet funkar sådär 
             (p.Members != null && p.Members.Any(m =>
                 (!string.IsNullOrEmpty(m.FullName) && m.FullName.ToLowerInvariant().Contains(t)) ||
                 (!string.IsNullOrEmpty(m.Email) && m.Email.ToLowerInvariant().Contains(t))

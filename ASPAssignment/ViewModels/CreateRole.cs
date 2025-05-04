@@ -2,7 +2,7 @@
 
 namespace ASPAssignment.ViewModels;
 
-public class CreateRole
+public class CreateRole // själva skapaformuläret för creatrolls
 {
     [Required]
     [Display(Name = "Rollnamn")]

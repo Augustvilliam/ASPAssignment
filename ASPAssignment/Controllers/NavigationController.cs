@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers
-{
+{//navigationcontroller specifikt för dynamiccontent delen.
     [Authorize]
     [Route("Navigation")]
     public class NavigationController : Controller

@@ -2,7 +2,7 @@
 
 namespace ASPAssignment.ViewModels
 {
-    public class AdminLoginForm
+    public class AdminLoginForm //för admins inloggningsformulär
     {
         [Required]
         [EmailAddress]

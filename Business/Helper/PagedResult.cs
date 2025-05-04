@@ -1,8 +1,8 @@
 ﻿
 
 namespace Business.Helper;
-
-public class PagedResult<T>
+//generisk pagedresult för pagering av data
+public class PagedResult<T> 
 {
     public IEnumerable<T> Itemn { get; set; } = Enumerable.Empty<T>();
     public int PageNumber { get; set; }

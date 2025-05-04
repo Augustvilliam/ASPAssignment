@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ASPAssignment.Controllers
+namespace ASPAssignment.Controllers //admincontroller för att hantera admin-inloggning och roller, samt admins rollskapa sida. 
 {
     [Authorize(Policy = "RequireAppAdmin")]
     public class AdminController : Controller
@@ -71,17 +71,14 @@ namespace ASPAssignment.Controllers
             //Inloggad som admin – skicka vidare
             return LocalRedirect(returnUrl ?? Url.Action("Index", "Home")!);
         }
-
         [HttpGet]
         public IActionResult Index()
         {
             var roles = _roleManager.Roles.ToList();
             return View(roles);
         }
-
         [HttpGet]
         public IActionResult Create() => View(new CreateRole());
-
         [HttpPost]
         public async Task<IActionResult> Create(CreateRole model)
         {
@@ -115,13 +112,12 @@ namespace ASPAssignment.Controllers
             if (role == null)
                 return NotFound();
 
-            if (role.Name == "User" || role.Name == "Admin")
+            if (role.Name == "User" || role.Name == "Admin" || role.Name == "ProjectLead") // får inte ta bort standardroller
                 return Forbid();
 
             await _roleManager.DeleteAsync(role);
             return RedirectToAction(nameof(Index));
         }
-
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
@@ -136,7 +132,6 @@ namespace ASPAssignment.Controllers
             };
             return View(vm);
         }
-
         [HttpPost]
         public async Task<IActionResult> Edit(EditRole model)
         {
@@ -146,8 +141,8 @@ namespace ASPAssignment.Controllers
             var role = await _roleManager.FindByIdAsync(model.Id);
             if (role == null) return NotFound();
 
-            // (Valfritt) hindra att standardroller byter namn
-            if ((role.Name == "User" || role.Name == "Admin") && role.Name != model.Name)
+            //hindra att standardroller byter namn
+            if ((role.Name == "User" || role.Name == "Admin" || role.Name == "ProjectLead") && role.Name != model.Name)
             {
                 ModelState.AddModelError("", "Du kan inte byta namn på standardrollerna.");
                 return View(model);

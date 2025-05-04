@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ASPAssignment.ViewModels;
+namespace ASPAssignment.ViewModels; //för memberview i dynamiccontent 
 
 public class MemberIndex
 {

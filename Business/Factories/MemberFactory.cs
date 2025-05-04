@@ -23,7 +23,7 @@ public static class MemberFactory
             ProfileImagePath = entity.ProfileImagePath
         };
 
-        // Profilcomplete flag
+        // lite restkod från när jag försökte få till så att notiserna skickades dynamiskt ifall inormation saknades. fick det aldrig att funka och är nu för rädd att ta bort det och ta sönder någont 04/05
         dto.HasCompleteProfile =
             !string.IsNullOrWhiteSpace(dto.ProfileImagePath) &&
             !string.IsNullOrWhiteSpace(dto.Phone) &&
@@ -59,7 +59,7 @@ public static class MemberFactory
         entity.Profile.City = dto.City;
         entity.Profile.PostalCode = dto.PostalCode;
 
-        // Assign RoleId from DTO
+        // rollid från dto
         if (!string.IsNullOrWhiteSpace(dto.RoleId))
         {
             entity.Profile.RoleId = dto.RoleId;

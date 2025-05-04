@@ -696,10 +696,14 @@ button {
 .satus-select {
     background-color: transparent;
     border: 1px solid var(--clr-border300);
-    color:var(--clr-heading)
+    color: var(--clr-body-light)
     option{
               background:var(--clr-bg);
+              color:var(--clr-body-light)
           }
+}
+#Status{
+    color:var(--clr-body-light);
 }
 .usersummary {
     padding-left: .5rem;
@@ -727,7 +731,8 @@ button {
 .form-control{
     margin:1rem;
     border-radius:.8rem;
-    height:50px
+    height:50px;
+    color:var(--clr-body-light)
 }
 
 .project-view {
@@ -791,6 +796,7 @@ span {
     margin-left: .5rem;
     grid-column: 2;
     margin-bottom:0;
+    color:var(--clr-dark-red);
 }
 }
 
@@ -800,6 +806,8 @@ span {
     text-align: start;
     margin-top: 1rem;
     margin-bottom: 2rem;
+    display: flex;
+    overflow: auto;
 }
 
 .settings-container {
@@ -1353,6 +1361,7 @@ button:hover {
     background-color: var(--clr-grey100);
     color: var(--clr-body-light);
     font-weight: 800;
+    margin-bottom: 1rem;
 }
 
 .edit-btn, .delete-btn, .addmember-btn {
@@ -1842,6 +1851,10 @@ h1 {
     font-size: 14px;
     border-radius: .8rem;
 }
+    .text-danger{
+                    grid-column:2;
+                    margin-top:1rem;
+                }
 }
 
    /*Member-picker*/
@@ -1875,7 +1888,7 @@ h1 {
     top: 72%;
     right: -1px;
     width: 516px;
-    background: #fff;
+    background: var(--clr-surface);
     border: 1px solid var(--clr-border300);
     border-top:none;
     border-radius:0 0 .8rem .8rem;
@@ -1896,6 +1909,7 @@ h1 {
     padding: 0;
     max-height: 200px;
     overflow-y: auto;
+    background:var(--clr-surface)
 }
 
     .suggestions-list li {
@@ -1927,9 +1941,10 @@ h1 {
 .selected-member {
     display: inline-flex;
     align-items: center;
-    background: #e9ecef;
+    background: var(--clr-grey100);
     border-radius: .25rem;
     padding: .25rem .5rem;
+
 }
 
     .selected-member img {
@@ -2547,7 +2562,36 @@ p {
         transform: translateX(8px);
     }
 }
+.modal.pop-in .modal-dialog {
+    animation: popIn 0.4s ease-out forwards;
+}
 
+.modal.bounce-in .modal-dialog {
+    animation: bounceIn 0.5s ease-out forwards;
+}
 
+.modal.slide-left .modal-dialog {
+    animation: slideInFromLeft 0.4s ease-out forwards;
+}
+
+.pop-in {
+    animation: popIn 0.3s ease-out forwards;
+    transform-origin: top right;
+}
+
+.more-menu:not(.d-none) {
+    animation: popIn 0.25s ease-out;
+    transform-origin: top right;
+}
+
+.notis-container.d-flex {
+    animation: popIn 0.25s ease-out;
+    transform-origin: top right;
+}
+
+#userModal.show .modal-content {
+    animation: popIn 0.25s ease-out;
+    transform-origin: top right;
+}
 
 

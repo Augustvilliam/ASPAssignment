@@ -3,7 +3,7 @@ using Business.Helper;
 
 namespace ASPAssignment.ViewModels;
 
-public class ProjectIndex
+public class ProjectIndex //för projectview 
 {
     public IEnumerable<ProjectDto> Items { get; set; } = [];
     public int PageNumber { get; set; }

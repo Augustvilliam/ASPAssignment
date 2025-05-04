@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services;
 
-public class ProjectService : IProjectService
+public class ProjectService : IProjectService //crud för projekt, använding av transaktioner osv
 {
     private readonly IGenericRepository<ProjectEntity> _projectRepo;
     private readonly IGenericRepository<MemberEntity> _memberRepo;
@@ -56,45 +56,86 @@ public class ProjectService : IProjectService
 
     public async Task<bool> UpdateProjectAsync(ProjectDto dto)
     {
-        // No explicit transaction needed for single SaveChanges
-        var context = _projectRepo.Context;
-
-        var existingProject = await context.Projects
-            .Include(p => p.Members)
-            .FirstOrDefaultAsync(p => p.Id == dto.Id);
-        if (existingProject == null)
-            return false;
-
-        // Prepare new members list
-        var updatedMembers = new List<MemberEntity>();
-        foreach (var memberId in dto.MemberIds)
-        {
-            var member = await _memberRepo.GetByIdAsync(memberId);
-            if (member != null)
-                updatedMembers.Add(member);
-        }
-
-        // Apply changes
-        ProjectFactory.UpdateEntity(existingProject, dto, updatedMembers);
-
+        
+        await _projectRepo.BeginTransactionAsync();
         try
         {
+            var context = _projectRepo.Context;
+
+            // Hämta projekt med medlemmar
+            var existingProject = await context.Projects
+                .Include(p => p.Members)
+                .FirstOrDefaultAsync(p => p.Id == dto.Id);
+
+            if (existingProject == null)
+            {
+                await _projectRepo.RollbackTransactionsAync();
+                return false;
+            }
+
+            //ny lista med MemberEntity
+            var updatedMembers = new List<MemberEntity>();
+            foreach (var memberId in dto.MemberIds)
+            {
+                var member = await _memberRepo.GetByIdAsync(memberId);
+                if (member != null)
+                    updatedMembers.Add(member);
+            }
+
+            //Tillämpa ändringar via factory
+            ProjectFactory.UpdateEntity(existingProject, dto, updatedMembers);
+
+            //Försök spara
             await context.SaveChangesAsync();
+
+            // Commit om allt gick bra
+            await _projectRepo.CommitTransactionAsync();
             return true;
         }
         catch (DbUpdateConcurrencyException)
         {
-            // Concurrency conflict detected. Reload and retry once.
-            await context.Entry(existingProject).ReloadAsync();
+            //Rulla tillbaka och försök igen, denna förblir oförändrad eftersom det fanns en massa problem under utvecklingen
+            await _projectRepo.RollbackTransactionsAync();
 
-            // Reapply changes
+            // Enkel retry: hämta om, applicera om och commit
+            var context = _projectRepo.Context;
+            var existingProject = await context.Projects
+                .Include(p => p.Members)
+                .FirstOrDefaultAsync(p => p.Id == dto.Id);
+            if (existingProject == null)
+                return false;
+
+            var updatedMembers = new List<MemberEntity>();
+            foreach (var memberId in dto.MemberIds)
+            {
+                var member = await _memberRepo.GetByIdAsync(memberId);
+                if (member != null)
+                    updatedMembers.Add(member);
+            }
+
             ProjectFactory.UpdateEntity(existingProject, dto, updatedMembers);
-            await context.SaveChangesAsync();
-            return true;
+            await _projectRepo.BeginTransactionAsync();
+            try
+            {
+                await context.SaveChangesAsync();
+                await _projectRepo.CommitTransactionAsync();
+                return true;
+            }
+            catch
+            {
+                await _projectRepo.RollbackTransactionsAync();
+                return false;
+            }
+        }
+        catch
+        {
+            //andra fel → rulla tillbaka
+            await _projectRepo.RollbackTransactionsAync();
+            throw;
         }
     }
 
-    public async Task<ProjectDto?> GetProjectByIdAsync(Guid id)
+    public async Task<ProjectDto?> GetProjectByIdAsync(Guid id) //hämta projekt entitet
     {
         var project = await _projectRepo.Context.Projects
             .Include(p => p.Members)
@@ -138,7 +179,7 @@ public class ProjectService : IProjectService
             throw;
         }
     }
-
+    //räkna antal projekt för pagination
     public async Task<int> CountAsync(string? status)
     {
         var query = _projectRepo.Context.Projects.AsQueryable();
@@ -146,7 +187,7 @@ public class ProjectService : IProjectService
             query = query.Where(p => p.Status == status);
         return await query.CountAsync();
     }
-
+    //hämta paginerade projekt och sortera dem efter startdatum
     public async Task<IEnumerable<ProjectDto>> GetPagedAsync(string? status, int skip, int take)
     {
         var query = _projectRepo.Context.Projects
@@ -163,38 +204,46 @@ public class ProjectService : IProjectService
 
         return list.Select(ProjectFactory.FromEntity);
     }
-    public async Task<bool> AddMembersToProjectAsync(Guid projectId, List<string> memberIds)
+    public async Task<bool> AddMembersToProjectAsync(Guid projectId, List<string> memberIds) //Lägger till medlemmar i projekt och hämtar de som redan är kopplade. funkade inte först och började sendan funka av sig själv
     {
-        var context = _projectRepo.Context;
-        // Hämta projekt med redan inkl. medlemmar
-        var project = await context.Projects
-            .Include(p => p.Members)
-            .FirstOrDefaultAsync(p => p.Id == projectId);
-
-        if (project == null)
-            return false;
-
-        // Hämta MemberEntity för varje ID
-        var membersToAdd = new List<MemberEntity>();
-        foreach (var mid in memberIds)
-        {
-            var member = await _memberRepo.GetByIdAsync(mid);
-            if (member != null && !project.Members.Any(m => m.Id == mid))
-                membersToAdd.Add(member);
-        }
-
-        // Lägg till nya medlemmar
-        foreach (var m in membersToAdd)
-            project.Members.Add(m);
-
-        // Spara
+        // Starta transaction
+        await _projectRepo.BeginTransactionAsync();
         try
         {
+            var context = _projectRepo.Context;
+            //Hämta projekt inkl. redan tillagda medlemmar
+            var project = await context.Projects
+                .Include(p => p.Members)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                await _projectRepo.RollbackTransactionsAync();
+                return false;
+            }
+
+            //Hämta varje MemberEntity och lägg bara till om den inte redan finns
+            foreach (var mid in memberIds)
+            {
+                if (project.Members.Any(m => m.Id == mid))
+                    continue;
+
+                var member = await _memberRepo.GetByIdAsync(mid);
+                if (member != null)
+                    project.Members.Add(member);
+            }
+
+            //Spara ändringarna
             await context.SaveChangesAsync();
+
+            //Commit om allt gick bra
+            await _projectRepo.CommitTransactionAsync();
             return true;
         }
         catch
         {
+            // Något gick fel → rulla tillbaka
+            await _projectRepo.RollbackTransactionsAync();
             return false;
         }
     }

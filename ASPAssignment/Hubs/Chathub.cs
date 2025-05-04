@@ -46,11 +46,11 @@ namespace ASPAssignment.Hubs
         // Privata meddelanden
         public async Task SendPrivateMessage(string recipientId, string message)
         {
-            // 1) Hämta avsändar‐ID från claims
+            //Hämta avsändar‐ID från claims
             var senderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (senderId == null) return;
 
-            // 2) Spara i databasen
+            //Spara i databasen för historik
             var chatMsg = new Data.Entities.ChatMessageEntity
             {
                 SenderId = senderId,
@@ -61,7 +61,7 @@ namespace ASPAssignment.Hubs
             _context.ChatMessages.Add(chatMsg);
             await _context.SaveChangesAsync();
 
-            // 3) Hämta avsändarens namn (för visning i klienten)
+            //Hämta avsändarens namn (för visning i klienten)
             var sender = await _context.Users
                 .Include(u => u.Profile)
                 .FirstOrDefaultAsync(u => u.Id == senderId);
@@ -70,7 +70,7 @@ namespace ASPAssignment.Hubs
                 ? $"{sender.Profile.FirstName} {sender.Profile.LastName}"
                 : sender?.UserName ?? "Unknown";
 
-            // 4) Skicka privata meddelandet – till mottagare och tillbaka till avsändare
+            //Skicka privata meddelandet – till mottagare och tillbaka till avsändare
             if (_userConnections.TryGetValue(recipientId, out var recConn))
             {
                 await Clients.Client(recConn)

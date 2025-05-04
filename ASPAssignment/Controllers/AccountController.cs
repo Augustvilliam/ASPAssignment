@@ -91,7 +91,7 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterForm form)
     {
-        if(!form.Terms)
+        if(!form.Terms) //se till att terms är ikryssad
         {
             ModelState.AddModelError(nameof(form.Terms), "You must accept the terms and conditions.");
             return View(form);
@@ -106,7 +106,7 @@ public class AccountController : Controller
             LastName = form.LastName,
             Email = form.Email,
             Password = form.Password
-        };
+        }; //skicka till DTO
 
         var result = await _accountService.RegisterAsync(dto);
         if (!result.Succeeded)

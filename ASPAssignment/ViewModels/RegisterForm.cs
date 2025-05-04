@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ASPAssignment.ViewModels;
 
-public class RegisterForm
+public class RegisterForm //lite striktare med validering här eftersom det är vid registrering. 
 {
     [Required]
     [DataType(DataType.Text)]

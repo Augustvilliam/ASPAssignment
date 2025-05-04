@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ASPAssignment.Controllers;
 
 [Route("Member")]
+[Authorize]
 public class MemberController : Controller
 {
     private readonly IMemberService _memberService;
@@ -56,7 +57,7 @@ public class MemberController : Controller
             return BadRequest(errors);
         }
 
-        // 1) Hantera uppladdad bild
+        // antera uppladdad bild
         string? imagePath = form.ExistingProfileImagePath;
         if (form.ProfilePic != null && form.ProfilePic.Length > 0)
         {
@@ -72,7 +73,7 @@ public class MemberController : Controller
             imagePath = $"/uploads/{fileName}";
         }
 
-        // 2) Bygg DTO med RoleId istället för JobTitle
+        // Bygg DTO
         var dto = new MemberDto
         {
             Id = form.Id,
@@ -88,7 +89,7 @@ public class MemberController : Controller
             BirthDate = form.BirthDate
         };
 
-        // 3) Skicka vidare till service
+        //Skicka vidare till service
         var result = await _memberService.UpdateMemberAsync(dto, imagePath);
         if (result)
             return Json(new { success = true });

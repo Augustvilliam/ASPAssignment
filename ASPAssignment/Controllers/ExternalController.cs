@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASPAssignment.Controllers;
-
+//kontroller för att hantera inloggning med externa leverantörer (t.ex. Google, Facebook)
 public class ExternalController : Controller
 {
     private readonly IAccountService _accountService;
@@ -53,12 +53,11 @@ public class ExternalController : Controller
         return Challenge(props, provider);
     }
 
-    // GET eller POST från externa leverantören
     public async Task<IActionResult> ExternalSignInCallback(
         string returnUrl = null!,
         string remoteError = null!)
     {
-        // Standard-redirect om ingen specifik returnUrl är angiven
+        //Standard-redirect om ingen specifik returnUrl är angiven
         returnUrl ??= Url.Action("Index", "Home");
 
         if (!string.IsNullOrEmpty(remoteError))
@@ -87,7 +86,7 @@ public class ExternalController : Controller
         if (signInRes.Succeeded)
             return LocalRedirect(returnUrl);
 
-        // 2) Annars: hämta e-post och antingen länka eller skapa konto
+        //Annars: hämta e-post och antingen länka eller skapa konto
         var email = info.Principal.FindFirstValue(ClaimTypes.Email);
         if (email != null)
         {
@@ -99,7 +98,7 @@ public class ExternalController : Controller
                 await _signInManager.SignInAsync(existing, isPersistent: false);
                 return LocalRedirect(returnUrl);
             }
-            else
+            else //else gjort av chatgpt-mini-high
             {
                 // Skapa nytt konto med automagic-lösen
                 var dto = new RegisterDto { Email = email };

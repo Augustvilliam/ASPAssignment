@@ -20,6 +20,7 @@ public class NotificationService : INotificationService
         _db = db;
     }
 
+    //skickka notis
     public async Task SendNotificationAsync(string userId, NotificationDto dto)
     {
         // 1) Persist
@@ -40,6 +41,7 @@ public class NotificationService : INotificationService
         await _hub.Clients.User(userId)
                  .SendAsync("ReceiveNotification", dto);
     }
+    //kryssa enskild notis
     public async Task DismissAsync(Guid notificationId, string userId)
     {
         var entity = await _db.Notifications.FindAsync(notificationId);
@@ -49,6 +51,7 @@ public class NotificationService : INotificationService
             await _db.SaveChangesAsync();
         }
     }
+    //dumpar alla notiser för en användare
     public async Task ClearAllForUserAsync(string userId)
     {
         var notes = _db.Notifications.Where(n => n.UserId == userId);
@@ -56,14 +59,15 @@ public class NotificationService : INotificationService
         _db.SaveChanges();
         await _db.SaveChangesAsync();
     }
+    //skickar notiser till alla användare
     public async Task BroadcastNotificationAsync(NotificationDto notification)
     {
-        // 1) Hämta alla userIds från Identity-tabellen
+        //Hämta alla userIds från Identity-tabellen
         var userIds = await _db.Users
                                .Select(u => u.Id)
                                .ToListAsync();
 
-        // 2) Bygg upp NotificationEntity-objekt och motsvarande DTO per user
+        // Bygg upp NotificationEntity-objekt och motsvarande DTO per user
         var entities = new List<NotificationEntity>(userIds.Count);
         var userNotifications = new Dictionary<string, NotificationDto>(userIds.Count);
 
@@ -92,11 +96,11 @@ public class NotificationService : INotificationService
             };
         }
 
-        // 3) Spara alla notiser i ett svep
+        //Spara alla notiser i ett svep
         await _db.Notifications.AddRangeAsync(entities);
         await _db.SaveChangesAsync();
 
-        // 4) Skicka en SignalR-händelse till var och en
+        //Skicka en SignalR-händelse till var och en
         foreach (var uid in userIds)
         {
             var dto = userNotifications[uid];
@@ -104,6 +108,7 @@ public class NotificationService : INotificationService
                       .SendAsync("ReceiveNotification", dto);
         }
     }
+    //hämtar notiser för en användare som inte är kryssade
     public async Task<IEnumerable<NotificationDto>> GetNotificationsForUserAsync(string userId)
     {
         var ents = await _db.Notifications

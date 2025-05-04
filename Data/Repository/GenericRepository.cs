@@ -19,23 +19,20 @@ public class GenericRepository<T>(DataContext context) : IGenericRepository<T> w
         await _context.SaveChangesAsync();
         return entity;
     }
-
+    //Generisk repository för CRUD-operationer
     public async Task<T?> GetByIdAsync(object id)
     {
         return await _dbSet.FindAsync(id);
     }
-
     public async Task<IEnumerable<T>> GetAllAsync()
     {
         return await _dbSet.ToListAsync();
     }
-
     public async Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
         await _context.SaveChangesAsync();
     }
-
     public async Task DeleteAsync(T entity)
     {
         var entry = _context.Entry(entity);
@@ -65,13 +62,10 @@ public class GenericRepository<T>(DataContext context) : IGenericRepository<T> w
 
         await _context.SaveChangesAsync();
     }
-
-
     public async Task BeginTransactionAsync()
     {
         _transaction = await _context.Database.BeginTransactionAsync();
     }
-
     public async Task CommitTransactionAsync()
     {
         if (_transaction != null)
@@ -81,7 +75,6 @@ public class GenericRepository<T>(DataContext context) : IGenericRepository<T> w
             _transaction = null;
         }
     }
-
     public async Task RollbackTransactionsAync()
     {
         if (_transaction != null)

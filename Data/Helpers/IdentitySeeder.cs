@@ -11,14 +11,14 @@ public class IdentitySeeder
         var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<MemberEntity>>();
 
-        var roles = new[]
+        var roles = new[] //Seedar standardroller. ProjectLead som mellansteg mellan Admin och User
         {
             new ApplicationRole { Name = "Admin", IsAdmin = true },
             new ApplicationRole { Name = "User",  IsAdmin = false },
             new ApplicationRole { Name = "ProjectLead", IsAdmin = false }
         };
 
-        foreach (var role in roles)
+        foreach (var role in roles) //kollar om rollerna finns, annars skapas de
         {
             var existing = await roleManager.FindByNameAsync(role.Name);
             if (existing == null)
@@ -42,7 +42,7 @@ public class IdentitySeeder
             }
         }
 
-        // Hämta den seedade Admin-rollen
+        // Hämta den seedade Admin-rollen och skapa en admin-användare om den inte finns
         var adminRole = await roleManager.FindByNameAsync("Admin");
         if (adminRole == null)
         {
@@ -67,7 +67,7 @@ public class IdentitySeeder
                 }
             };
 
-            var createUserResult = await userManager.CreateAsync(newAdminUser, "Admin@123");
+            var createUserResult = await userManager.CreateAsync(newAdminUser, "Admin@123"); //bara något enkelt för att se att det funkar
             if (!createUserResult.Succeeded)
             {
                 foreach (var error in createUserResult.Errors)

@@ -28,7 +28,7 @@ namespace Business.Services
             return result.Succeeded;
         }
 
-        public async Task<IdentityResult> RegisterAsync(RegisterDto registerDto)
+        public async Task<IdentityResult> RegisterAsync(RegisterDto registerDto) //skapar användare och sätter alltid USER-rollen som standrad. 
         {
             //Hämta den standard-rollen "User"
             var userRole = await _roleManager.FindByNameAsync("User");
@@ -51,7 +51,7 @@ namespace Business.Services
             //Skapa användaren
             var result = await _userManager.CreateAsync(
                 memberEntity,
-                registerDto.Password ?? "ExternalLogin123!"
+                registerDto.Password ?? "ExternalLogin123!" //chatgpt sa att det är bra att ha en default password här och la till det
             );
             if (!result.Succeeded)
                 return result;
@@ -67,7 +67,7 @@ namespace Business.Services
             await _signInManager.SignOutAsync();
         }
 
-        public async Task AddLoginAsync(string email, ExternalLoginInfo loginInfo)
+        public async Task AddLoginAsync(string email, ExternalLoginInfo loginInfo) // lägger till extärn användare. 
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)

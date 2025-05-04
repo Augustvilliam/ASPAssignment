@@ -5,7 +5,7 @@
     document.body.addEventListener("click", async e => {
         const t = e.target;
 
-        // Sidomeny
+        // ── Sidomeny ─────────────────────────────────────────────
         if (t.matches("#load-projects")) {
             e.preventDefault();
             await loadView("/Navigation/LoadProjects");
@@ -17,25 +17,46 @@
             return;
         }
 
-        // Status-bar
+        // ── Status-bar ───────────────────────────────────────────
         if (t.matches(".status-bar .navbar-link")) {
             e.preventDefault();
             const status = t.dataset.status || "";
-            activateStatus(t);
+
+            // 1) Ladda om projekten
             await loadView(`/Navigation/LoadProjects?status=${encodeURIComponent(status)}`);
+
+            // 2) Sätt active på rätt länk i den nya status-baren
+            document
+                .querySelectorAll(".status-bar .navbar-link")
+                .forEach(l => l.classList.remove("active"));
+            const newLink = document.querySelector(
+                `.status-bar .navbar-link[data-status="${status}"]`
+            );
+            if (newLink) newLink.classList.add("active");
+
             return;
         }
 
-        // Projekts-pagination
+        // ── Projekts-pagination ───────────────────────────────────
         if (t.matches(".project-page")) {
             e.preventDefault();
             const page = t.dataset.page;
             const status = t.dataset.status || "";
             await loadView(`/Navigation/LoadProjects?status=${encodeURIComponent(status)}&page=${page}`);
+
+            // Efter sidbyte: sätt active på länk med samma status som innan
+            document
+                .querySelectorAll(".status-bar .navbar-link")
+                .forEach(l => l.classList.remove("active"));
+            const activeLink = document.querySelector(
+                `.status-bar .navbar-link[data-status="${status}"]`
+            );
+            if (activeLink) activeLink.classList.add("active");
+
             return;
         }
 
-        // Members-pagination
+        // ── Members-pagination ───────────────────────────────────
         if (t.matches(".member-page")) {
             e.preventDefault();
             const page = t.dataset.page;
@@ -44,7 +65,7 @@
         }
     });
 
-    // Global search
+    // ── Global search ─────────────────────────────────────────
     const searchInput = document.getElementById("globalSearch");
     if (searchInput) {
         let timeout;
@@ -57,10 +78,20 @@
                     ? `/Navigation/LoadMembers?term=${term}`
                     : `/Navigation/LoadProjects?term=${term}`;
                 await loadView(url);
+
+                // Efter sökning: om vi är i projektvy, markera "ALL" eftersom status-term elimineras
+                if (!isMembers) {
+                    document
+                        .querySelectorAll(".status-bar .navbar-link")
+                        .forEach(l => l.classList.remove("active"));
+                    const allLink = document.querySelector(`.status-bar .navbar-link[data-status=""]`);
+                    if (allLink) allLink.classList.add("active");
+                }
             }, 300);
         });
     }
 
+    // ── Hjälpfunktion för att ladda in partial och fade-in ─────
     async function loadView(url) {
         container.classList.remove("visible");
         container.classList.add("fade-in");
@@ -72,11 +103,5 @@
         } catch {
             container.innerHTML = "<div class='text-danger'>Kunde inte ladda innehållet.</div>";
         }
-    }
-
-    function activateStatus(el) {
-        document.querySelectorAll(".status-bar .navbar-link")
-            .forEach(l => l.classList.remove("active"));
-        el.classList.add("active");
     }
 });

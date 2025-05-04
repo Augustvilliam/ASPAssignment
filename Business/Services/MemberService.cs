@@ -93,56 +93,67 @@ public class MemberService: IMemberService
 
     public async Task<bool> UpdateMemberAsync(MemberDto dto, string? imagePath)
     {
-        // 1) Hämta användare inkl. profil
-        var user = await _userManager.Users
-            .Include(u => u.Profile)
-            .FirstOrDefaultAsync(x => x.Id == dto.Id);
-
-        if (user == null)
-            return false;
-
-        // 2) Se till att en profil alltid finns
-        if (user.Profile == null)
+        await using var tx = await _context.Database.BeginTransactionAsync();
+        try
         {
-            user.Profile = new MemberProfileEntity { MemberId = user.Id };
-            _context.MemberProfile.Add(user.Profile);
-        }
+            var user = await _userManager.Users
+                .Include(u => u.Profile)
+                .FirstOrDefaultAsync(u => u.Id == dto.Id);
+            if (user == null) return false;
 
-        // 3) Uppdatera roller **ENDAST om** RoleId skiljer sig
-        var currentRoles = await _userManager.GetRolesAsync(user);
-        var newRoleEntity = await _roleManager.FindByIdAsync(dto.RoleId);
-        if (newRoleEntity != null)
-        {
-            var newRoleName = newRoleEntity.Name!;
-            if (!currentRoles.Contains(newRoleName))
+            if (user.Profile == null)
             {
-                // Ta bort gamla roller
+                user.Profile = new MemberProfileEntity { MemberId = user.Id };
+                _context.MemberProfile.Add(user.Profile);
+            }
+
+            // --- hitta/validera targetRole som tidigare ---
+            var targetRole = !string.IsNullOrWhiteSpace(dto.RoleId)
+                ? await _roleManager.FindByIdAsync(dto.RoleId)
+                : null;
+            if (targetRole == null)
+            {
+                targetRole = await _roleManager.FindByNameAsync("User")
+                            ?? throw new InvalidOperationException("Standardrollen saknas!");
+            }
+
+            //  --- räddad av chatgpt eftersom man kunde delete tillsatta roller som satt användaren i limbo. 
+            user.Profile.RoleId = targetRole.Id;
+
+            // 3) Identity‐roller på Membership‐tabellen
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (!currentRoles.Contains(targetRole.Name!))
+            {
                 if (currentRoles.Any())
                     await _userManager.RemoveFromRolesAsync(user, currentRoles);
-
-                // Tilldela ny
-                await _userManager.AddToRoleAsync(user, newRoleName);
+                await _userManager.AddToRoleAsync(user, targetRole.Name!);
             }
+
+            // 4) övriga fält
+            MemberFactory.UpdateEntity(user, dto);
+            if (!string.IsNullOrEmpty(imagePath))
+                user.ProfileImagePath = imagePath;
+
+            // 5) Spara Identity‐delen
+            var idRes = await _userManager.UpdateAsync(user);
+            if (!idRes.Succeeded)
+            {
+                await tx.RollbackAsync();
+                return false;
+            }
+
+            // 6) Spara EF‐delen (inklusive Profile.RoleId)
+            await _context.SaveChangesAsync();
+
+            await tx.CommitAsync();
+            return true;
         }
-
-        // 4) Använd din factory för att uppdatera profilfält
-        MemberFactory.UpdateEntity(user, dto);
-
-        // 5) Bild och telefonnummer (factory uppdaterar ProfileImagePath och PhoneNumber)
-        if (!string.IsNullOrEmpty(imagePath))
-            user.ProfileImagePath = imagePath;
-
-        // 6) Spara user (inbegriper AspNetUsers-tabellen och UserRoles)
-        var userUpdateResult = await _userManager.UpdateAsync(user);
-        if (!userUpdateResult.Succeeded)
-            return false;
-
-        // 7) Spara MemberProfile-ändringar (BirthDate, Address, RoleId etc.)
-        await _context.SaveChangesAsync();
-
-        return true;
+        catch
+        {
+            await tx.RollbackAsync();
+            throw;
+        }
     }
-
 
     public async Task<bool> DeleteMemberAsync(string id)
     {

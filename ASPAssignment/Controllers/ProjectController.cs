@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace ASPAssignment.Controllers;
 
 [Route("Project")]
-[Authorize]
+[Authorize] // minst var inloggad 
 public class ProjectController(IProjectService projectService,
     IMemberService memberService,
     INotificationService notificationService) : Controller
@@ -96,42 +96,42 @@ public class ProjectController(IProjectService projectService,
     }
 
     [HttpPost("Update")]
-    [Authorize(Policy = "RequireProjectLeadOrAppAdmin")]
+    [Authorize(Policy = "RequireProjectLeadOrAppAdmin")] // Endast projektledare eller appadmin kan uppdatera
     public async Task<IActionResult> Update(ProjectEditForm form)
     {
         if (!ModelState.IsValid)
         {
             var errors = ModelState
                 .Where(x => x.Value.Errors.Count > 0)
-                .Select(x => new
-                {
+                .Select(x => new {
                     Field = x.Key,
                     Errors = x.Value.Errors.Select(e => e.ErrorMessage)
                 });
-
             return BadRequest(errors);
         }
 
-        string? imagePath = form.ExistingImagePath;
+        //Hämta befintligt projekt DTO för att få gamla medlemmar
+        var projectId = Guid.Parse(form.Id);
+        var existing = await _projectService.GetProjectByIdAsync(projectId);
+        var oldMemberIds = existing?.MemberIds ?? Enumerable.Empty<string>();
 
+        //Hantera eventuell ny bild
+        string? imagePath = form.ExistingImagePath;
         if (form.ProjectImage is { Length: > 0 })
         {
-            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            if (!Directory.Exists(uploadPath))
-                Directory.CreateDirectory(uploadPath);
-
+            var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadDir);
             var fileName = $"{Guid.NewGuid()}_{form.ProjectImage.FileName}";
-            var filePath = Path.Combine(uploadPath, fileName);
-
-            using var stream = new FileStream(filePath, FileMode.Create);
+            var fullPath = Path.Combine(uploadDir, fileName);
+            using var stream = new FileStream(fullPath, FileMode.Create);
             await form.ProjectImage.CopyToAsync(stream);
-
             imagePath = $"/uploads/{fileName}";
         }
 
+        //Bygg DTO och uppdatera
         var dto = new ProjectDto
         {
-            Id = Guid.Parse(form.Id),
+            Id = projectId,
             ProjectName = form.ProjectName,
             ClientName = form.ClientName,
             Description = form.Description,
@@ -143,29 +143,44 @@ public class ProjectController(IProjectService projectService,
             Status = form.Status
         };
 
-        var result = await _projectService.UpdateProjectAsync(dto);
-        if (result)
-        {
-            var changer = await _memberService.GetMemberByEmailAsync(User.Identity.Name);
-            var changerName = $"{changer.FirstName} {changer.LastName}".Trim();
+        var ok = await _projectService.UpdateProjectAsync(dto);
+        if (!ok)
+            return StatusCode(500, new { message = "Failed to update project." });
 
-            var notification = new NotificationDto
+        //Skicka notis till nytillagda medlemmar
+        var addedMemberIds = dto.MemberIds.Except(oldMemberIds);
+        var changer = await _memberService.GetMemberByEmailAsync(User.Identity.Name!);
+        var changerName = $"{changer.FirstName} {changer.LastName}".Trim();
+
+        foreach (var memberId in addedMemberIds)
+        {
+            var member = await _memberService.GetMemberByIdAsync(memberId);
+            if (member == null) continue;
+            var note = new NotificationDto
             {
                 ImageUrl = changer.ProfileImagePath ?? "/img/default-user.svg",
-                Message = $"{changerName} har bytt status på projektet {dto.ProjectName} till {dto.Status}",
+                Message = $"{changerName} har lagt till dig i projektet \"{dto.ProjectName}\"",
                 Timestamp = DateTime.UtcNow,
-                NotificationId = Guid.NewGuid().ToString(),
-                NotificationType = "StatusChanged"
+                NotificationType = "ProjectMemberAdded"
             };
-
-            var admins = await _memberService.GetAllAdminsAsync();
-            foreach (var admin in admins)
-                await _notificationService.SendNotificationAsync(admin.Email, notification);
-
-            return Json(new { success = true });
+            await _notificationService.SendNotificationAsync(member.Email, note);
         }
-        return StatusCode(500, new { message = "Failed to update project." });
+
+        //Skicka status-notification 
+        var statusNote = new NotificationDto
+        {
+            ImageUrl = changer.ProfileImagePath ?? "/img/default-user.svg",
+            Message = $"{changerName} har ändrat status på \"{dto.ProjectName}\" till {dto.Status}",
+            Timestamp = DateTime.UtcNow,
+            NotificationType = "StatusChanged"
+        };
+        var admins = await _memberService.GetAllAdminsAsync();
+        foreach (var admin in admins)
+            await _notificationService.SendNotificationAsync(admin.Email, statusNote);
+
+        return Json(new { success = true });
     }
+
 
     [HttpGet("GetProject/{id}")]
     public async Task<IActionResult> GetProject(string id)
@@ -205,7 +220,7 @@ public class ProjectController(IProjectService projectService,
     }
 
     [HttpDelete("Delete/{id}")]
-    [Authorize(Policy = "RequireAppAdmin")]
+    [Authorize(Policy = "RequireAppAdmin")] // Endast appadmin kan ta bort projekt
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _projectService.DeleteProjectAsync( id);

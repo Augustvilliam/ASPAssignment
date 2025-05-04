@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 
 namespace ASPAssignment.Services;
-
+//claimstransformer för att lägga till en claim i användarens identitet
 public class AdminClaimsTransformer : IClaimsTransformation 
 {
     private readonly UserManager<MemberEntity> _userManager;

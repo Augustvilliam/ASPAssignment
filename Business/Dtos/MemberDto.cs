@@ -15,7 +15,7 @@ public class MemberDto
     public string? StreetAddress { get; set; }
     public string? City { get; set; }
     public string? PostalCode { get; set; }
-    public string FullName => $"{FirstName} {LastName}";
+    public string FullName => $"{FirstName} {LastName}"; //slänga ihop ett fullname
     public string? ProfileImageUrl { get; set; }
     public bool HasCompleteProfile { get; set; }
 }

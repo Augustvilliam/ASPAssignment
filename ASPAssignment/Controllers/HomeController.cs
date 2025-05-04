@@ -33,7 +33,7 @@ namespace ASPAssignment.Controllers
         
         public async Task<IActionResult> Index(string? status, int page = 1)
         {
-            // 1) Profil-info till layout
+            //Profil-info till layout
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return RedirectToAction("Login", "Account");

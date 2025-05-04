@@ -8,6 +8,7 @@
     initAddMemberModal();
 }
 document.addEventListener("DOMContentLoaded", initAll);
+const MAX_BUDGET = 2147483647; //maximalt värde för budget
 
 // CREATE project modal
 function initCreateProjectModal() {
@@ -52,15 +53,18 @@ function initCreateProjectModal() {
             },
             StartDate: {
                 fn: v => v !== "",
-                msg: "StartDate is required."
+                msg: "Start Date is required."
             },
             EndDate: {
                 fn: v => v !== "",
-                msg: "EndDate is required."
+                msg: "End Date is required."
             },
             Budget: {
-                fn: v => !isNaN(v) && Number(v) >= 0,
-                msg: "Budget cannot be 0 or below."
+                fn: v => {
+                    const n = Number(v);
+                    return /^\d+$/.test(v) && n >= 0 && n <= MAX_BUDGET;
+                },
+                msg: `Budget must be a number between 0 and ${MAX_BUDGET}.`
             }
         };
         if (!validateForm(form, rules)) {
@@ -155,17 +159,27 @@ function initEditProjectModal() {
         const rules = {
             ProjectName: {
                 fn: v => v.trim() !== "",
-                msg: "Project Name is Required."
+                msg: "Project Name is required."
             },
             ClientName: {
                 fn: v => v.trim() !== "",
-                msg: "Client Name is Required."
+                msg: "Client Name is required."
+            },
+            StartDate: {
+                fn: v => v !== "",
+                msg: "Start Date is required."
+            },
+            EndDate: {
+                fn: v => v !== "",
+                msg: "End Date is required."
             },
             Budget: {
-                fn: v => !isNaN(v) && Number(v) >= 0,
-                msg: "Budget must be greater then Zero"
+                fn: v => {
+                    // bara heltal, 0 <= n <= MAX_BUDGET
+                    return /^\d+$/.test(v) && Number(v) >= 0 && Number(v) <= MAX_BUDGET;
+                },
+                msg: `Budget must be an integer between 0 and ${MAX_BUDGET}.`
             }
-            // Lägg till fler regler om du behöver validera Status, Description etc.
         };
 
         // Kör valideringen – avbryt om något är fel
@@ -263,18 +277,25 @@ function initEditTeamMemberModal() {
         // Valideringsregler för medlem
         const rules = {
             FirstName: {
-                fn: v => v.trim() !== "",
-                msg: "Last Name is required."
+                fn: v => /^[A-Za-zÅÄÖåäö]+$/.test(v.trim()),
+                msg: "First name must only contain letters"
             },
             LastName: {
-                fn: v => v.trim() !== "",
-                msg: "Last Name is required."
+                fn: v => /^[A-Za-zÅÄÖåäö]+$/.test(v.trim()),
+                msg: "Last name must only contain letters"
+            },
+            Phone: {
+                fn: v => v === "" || /^\d+$/.test(v),
+                msg: "Phone Number name must only contain numbers"
+            },
+            PostalCode: {
+                fn: v => v === "" || /^\d+$/.test(v),
+                msg: "Postal-code must only contain Numbers"
             },
             RoleId: {
                 fn: v => v.trim() !== "",
-                msg: "Role is required"
+                msg: "You must choose a role"
             }
-            // Du kan lägga till postnummer, telefon m.m. här också
         };
 
         if (!validateForm(form, rules)) {
@@ -286,7 +307,7 @@ function initEditTeamMemberModal() {
         errorContainer.innerHTML = "";
 
         try {
-            const resp = await fetch(form.action || "/Member/Update", {
+            const resp = await fetch(form.action, {
                 method: "POST",
                 body: data,
                 credentials: "same-origin"
@@ -456,7 +477,9 @@ function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));
     form.querySelectorAll("span[data-valmsg-for]").forEach(s => s.textContent = "");
 }
-// Validering för modalerna. 
+// Validering för modalerna.
+
+//dessa tre sista är 99% copy-paste från chatgpt-mini-high
 function validateForm(form, rules) {
     let isValid = true;
     Object.entries(rules).forEach(([name, { fn, msg }]) => {
