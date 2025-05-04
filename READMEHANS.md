@@ -1,5 +1,12 @@
 10 veckor senare, 1dm längre skägg. kronsik migrän. 
 
+Ej reposonsivt, inte gjort några Enhetstester och har inte sätt över arial-träden. jag kände att det ej fanns tid för detta. 
+Och av någon outgrundlig anledning vägar VS2022 låta mig ta bort delarna från "Lib" mappen. så dom filer ligger tyvär kvar. 
+
+
+
+
+
 NOTERINGAR:
 Vi pratade snabbt om min ajaxlösning för project och member vyn, den var en mardröm att jobba med. kom med ungefär 1000000bugs och 15 miljoner rader javascript. 
 jag valde dock att implementera mer klassisk MVC för te.x settings(förutom navigeringen innuti själva settings där körde jag SPA igen), admins roll managersida osv. kände att det var alldeless för mycket. Jag kommer nog hålla mig till rå MVC i framtiden. C# -> JS
