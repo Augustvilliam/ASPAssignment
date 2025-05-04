@@ -42,7 +42,7 @@ public class MemberService: IMemberService
         return user == null ? null : MemberFactory.FromEntity(user);
     }
 
-    public async Task<MemberDto?> GetMemberByEmailAsync(string email)
+    public async Task<MemberDto?> GetMemberByEmailAsync(string email) 
     {
         var user = await _userManager.Users
             .Include(u => u.Profile)
@@ -52,8 +52,8 @@ public class MemberService: IMemberService
             return null;
 
         var dto = MemberFactory.FromEntity(user);
-        dto.ProfileImageUrl = user.ProfileImagePath;
-        dto.HasCompleteProfile =
+        dto.ProfileImageUrl = user.ProfileImagePath; 
+        dto.HasCompleteProfile = //restkod från när jag försäkte implementera automatiska notiser när en profil inte var komplett. men fick det aldrig fungera så nu ligger den bara kvar så inget går sönder. 
             !string.IsNullOrEmpty(user.ProfileImagePath) &&
             !string.IsNullOrEmpty(user.PhoneNumber) &&
             !string.IsNullOrEmpty(user.Profile?.StreetAddress) &&
@@ -120,7 +120,7 @@ public class MemberService: IMemberService
             //  --- räddad av chatgpt eftersom man kunde delete tillsatta roller som satt användaren i limbo. 
             user.Profile.RoleId = targetRole.Id;
 
-            // 3) Identity‐roller på Membership‐tabellen
+            //Identity‐roller på Membership‐tabellen
             var currentRoles = await _userManager.GetRolesAsync(user);
             if (!currentRoles.Contains(targetRole.Name!))
             {
@@ -129,12 +129,12 @@ public class MemberService: IMemberService
                 await _userManager.AddToRoleAsync(user, targetRole.Name!);
             }
 
-            // 4) övriga fält
+            //övriga fält
             MemberFactory.UpdateEntity(user, dto);
             if (!string.IsNullOrEmpty(imagePath))
                 user.ProfileImagePath = imagePath;
 
-            // 5) Spara Identity‐delen
+            //Spara Identity‐delen
             var idRes = await _userManager.UpdateAsync(user);
             if (!idRes.Succeeded)
             {
@@ -142,7 +142,7 @@ public class MemberService: IMemberService
                 return false;
             }
 
-            // 6) Spara EF‐delen (inklusive Profile.RoleId)
+            //Spara EF‐delen (inklusive Profile.RoleId)
             await _context.SaveChangesAsync();
 
             await tx.CommitAsync();
@@ -169,7 +169,7 @@ public class MemberService: IMemberService
         return result.Succeeded;
     }
 
-    public async Task<int> CountAsync()
+    public async Task<int> CountAsync() // räknar antalet användare för paginering
     {
         return await _userManager.Users.CountAsync();
     }
