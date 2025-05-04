@@ -1,4 +1,4 @@
-
+Ôªø
 using ASPAssignment.Hubs;
 using ASPAssignment.Services;
 using Business.Interface;
@@ -24,8 +24,20 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// ===== MVC + Identity =====
+// ===== MVC + Identity + Cookie + AntiForgery =====
 builder.Services.AddControllersWithViews();
+builder.Services.AddCookiePolicy(options =>
+{
+    // Kr√§ver samtycke f√∂r alla icke-n√∂dv√§ndiga cookies
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+});
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = "XSRF-TOKEN";
+    options.Cookie.IsEssential = true;      // ‚Üê alltid satt
+});
 
 builder.Services.AddIdentity<MemberEntity, ApplicationRole>(options =>
 {
@@ -37,13 +49,13 @@ builder.Services.AddIdentity<MemberEntity, ApplicationRole>(options =>
 })
 .AddEntityFrameworkStores<DataContext>();
 
-// Claims-transformering fˆr IsAppAdmin
+// Claims-transformering f√∂r IsAppAdmin
 builder.Services.AddScoped<IClaimsTransformation, AdminClaimsTransformer>();
 
-// Policyn som kr‰ver admin-claim
+// Policyn som kr√§ver admin-claim
 builder.Services.AddAuthorization(options =>
 {
-    // Endast de med IsAppAdmin-claim fÂr denna
+    // Endast de med IsAppAdmin-claim f√•r denna
     options.AddPolicy("RequireAppAdmin", policy =>
         policy.RequireClaim("IsAppAdmin", "true"));
 
@@ -56,21 +68,25 @@ builder.Services.AddAuthorization(options =>
 });
 
 
-// Konfigurera Identity-cookien EN G≈NG
+// Konfigurera Identity-cookien EN G√ÖNG
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Standardlogin fˆr vanliga anv‰ndare
-    options.LoginPath = "/Account/Login";
+    // Standardlogin f√∂r vanliga anv√§ndare
+    
+    options.Cookie.Name = "MyAppAuth";
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.None;
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/Account/Login";
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.Name = "MyAppAuth";
+   
+    
 
-    // S‰rskilj inloggningsv‰g fˆr /Admin helt genererad av chatgpt-mini-hight
+    // S√§rskilj inloggningsv√§g f√∂r /Admin helt genererad av chatgpt-mini-hight
     options.Events.OnRedirectToLogin = ctx =>
     {
-        // Skapa samma typ fˆr bÂda v‰garna
+        // Skapa samma typ f√∂r b√•da v√§garna
         var returnUrl = ctx.Request.Path + ctx.Request.QueryString;
         PathString targetLogin = ctx.Request.Path.StartsWithSegments("/Admin")
             ? new PathString("/Admin/Login")
@@ -86,7 +102,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// ===== Externa inloggningsleverantˆrer =====
+// ===== Externa inloggningsleverant√∂rer =====
 builder.Services.AddAuthentication()
     .AddGoogle(opts =>
     {
@@ -160,11 +176,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.UseCookiePolicy();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -175,7 +190,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ===== Routing =====
-// Admin-route (mÂste deklareras fˆre default)
+// Admin-route (m√•ste deklareras f√∂re default)
 app.MapControllerRoute(
     name: "admin",
     pattern: "Admin/{action=Login}/{id?}",

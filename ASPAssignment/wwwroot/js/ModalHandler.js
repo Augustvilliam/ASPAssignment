@@ -41,13 +41,44 @@ function initCreateProjectModal() {
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault(); clearValidation(form);
+        const rules = {
+            ProjectName: {
+                fn: v => v.trim() !== "",
+                msg: "Project Name is required."
+            },
+            ClientName: {
+                fn: v => v.trim() !== "",
+                msg: "Client Name is required."
+            },
+            StartDate: {
+                fn: v => v !== "",
+                msg: "StartDate is required."
+            },
+            EndDate: {
+                fn: v => v !== "",
+                msg: "EndDate is required."
+            },
+            Budget: {
+                fn: v => !isNaN(v) && Number(v) >= 0,
+                msg: "Budget cannot be 0 or below."
+            }
+        };
+        if (!validateForm(form, rules)) {
+            return;
+        }
         if (window.quillCreate) {
             document.getElementById('create-description-input').value = quillCreate.root.innerHTML;
         }
         const data = new FormData(form);
-        if (errorContainer) errorContainer.innerHTML = "";
+        errorContainer.innerHTML = "";
         try {
-            const resp = await fetch("/Project/Create", { method: "POST", body: data });
+            const token = data.get("__RequestVerificationToken");
+            const resp = await fetch(form.action || "/Project/Create", {
+                method: "POST",
+                body: data,
+                headers: token ? { "RequestVerificationToken": token } : {},
+                credentials: "same-origin"
+            });
             await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
         } catch (err) {
             console.error("Create project error:", err);
@@ -116,24 +147,55 @@ function initEditProjectModal() {
             console.error("❌ Kunde inte hämta projektdata:", err);
         }
     });
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async e => {
         e.preventDefault();
         clearValidation(form);
-        // ── 5) Flytta Quill-beskrivningen in i den dolda inputen ──
-        if (window.quillEdit) {
-            document.getElementById('edit-description-input').value = quillEdit.root.innerHTML;
+
+        // Valideringsregler för Edit Project
+        const rules = {
+            ProjectName: {
+                fn: v => v.trim() !== "",
+                msg: "Project Name is Required."
+            },
+            ClientName: {
+                fn: v => v.trim() !== "",
+                msg: "Client Name is Required."
+            },
+            Budget: {
+                fn: v => !isNaN(v) && Number(v) >= 0,
+                msg: "Budget must be greater then Zero"
+            }
+            // Lägg till fler regler om du behöver validera Status, Description etc.
+        };
+
+        // Kör valideringen – avbryt om något är fel
+        if (!validateForm(form, rules)) {
+            return;
         }
+
+        // Flytta in Quill-text om du använder det
+        if (window.quillEdit) {
+            document.getElementById('edit-description-input')
+                .value = quillEdit.root.innerHTML;
+        }
+
+        // Skapa FormData och skicka
         const data = new FormData(form);
-        if (errorContainer) errorContainer.innerHTML = '';
+        const token = data.get("__RequestVerificationToken");
+        const errorContainer = document.getElementById("edit-project-errors");
+        errorContainer.innerHTML = "";  // rensa gamla fel
+
         try {
-            const resp = await fetch("/Project/Update", { method: "POST", body: data, credentials: 'same-origin'});
+            const resp = await fetch(form.action || "/Project/Update", {
+                method: "POST",
+                body: data,
+                headers: token ? { "RequestVerificationToken": token } : {},
+                credentials: "same-origin"
+            });
             await handleFormResponse(resp, modal, "/Navigation/LoadProjects", errorContainer);
         } catch (err) {
             console.error("Update project error:", err);
         }
-    });
-    modal.addEventListener("hidden.bs.modal", () => {
-        delete modal.dataset.keepMembers;
     });
 }
 function initEditTeamMemberModal() {
@@ -194,19 +256,42 @@ function initEditTeamMemberModal() {
         }
     });
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async e => {
         e.preventDefault();
         clearValidation(form);
 
+        // Valideringsregler för medlem
+        const rules = {
+            FirstName: {
+                fn: v => v.trim() !== "",
+                msg: "Last Name is required."
+            },
+            LastName: {
+                fn: v => v.trim() !== "",
+                msg: "Last Name is required."
+            },
+            RoleId: {
+                fn: v => v.trim() !== "",
+                msg: "Role is required"
+            }
+            // Du kan lägga till postnummer, telefon m.m. här också
+        };
+
+        if (!validateForm(form, rules)) {
+            return;
+        }
+
+        // Skapa och skicka FormData
         const data = new FormData(form);
-        if (errorContainer) errorContainer.innerHTML = "";
+        errorContainer.innerHTML = "";
 
         try {
-            const response = await fetch("/Member/Update", {
+            const resp = await fetch(form.action || "/Member/Update", {
                 method: "POST",
-                body: data
+                body: data,
+                credentials: "same-origin"
             });
-            await handleFormResponse(response, modal, "/Navigation/LoadMembers", errorContainer);
+            await handleFormResponse(resp, modal, "/Navigation/LoadMembers", errorContainer);
         } catch (err) {
             console.error("Update member error:", err);
         }
@@ -370,6 +455,21 @@ function initAddMemberModal() {
 function clearValidation(form) {
     form.querySelectorAll(".input-validation-error").forEach(i => i.classList.remove("input-validation-error"));
     form.querySelectorAll("span[data-valmsg-for]").forEach(s => s.textContent = "");
+}
+// Validering för modalerna. 
+function validateForm(form, rules) {
+    let isValid = true;
+    Object.entries(rules).forEach(([name, { fn, msg }]) => {
+        const input = form.querySelector(`[name="${name}"]`);
+        const span = form.querySelector(`span[data-valmsg-for="${name}"]`);
+        if (!input) return;            
+        if (!fn(input.value)) {
+            isValid = false;
+            input.classList.add("input-validation-error");
+            if (span) span.textContent = msg;
+        }
+    });
+    return isValid;
 }
 async function handleFormResponse(response, modal, reloadUrl, errorContainer) {
     if (response.ok) {

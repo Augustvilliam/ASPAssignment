@@ -13,7 +13,8 @@
                     <img id="projectPreviewImage" src="/img/upload.svg" alt="Project Image">
                 </button>
 
-                <form id="create-project-form" class="project-form" method="post" asp-controller="Project" asp-action="Create" enctype="multipart/form-data" novalidate>
+                <form id="create-project-form" class="project-form needs-validation" method="post" asp-controller="Project" asp-action="Create" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
                     <div id="create-project-errors" class="text-danger mb-2"></div>
                     @if (!ViewData.ModelState.IsValid)
                     {

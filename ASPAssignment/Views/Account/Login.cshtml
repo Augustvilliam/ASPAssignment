@@ -16,7 +16,7 @@
 
     <img class="splitter" src="~/img/splitter.svg" alt="Splitter" />
 
-    <form class="reg-form" asp-controller="Account" asp-action="Login" method="post" novalidate>
+    <form class="reg-form needs-validation" asp-controller="Account" asp-action="Login" method="post" novalidate>
         @Html.AntiForgeryToken()
         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
         @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))

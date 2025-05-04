@@ -25,7 +25,6 @@ namespace ASPAssignment.ViewModels
         [Display(Name = "End Date")]
         public DateTime EndDate { get; set; } = DateTime.Now;
 
-        [Required(ErrorMessage = "At least one member must be selected.")]
         [Display(Name = "Project Member")]
         public List<string> SelectedMemberId { get; set; } = [];
 

@@ -8,7 +8,7 @@
         <div class="text-danger mb-3">@ViewBag.ErrorMessage</div>
     }
 
-    <form class="log-form" asp-action="Login" asp-controller="Admin" method="post">
+    <form class="log-form needs-validation" asp-action="Login" asp-controller="Admin" method="post">
         <p>Email</p>
         <input asp-for="Email" class="form-input" placeholder="Your Email" />
         <span asp-validation-for="Email" class="text-danger"></span>

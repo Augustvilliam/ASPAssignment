@@ -15,7 +15,8 @@
                     </button>
 
 
-                    <form id="edit-member-form" class="project-form" enctype="multipart/form-data" novalidate>
+                    <form id="edit-member-form" class="project-form needs-validation" enctype="multipart/form-data" novalidate>
+                        @Html.AntiForgeryToken()
                         <input asp-for="Id" type="hidden" id="member-id" name="Id" />
                         <input asp-for="ProfilePic" name="ProfilePic" type="file" id="profilepic" accept="image/*" style="display: none;" />
 

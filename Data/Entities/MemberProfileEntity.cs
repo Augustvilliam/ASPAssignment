@@ -14,7 +14,6 @@ public class MemberProfileEntity
     [ProtectedPersonalData]
     public string? LastName { get; set; }
 
-    // JobTitle som fk till ApplicationRole
     [Required]
     [Display(Name = "Roll / Job Title")]
     public string RoleId { get; set; } = null!;
@@ -34,7 +33,6 @@ public class MemberProfileEntity
     [ProtectedPersonalData]
     public string? PostalCode { get; set; }
 
-    // Navigation till MemberEntity
     [ForeignKey(nameof(MemberId))]
     public virtual MemberEntity Member { get; set; } = null!;
 }

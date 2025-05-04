@@ -13,7 +13,8 @@
                     <img id="editProjectPreviewImage" src="@(!string.IsNullOrEmpty(Model.ExistingImagePath) ? Model.ExistingImagePath : "/img/upload.svg")" alt="Project Image" />
                 </button>
 
-                <form id="edit-project-form" class="project-form" method="post" asp-controller="Project" asp-action="Update" enctype="multipart/form-data" novalidate>
+                <form id="edit-project-form" class="project-form needs-validation" method="post" asp-controller="Project" asp-action="Update" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
                     <input asp-for="ProjectImage" type="file" id="editProjectImageInput" accept="image/*" style="display: none;" />
 
                     <div id="edit-project-errors" class="text-danger mb-2"></div>

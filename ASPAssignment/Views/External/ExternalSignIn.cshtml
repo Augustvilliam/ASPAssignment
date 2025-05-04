@@ -11,7 +11,7 @@
     {
         <div id="error-center" class="text-danger mb-2">@ViewBag.ErrorMessage</div>
     }
-    <form asp-controller="External" asp-action="ExternalSignIn" method="post" novalidate>
+    <form class="needs-validation" asp-controller="External" asp-action="ExternalSignIn" method="post" novalidate>
         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
     <button type="submit" name="provider" value="Google" class="media-btn">
